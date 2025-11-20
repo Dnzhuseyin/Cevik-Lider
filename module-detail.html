@@ -232,7 +232,7 @@
     <!-- Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-production.js?v=20241121002"></script>
+    <script src="js/firebase-production.js?v=20241121003"></script>
     <script src="js/user-utils.js"></script>
     <script src="js/groq-api.js"></script>
     <script src="js/main.js"></script>
@@ -1145,13 +1145,39 @@
                 
                 // Get API instance
                 const api = window.GroqAPI || window.GeminiAPI;
+                console.log('🔍 API kontrol:', {
+                    GroqAPI: !!window.GroqAPI,
+                    GeminiAPI: !!window.GeminiAPI,
+                    api: !!api,
+                    hasFunction: api && typeof api.generateVideoRecommendation === 'function'
+                });
+                
                 if (!api || typeof api.generateVideoRecommendation !== 'function') {
                     console.error('❌ Groq API veya generateVideoRecommendation fonksiyonu bulunamadı');
+                    
+                    // Use fallback recommendation
+                    const fallbackRecommendation = {
+                        success: true,
+                        feedback: `❌ Yanlış cevap: "${wrongAnswerText}"\n✅ Doğru cevap: "${correctAnswerText}"\n\n💡 Bu konuyu daha iyi anlamak için videoyu tekrar izleyin ve önemli noktaları not alın.`,
+                        recommendedVideoId: null,
+                        recommendedVideoTitle: 'Mevcut Video',
+                        reason: 'Konuyu pekiştirmek için'
+                    };
+                    
                     loadingDiv.remove();
+                    displayRecommendation(fallbackRecommendation, explanationBox);
                     return;
                 }
                 
                 // Get AI recommendation
+                console.log('🤖 API çağrısı yapılıyor:', {
+                    question: question.question,
+                    wrongAnswer: wrongAnswerText,
+                    correctAnswer: correctAnswerText,
+                    modulesCount: allModules.length,
+                    videosCount: allVideos.length
+                });
+                
                 const recommendation = await api.generateVideoRecommendation(
                     question.question,
                     wrongAnswerText,
@@ -1347,6 +1373,32 @@
             
             console.log(`📊 Video ilerleme güncellendi: ${correctAnswers}/${totalQuestions} = ${progressPercent}%`);
             console.log(`📊 Modül ilerleme: ${totalModuleCorrect}/${totalModuleQuestions} = ${moduleProgress}%`);
+        }
+        
+        // Display AI recommendation
+        function displayRecommendation(recommendation, explanationBox) {
+            if (!recommendation || !recommendation.success) {
+                console.warn('⚠️ Geçersiz öneri:', recommendation);
+                return;
+            }
+            
+            const recommendationHtml = `
+                <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 class="font-semibold text-blue-800 mb-2">
+                        <i class="fas fa-lightbulb mr-2"></i>AI Önerisi
+                    </h4>
+                    <div class="text-sm text-blue-700 whitespace-pre-line">${recommendation.feedback}</div>
+                    ${recommendation.recommendedVideoTitle ? `
+                        <div class="mt-3 p-2 bg-blue-100 rounded border-l-4 border-blue-400">
+                            <div class="text-xs font-medium text-blue-600">Önerilen Video:</div>
+                            <div class="text-sm text-blue-800">${recommendation.recommendedVideoTitle}</div>
+                            ${recommendation.reason ? `<div class="text-xs text-blue-600 mt-1">${recommendation.reason}</div>` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            explanationBox.insertAdjacentHTML('beforeend', recommendationHtml);
         }
         
         // Save question answer to Firebase
