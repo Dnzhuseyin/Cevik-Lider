@@ -794,14 +794,16 @@
         });
 
         function setupEventListeners() {
-            // Video form submission
+            // Video form submission - prevent duplicate event listeners
             const videoForm = document.getElementById('videoForm');
-            if (videoForm) {
+            if (videoForm && !videoForm.hasAttribute('data-listener-added')) {
                 videoForm.addEventListener('submit', function(e) {
                     e.preventDefault();
                     console.log('📝 Form submit edildi');
                     addVideo();
                 });
+                videoForm.setAttribute('data-listener-added', 'true');
+                console.log('✅ Video form event listener eklendi');
             }
 
             // AI Questions button
@@ -1166,6 +1168,19 @@
         async function addVideo() {
             console.log('🎬 Video ekleme başladı...');
             
+            // Prevent duplicate submissions
+            const submitButton = document.querySelector('#videoForm button[type="submit"]');
+            if (submitButton && submitButton.disabled) {
+                console.log('⚠️ Video ekleme zaten devam ediyor, tekrar gönderim engellendi');
+                return;
+            }
+            
+            // Disable submit button to prevent duplicates
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Ekleniyor...';
+            }
+            
             const title = document.getElementById('videoTitle').value;
             const moduleId = document.getElementById('videoModule').value;
             const youtubeUrl = document.getElementById('youtubeUrl').value;
@@ -1227,6 +1242,13 @@
                         await window.DB.syncCoordinatorVideos();
                         alert(`✅ "${title}" videosu başarıyla güncellendi!`);
                         resetVideoForm();
+                        
+                        // Re-enable submit button
+                        const submitBtn = document.querySelector('#videoForm button[type="submit"]');
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = '<i class="fas fa-upload mr-2"></i>Video Yükle';
+                        }
                     } else {
                         throw new Error('Video güncelleme başarısız');
                     }
@@ -1318,6 +1340,13 @@
                         
                         // Update stats
                         updateStats();
+                        
+                        // Re-enable submit button
+                        const submitBtn = document.querySelector('#videoForm button[type="submit"]');
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = '<i class="fas fa-upload mr-2"></i>Video Yükle';
+                        }
                     } else {
                         throw new Error('Video ekleme başarısız');
                     }
@@ -1326,6 +1355,13 @@
             } catch (error) {
                 console.error('❌ Video ekleme/güncelleme hatası:', error);
                 alert('❌ Video işleminde hata oluştu: ' + error.message);
+            } finally {
+                // Re-enable submit button
+                const submitButton = document.querySelector('#videoForm button[type="submit"]');
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="fas fa-upload mr-2"></i>Video Yükle';
+                }
             }
         }
 
@@ -2184,55 +2220,6 @@
                 console.error('❌ Test videosu oluşturma hatası:', error);
                 alert('❌ Test videosu oluşturulurken hata: ' + error.message);
             }
-            try {
-                const title = 'Test Video ' + Math.floor(Math.random() * 100);
-                const moduleId = '1'; // Example module
-                const youtubeUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'; // Example YouTube URL
-                const description = 'Bu bir test videosudur. Koordinatör tarafından eklendi.';
-                const duration = '5';
-                const difficulty = 'beginner';
- 
-                const videoId = extractYouTubeVideoId(youtubeUrl);
-                if (!videoId) {
-                    alert('Geçerli bir YouTube URL\'si girin.');
-                    return;
-                }
- 
-                const videoData = {
-                    title: title,
-                    moduleId: moduleId,
-                    youtubeUrl: youtubeUrl,
-                    youtubeVideoId: videoId,
-                    description: description,
-                    duration: duration,
-                    difficulty: difficulty,
-                    questions: [
-                        {
-                            question: "Bu test videosu hangi amaçla oluşturuldu?",
-                            options: ["Test için", "Eğlence için", "Sıkıntıdan", "Bilinmiyor"],
-                            correct: 0,
-                            explanation: "Bu video senkronizasyon testleri için oluşturulmuştur."
-                        }
-                    ]
-                };
- 
-                console.log('📹 Test video oluşturuluyor:', videoData);
- 
-                const success = await window.DB.save('coordinatorVideos', videoData);
-                if (success && success.success) {
-                    console.log('✅ Test video eklendi:', success.id);
-                    
-                    // Immediately sync
-                    const syncResult = await window.DB.syncCoordinatorVideos();
-                    console.log('🔄 Senkronizasyon sonucu:', syncResult);
-                    
-                    alert(`✅ Test video başarıyla eklendi ve senkronize edildi!\nVideo ID: ${success.id}\nModül: ${moduleId}`);
-                    await loadVideos(); // Reload to show the new video
-                    await updateStats();
-                } else {
-                    throw new Error('Test video ekleme başarısız');
-                }
-            } catch (error) {
                 console.error('❌ Test video oluşturma hatası:', error);
                 alert('❌ Test video oluşturulurken hata oluştu: ' + error.message);
             }
