@@ -764,6 +764,9 @@
             console.log('📊 allStudents:', allStudents.length, 'öğrenci');
             console.log('📊 allStudents array:', allStudents);
             
+            // Force alert to check if function is called
+            alert(`🔍 viewStudentDetail çağrıldı! ID: ${studentId}, Öğrenci sayısı: ${allStudents.length}`);
+            
             // Debug: Show all student IDs
             allStudents.forEach((s, index) => {
                 console.log(`Student ${index}: ID="${s.id}", Email="${s.email}", Name="${s.name}"`);
@@ -778,6 +781,7 @@
             }
 
             console.log('✅ Öğrenci bulundu:', student.name);
+            alert('✅ Öğrenci bulundu: ' + student.name);
 
             const modal = document.getElementById('student-modal');
             const content = document.getElementById('student-detail-content');

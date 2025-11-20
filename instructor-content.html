@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>Video Yönetimi - EduPlatform Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -139,10 +142,16 @@
                         <h1 class="text-3xl font-bold text-gray-900 mb-2">Video Yönetimi</h1>
                         <p class="text-gray-600">Siber güvenlik eğitim videolarını yönetin ve AI ile sorular oluşturun</p>
                     </div>
-                    <button class="bg-cyber text-white px-4 py-2 rounded-lg flex items-center" id="add-video-btn">
-                        <i class="fas fa-plus mr-2"></i>
-                        Yeni Video Ekle
-                    </button>
+                    <div class="flex gap-3">
+                        <button onclick="createTestVideo()" class="bg-orange-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-orange-600">
+                            <i class="fas fa-flask mr-2"></i>
+                            Test Video Oluştur
+                        </button>
+                        <button class="bg-cyber text-white px-4 py-2 rounded-lg flex items-center" id="add-video-btn">
+                            <i class="fas fa-plus mr-2"></i>
+                            Yeni Video Ekle
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -2138,6 +2147,36 @@
 
         // Test video creation function
         async function createTestVideo() {
+            try {
+                console.log('🧪 Test videosu oluşturuluyor...');
+                
+                const testVideo = {
+                    title: 'Test Video - Silinecek',
+                    moduleId: '1',
+                    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                    youtubeVideoId: 'dQw4w9WgXcQ',
+                    description: 'Bu test videosu silme işlemini test etmek için oluşturuldu',
+                    duration: '3:32',
+                    difficulty: 'easy',
+                    status: 'active',
+                    questions: [],
+                    createdAt: new Date().toISOString()
+                };
+                
+                const result = await window.DB.save('coordinatorVideos', testVideo);
+                if (result && result.success) {
+                    console.log('✅ Test videosu oluşturuldu');
+                    alert('✅ Test videosu oluşturuldu! Şimdi videoları yeniden yükleyin.');
+                    await loadVideos();
+                    await updateStats();
+                } else {
+                    throw new Error('Test videosu oluşturulamadı');
+                }
+                
+            } catch (error) {
+                console.error('❌ Test videosu oluşturma hatası:', error);
+                alert('❌ Test videosu oluşturulurken hata: ' + error.message);
+            }
             try {
                 const title = 'Test Video ' + Math.floor(Math.random() * 100);
                 const moduleId = '1'; // Example module
