@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Eğitim Modülleri - EduPlatform</title>
+    <title>Eğitim Modülleri - Çevik Lider</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -36,7 +36,7 @@
         <div class="p-4">
             <a href="student-dashboard.html" class="font-bold text-xl text-cyber block mb-8 flex items-center">
                 <i class="fas fa-graduation-cap text-2xl mr-3"></i>
-                EduPlatform
+                Çevik Lider
             </a>
             
             <div class="mb-8">

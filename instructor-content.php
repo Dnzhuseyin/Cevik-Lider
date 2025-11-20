@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>Video Yönetimi - EduPlatform Admin</title>
+    <title>Video Yönetimi - Çevik Lider Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -92,7 +92,7 @@
         <div class="p-4">
             <a href="instructor-dashboard.html" class="font-bold text-xl text-secondary block mb-8 flex items-center">
                 <i class="fas fa-graduation-cap text-2xl mr-3"></i>
-                EduPlatform Admin
+                Çevik Lider Admin
             </a>
             
             <div class="mb-8">
