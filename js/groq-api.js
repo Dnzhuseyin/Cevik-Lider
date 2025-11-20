@@ -2,12 +2,42 @@
 class GroqAPI {
     constructor() {
         // API Key'i buraya ekleyin: https://console.groq.com/
-        this.apiKey = 'gsk_cD8KPqFq0jgIqTvF59RuWGdyb3FYcoPFPi2zA2zA25JsfLz04zensNo';
+        this.apiKey = 'gsk_YOUR_NEW_GROQ_API_KEY_HERE'; // Yeni API key gerekli
         this.baseURL = 'https://api.groq.com/openai/v1/chat/completions';
         this.model = 'llama-3.1-70b-versatile'; // Primary model
         this.fallbackModels = ['mixtral-8x7b-32768', 'llama-3.1-8b-instant'];
         this.lastRequestTime = 0;
         this.minRequestInterval = 1000; // 1 second between requests (Groq is faster)
+        
+        // Test API key on initialization
+        this.testAPIKey();
+    }
+    
+    async testAPIKey() {
+        try {
+            console.log('🔑 Groq API key test ediliyor...');
+            const testResponse = await fetch(this.baseURL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.apiKey}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: this.model,
+                    messages: [{ role: 'user', content: 'Test' }],
+                    max_tokens: 10
+                })
+            });
+            
+            if (testResponse.ok) {
+                console.log('✅ Groq API key geçerli!');
+            } else {
+                const errorText = await testResponse.text();
+                console.error('❌ Groq API key test hatası:', testResponse.status, errorText);
+            }
+        } catch (error) {
+            console.error('❌ Groq API key test hatası:', error);
+        }
     }
     
     async generateContent(prompt, context = '', retryCount = 0) {
@@ -45,6 +75,10 @@ class GroqAPI {
             });
             
             if (!response.ok) {
+                // Enhanced error logging
+                const errorText = await response.text();
+                console.error(`❌ Groq API Hatası (${response.status}):`, errorText);
+                
                 // Handle rate limit (429)
                 if (response.status === 429) {
                     if (retryCount < 3) {
@@ -182,6 +216,12 @@ SADECE JSON, BAŞKA HİÇBİR ŞEY YAZMA!`;
     
     // YENİ: Yanlış cevaplara göre kişiselleştirilmiş video önerisi
     async generateVideoRecommendation(wrongQuestion, wrongAnswer, correctAnswer, allModules, allVideos) {
+        // Check if API key is valid
+        if (!this.apiKey || this.apiKey.includes('YOUR_NEW_GROQ_API_KEY_HERE')) {
+            console.warn('⚠️ Groq API key bulunamadı, fallback cevap kullanılıyor');
+            return this.getFallbackRecommendation(wrongQuestion, wrongAnswer, correctAnswer);
+        }
+        
         try {
             const context = `Sen bir eğitim danışmanısın. Öğrencilerin yanlış cevapladığı sorulara göre hangi videoları izlemeleri gerektiğini öneriyorsun. Türkçe yanıt ver.`;
             
@@ -299,14 +339,36 @@ SADECE JSON DÖNDÜR!`;
             };
         } catch (error) {
             console.error('❌ generateVideoRecommendation hatası:', error);
-            return {
-                success: false,
-                feedback: 'Bu konuyu tekrar gözden geçirmenizi öneririz.',
-                recommendedVideoId: null,
-                recommendedVideoTitle: null,
-                reason: ''
-            };
+            return this.getFallbackRecommendation(wrongQuestion, wrongAnswer, correctAnswer);
         }
+    }
+    
+    getFallbackRecommendation(wrongQuestion, wrongAnswer, correctAnswer) {
+        const recommendations = [
+            {
+                success: true,
+                feedback: `❌ Yanlış cevap: "${wrongAnswer}"\n✅ Doğru cevap: "${correctAnswer}"\n\n💡 Bu konuyu daha iyi anlamak için videoyu tekrar izleyin ve önemli noktaları not alın.`,
+                recommendedVideoId: null,
+                recommendedVideoTitle: 'Mevcut Video',
+                reason: 'Konuyu pekiştirmek için'
+            },
+            {
+                success: true,
+                feedback: `🎯 Doğru cevap "${correctAnswer}" idi.\n\n📚 İlgili video bölümünü tekrar izleyin ve benzer sorularla pratik yapın.`,
+                recommendedVideoId: null,
+                recommendedVideoTitle: 'Mevcut Video',
+                reason: 'Pratik yapmak için'
+            },
+            {
+                success: true,
+                feedback: `⚠️ "${correctAnswer}" doğru cevaptı.\n\n🔄 Videoyu dikkatlice tekrar izleyin ve ana kavramları not alın.`,
+                recommendedVideoId: null,
+                recommendedVideoTitle: 'Mevcut Video',
+                reason: 'Kavramları pekiştirmek için'
+            }
+        ];
+        
+        return recommendations[Math.floor(Math.random() * recommendations.length)];
     }
 }
 
