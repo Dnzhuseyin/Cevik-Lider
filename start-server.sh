@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 EduPlatform Server Başlatılıyor..."
+echo "🚀 Çevik Lider Server Başlatılıyor..."
 echo "📁 Dizin: $(pwd)"
 echo ""
 
