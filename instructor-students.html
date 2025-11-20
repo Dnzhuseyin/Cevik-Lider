@@ -656,9 +656,14 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button onclick="viewStudentDetail('${student.id}')" class="text-cyber hover:text-primary mr-3">
-                            <i class="fas fa-eye"></i> Detay
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="viewStudentDetail('${student.id}')" class="text-cyber hover:text-primary">
+                                <i class="fas fa-eye"></i> Detay
+                            </button>
+                            <button onclick="deleteStudent('${student.id}', '${student.name}')" class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i> Sil
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
@@ -756,6 +761,89 @@
                     window.location.href = 'index.html';
                 });
             });
+        }
+
+        // Delete student function
+        async function deleteStudent(studentId, studentName) {
+            if (!confirm(`"${studentName}" adlı öğrenciyi kalıcı olarak silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz ve öğrencinin tüm verileri (ilerleme, notlar, cevaplar) silinecektir.`)) {
+                return;
+            }
+
+            try {
+                console.log('🗑️ Öğrenci siliniyor:', studentId, studentName);
+                
+                // Show loading
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                loadingDiv.innerHTML = `
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <div class="flex items-center">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mr-3"></div>
+                            <span class="text-lg">Öğrenci siliniyor...</span>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(loadingDiv);
+
+                // Delete from all collections
+                const collections = [
+                    'userProfiles',
+                    'userProgress', 
+                    'userNotes',
+                    'videoQuestionAnswers',
+                    'quizResponses'
+                ];
+
+                let deletedCount = 0;
+                
+                for (const collection of collections) {
+                    try {
+                        console.log(`🔍 ${collection} koleksiyonunda ${studentId} aranıyor...`);
+                        
+                        const result = await window.DB.load(collection);
+                        if (result && result.success) {
+                            const allData = Array.isArray(result.data) ? result.data : Object.values(result.data || {});
+                            
+                            // Find records for this student
+                            const studentRecords = allData.filter(record => {
+                                return record.id === studentId || 
+                                       record.userId === studentId || 
+                                       record.userEmail === studentId ||
+                                       (record.email && record.email === studentId);
+                            });
+                            
+                            console.log(`📊 ${collection}: ${studentRecords.length} kayıt bulundu`);
+                            
+                            // Delete each record
+                            for (const record of studentRecords) {
+                                const deleteResult = await window.DB.delete(collection, record.id || record.userId || studentId);
+                                if (deleteResult && deleteResult.success) {
+                                    deletedCount++;
+                                    console.log(`✅ ${collection}/${record.id || record.userId || studentId} silindi`);
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`❌ ${collection} silme hatası:`, error);
+                    }
+                }
+
+                loadingDiv.remove();
+                
+                console.log(`✅ Toplam ${deletedCount} kayıt silindi`);
+                alert(`✅ "${studentName}" adlı öğrenci ve tüm verileri başarıyla silindi!\n\nSilinen kayıt sayısı: ${deletedCount}`);
+                
+                // Reload students list
+                await loadStudents();
+                
+            } catch (error) {
+                console.error('❌ Öğrenci silme hatası:', error);
+                alert('❌ Öğrenci silinirken hata oluştu: ' + error.message);
+                
+                // Remove loading if exists
+                const loadingDiv = document.querySelector('.fixed.inset-0');
+                if (loadingDiv) loadingDiv.remove();
+            }
         }
 
         // View student detail
