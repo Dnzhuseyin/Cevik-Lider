@@ -1,29 +1,28 @@
-# Çevik Liderlik Eğitim Platformu - Apache Configuration
+# Çevik Lider Eğitim Platformu - Apache Configuration
 
 # HTTPS Yönlendirmesi
 RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# JS ve CSS dosyaları için doğru MIME type
+AddType application/javascript .js
+AddType text/css .css
+AddType application/json .json
+
 # Security Headers
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options nosniff
-    Header always set X-Frame-Options DENY
+    Header always set X-Frame-Options SAMEORIGIN
     Header always set X-XSS-Protection "1; mode=block"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
-</IfModule>
-
-# Cache Control
-<IfModule mod_expires.c>
-    ExpiresActive on
-    ExpiresByType text/css "access plus 1 year"
-    ExpiresByType application/javascript "access plus 1 year"
-    ExpiresByType image/png "access plus 1 year"
-    ExpiresByType image/jpg "access plus 1 year"
-    ExpiresByType image/jpeg "access plus 1 year"
-    ExpiresByType image/gif "access plus 1 year"
-    ExpiresByType image/svg+xml "access plus 1 year"
+    
+    # JS ve CSS için no-cache
+    <FilesMatch "\.(js|css)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
 </IfModule>
 
 # Compression
@@ -39,16 +38,13 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     AddOutputFilterByType DEFLATE application/x-javascript
 </IfModule>
 
-# Error Pages
-ErrorDocument 404 /index.html
-
-# File Protection
-<Files "firebase.json">
+# Sadece hassas dosyaları koru
+<Files ".htaccess">
     Order allow,deny
     Deny from all
 </Files>
 
-<Files ".htaccess">
+<Files "*.env">
     Order allow,deny
     Deny from all
-</Files> 
+</Files>
