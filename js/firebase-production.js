@@ -270,10 +270,15 @@ class FirebaseProductionDB {
     async load(table, id = null) {
         const cacheKey = this.getCacheKey(table, id);
         
-        // Check cache first
-        if (this.isCacheValid(cacheKey)) {
-            console.log(`📋 Cache'den veri alınıyor: ${cacheKey}`);
-            return { success: true, data: this.getCache(cacheKey) };
+        // DISABLE CACHE for coordinatorVideos to ensure fresh data
+        if (table !== 'coordinatorVideos') {
+            // Check cache first for other collections
+            if (this.isCacheValid(cacheKey)) {
+                console.log(`📋 Cache'den veri alınıyor: ${cacheKey}`);
+                return { success: true, data: this.getCache(cacheKey) };
+            }
+        } else {
+            console.log(`🚫 Cache atlandı: ${table} - Fresh data yükleniyor`);
         }
         
         if (!this.isFirebaseReady) {

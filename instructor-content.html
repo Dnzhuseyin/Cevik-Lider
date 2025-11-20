@@ -355,7 +355,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     
     <!-- Firebase Production DB -->
-    <script src="js/firebase-production.js?v=20241121001"></script>
+    <script src="js/firebase-production.js?v=20241121002"></script>
     <script src="js/user-utils.js"></script>
     <script src="js/groq-api.js"></script>
     <script src="js/main.js"></script>
@@ -1541,6 +1541,10 @@
         async function loadVideos() {
             try {
                 console.log('📚 Videolar yükleniyor...');
+                
+                // Force clear cache before loading
+                window.DB.clearCache('coordinatorVideos');
+                
                 const videosResult = await window.DB.load('coordinatorVideos');
                 const allVideos = (videosResult && videosResult.success) ? videosResult.data : [];
                 
