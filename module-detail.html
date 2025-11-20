@@ -309,7 +309,7 @@
                     return;
                 }
 
-                // Load videos
+                // Load videos - getCoordinatorVideos() already filters deleted videos
                 const coordinatorVideos = await window.DB.getCoordinatorVideos();
                 const studentVideos = await window.DB.getStudentVideos();
 
