@@ -32,8 +32,8 @@ class GroqAPI {
             if (testResponse.ok) {
                 console.log('✅ Groq API key geçerli!');
             } else {
-                const errorText = await testResponse.text();
-                console.error('❌ Groq API key test hatası:', testResponse.status, errorText);
+                const testErrorText = await testResponse.text();
+                console.error('❌ Groq API key test hatası:', testResponse.status, testErrorText);
             }
         } catch (error) {
             console.error('❌ Groq API key test hatası:', error);
@@ -101,9 +101,9 @@ class GroqAPI {
                     return result;
                 }
                 
-                const errorText = await response.text().catch(() => '');
-                console.error(`❌ API Hatası (${response.status}):`, errorText);
-                throw new Error(`Groq API error: ${response.status} - ${errorText.substring(0, 100)}`);
+                const apiErrorText = await response.text().catch(() => '');
+                console.error(`❌ API Hatası (${response.status}):`, apiErrorText);
+                throw new Error(`Groq API error: ${response.status} - ${apiErrorText.substring(0, 100)}`);
             }
             
             const data = await response.json();
