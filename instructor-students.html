@@ -762,10 +762,17 @@
         async function viewStudentDetail(studentId) {
             console.log('🔍 viewStudentDetail çağrıldı:', studentId);
             console.log('📊 allStudents:', allStudents.length, 'öğrenci');
+            console.log('📊 allStudents array:', allStudents);
+            
+            // Debug: Show all student IDs
+            allStudents.forEach((s, index) => {
+                console.log(`Student ${index}: ID="${s.id}", Email="${s.email}", Name="${s.name}"`);
+            });
             
             const student = allStudents.find(s => s.id === studentId);
             if (!student) {
                 console.error('❌ Öğrenci bulunamadı:', studentId);
+                console.error('❌ Aranan ID:', studentId, 'Tip:', typeof studentId);
                 alert('❌ Öğrenci bulunamadı: ' + studentId);
                 return;
             }

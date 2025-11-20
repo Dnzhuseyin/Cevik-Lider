@@ -2,7 +2,7 @@
 class GroqAPI {
     constructor() {
         // API Key'i buraya ekleyin: https://console.groq.com/
-        this.apiKey = 'YOUR_GROQ_API_KEY_HERE';
+        this.apiKey = 'gsk_cD8KPqFq0jgIqTvF59RuWGdyb3FYcoPFPi2zA2zA25JsfLz04zensNo';
         this.baseURL = 'https://api.groq.com/openai/v1/chat/completions';
         this.model = 'llama-3.1-70b-versatile'; // Primary model
         this.fallbackModels = ['mixtral-8x7b-32768', 'llama-3.1-8b-instant'];

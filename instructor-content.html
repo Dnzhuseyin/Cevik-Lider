@@ -421,9 +421,24 @@
             try {
                 console.log('🗑️ Video siliniyor:', videoId);
                 
-                const result = await window.DB.delete('coordinatorVideos', videoId);
+                // Get existing video first
+                const existingVideoResult = await window.DB.load('coordinatorVideos', videoId);
+                const existingVideo = (existingVideoResult && existingVideoResult.success) ? existingVideoResult.data : null;
+                
+                if (!existingVideo) {
+                    throw new Error('Silinecek video bulunamadı');
+                }
+                
+                // Mark as deleted instead of actually deleting
+                const updatedVideo = {
+                    ...existingVideo,
+                    status: 'deleted',
+                    deletedAt: new Date().toISOString()
+                };
+                
+                const result = await window.DB.save('coordinatorVideos', updatedVideo, videoId);
                 if (result && result.success) {
-                    console.log('✅ Video başarıyla silindi');
+                    console.log('✅ Video başarıyla silindi (deleted olarak işaretlendi)');
                     
                     // Reload videos and update stats
                     await loadVideos();
@@ -1515,10 +1530,13 @@
             try {
                 console.log('📚 Videolar yükleniyor...');
                 const videosResult = await window.DB.load('coordinatorVideos');
-                const videos = (videosResult && videosResult.success) ? videosResult.data : [];
+                const allVideos = (videosResult && videosResult.success) ? videosResult.data : [];
+                
+                // Filter out deleted videos for coordinator view
+                const videos = allVideos.filter(video => video.status !== 'deleted');
                 const videosList = document.getElementById('videos-container');
                 
-                console.log('📹 Bulunan video sayısı:', videos.length);
+                console.log('📹 Toplam video sayısı:', allVideos.length, 'Aktif video sayısı:', videos.length);
                 
                 if (videos.length === 0) {
                     videosList.innerHTML = '<p class="text-gray-500 text-center py-8">Henüz video eklenmemiş. Yukarıdaki formu kullanarak ilk videonuzu ekleyin.</p>';
