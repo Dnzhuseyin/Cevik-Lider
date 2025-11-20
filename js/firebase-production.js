@@ -1,15 +1,14 @@
 // Firebase Veritabanı Sistemi - Production Ready (Pure Firebase)
 // Sadece Firebase Firestore kullanır, localStorage yok
 
-// Firebase configuration
+// Firebase configuration - Çevik Lider Production
 const firebaseConfig = {
-    apiKey: "AIzaSyDHvhmF3Kymlx3UQuygB2fFAPfxuVoav3o",
-    authDomain: "egitimplatformu-ea723.firebaseapp.com",
-    projectId: "egitimplatformu-ea723",
-    storageBucket: "egitimplatformu-ea723.firebasestorage.app",
-    messagingSenderId: "140091126163",
-    appId: "1:140091126163:web:d9a8fa55f314efa243b866",
-    measurementId: "G-BFVW3G17S5"
+    apiKey: "AIzaSyAbNX9SfGX_mQgflhGBlXi6TtTnphZRViQ",
+    authDomain: "cevik-lider.firebaseapp.com",
+    projectId: "cevik-lider",
+    storageBucket: "cevik-lider.firebasestorage.app",
+    messagingSenderId: "699654400562",
+    appId: "1:699654400562:web:b4a305c2513cc2cb7caa2b"
 };
 
 class FirebaseProductionDB {
