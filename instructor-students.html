@@ -502,97 +502,9 @@
                 // Convert map to array
                 allStudents = Array.from(studentMap.values());
                 
-                // If no students found, create some sample data
-                if (allStudents.length === 0) {
-                    console.log('📝 Örnek öğrenci verileri oluşturuluyor...');
-                    
-                    // Create sample students directly
-                    const sampleStudents = [
-                        {
-                            id: 'ahmet.kaya@ogrenci.edu.tr',
-                            email: 'ahmet.kaya@ogrenci.edu.tr',
-                            name: 'Ahmet Kaya',
-                            firstName: 'Ahmet',
-                            lastName: 'Kaya',
-                            studentId: '20240001',
-                            department: 'bilgisayar-muhendisligi',
-                            school: 'EduPlatform Üniversitesi',
-                            city: 'İstanbul',
-                            totalProgress: 75,
-                            completedModules: 3,
-                            lastActivity: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-                            joinDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-                            isActive: true,
-                            moduleProgress: { '1': 100, '2': 80, '3': 45 },
-                            notes: 5,
-                            completedVideos: 8
-                        },
-                        {
-                            id: 'fatma.demir@ogrenci.edu.tr',
-                            email: 'fatma.demir@ogrenci.edu.tr',
-                            name: 'Fatma Demir',
-                            firstName: 'Fatma',
-                            lastName: 'Demir',
-                            studentId: '20240002',
-                            department: 'siber-guvenlik',
-                            school: 'EduPlatform Üniversitesi',
-                            city: 'Ankara',
-                            totalProgress: 90,
-                            completedModules: 4,
-                            lastActivity: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-                            joinDate: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
-                            isActive: true,
-                            moduleProgress: { '1': 100, '2': 100, '3': 85, '4': 75 },
-                            notes: 12,
-                            completedVideos: 15
-                        },
-                        {
-                            id: 'mehmet.ozkan@ogrenci.edu.tr',
-                            email: 'mehmet.ozkan@ogrenci.edu.tr',
-                            name: 'Mehmet Özkan',
-                            firstName: 'Mehmet',
-                            lastName: 'Özkan',
-                            studentId: '20240003',
-                            department: 'bilisim-sistemleri',
-                            school: 'EduPlatform Üniversitesi',
-                            city: 'İzmir',
-                            totalProgress: 45,
-                            completedModules: 1,
-                            lastActivity: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-                            joinDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-                            isActive: false,
-                            moduleProgress: { '1': 100, '2': 35 },
-                            notes: 3,
-                            completedVideos: 4
-                        },
-                        {
-                            id: 'ayse.yilmaz@ogrenci.edu.tr',
-                            email: 'ayse.yilmaz@ogrenci.edu.tr',
-                            name: 'Ayşe Yılmaz',
-                            firstName: 'Ayşe',
-                            lastName: 'Yılmaz',
-                            studentId: '20240004',
-                            department: 'yazilim-muhendisligi',
-                            school: 'EduPlatform Üniversitesi',
-                            city: 'Bursa',
-                            totalProgress: 60,
-                            completedModules: 2,
-                            lastActivity: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-                            joinDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-                            isActive: true,
-                            moduleProgress: { '1': 100, '2': 100, '3': 20 },
-                            notes: 8,
-                            completedVideos: 6
-                        }
-                    ];
-                    
-                    allStudents = sampleStudents;
-                    filteredStudents = [...allStudents];
-                    
-                    console.log('✅ Örnek öğrenci verileri oluşturuldu:', allStudents.length);
-                } else {
-                    filteredStudents = [...allStudents];
-                }
+                // No default students - only show real registered students
+                console.log(`✅ ${allStudents.length} gerçek öğrenci yüklendi`);
+                filteredStudents = [...allStudents];
                 
                 console.log('✅ Öğrenci verileri başarıyla yüklendi:', allStudents.length);
                 
@@ -624,140 +536,10 @@
             }
         }
 
-        // Create sample students for demo
+        // No default students - only real registered users will be shown
         async function createSampleStudents() {
-            try {
-                console.log('📝 Örnek öğrenci profilleri oluşturuluyor...');
-                
-                const sampleProfiles = [
-                    {
-                        userEmail: 'ahmet.kaya@meb.gov.tr',
-                        firstName: 'Ahmet',
-                        lastName: 'Kaya',
-                        school: 'Adıyaman Merkez İlkokulu',
-                        city: 'Adıyaman',
-                        phone: '+90 532 123 45 67',
-                        bio: '15 yıllık eğitim deneyimi olan okul müdürü.',
-                        joinDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-                        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-                        updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-                    },
-                    {
-                        userEmail: 'fatma.demir@meb.gov.tr',
-                        firstName: 'Fatma',
-                        lastName: 'Demir',
-                        school: 'Kahramanmaraş Ortaokulu',
-                        city: 'Kahramanmaraş',
-                        phone: '+90 532 234 56 78',
-                        bio: 'Kriz yönetimi konusunda uzman okul müdürü.',
-                        joinDate: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
-                        createdAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
-                        updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
-                    },
-                    {
-                        userEmail: 'mehmet.ozkan@meb.gov.tr',
-                        firstName: 'Mehmet',
-                        lastName: 'Özkan',
-                        school: 'Gaziantep Anadolu Lisesi',
-                        city: 'Gaziantep',
-                        phone: '+90 532 345 67 89',
-                        bio: 'Siber güvenlik alanında deneyimli öğrenci.',
-                        joinDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-                        createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-                        updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-                    },
-                    {
-                        userEmail: 'ayse.yilmaz@meb.gov.tr',
-                        firstName: 'Ayşe',
-                        lastName: 'Yılmaz',
-                        school: 'Şanlıurfa Cumhuriyet İlkokulu',
-                        city: 'Şanlıurfa',
-                        phone: '+90 532 456 78 90',
-                        bio: 'Öğrenci ve veli iletişimi konusunda deneyimli müdür.',
-                        joinDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-                        createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-                        updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-                    }
-                ];
-
-                const sampleProgress = [
-                    {
-                        userEmail: 'ahmet.kaya@meb.gov.tr',
-                        userName: 'Ahmet Kaya',
-                        moduleProgress: { '1': 100, '2': 75, '3': 30 },
-                        lastActivity: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-                        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-                        updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-                    },
-                    {
-                        userEmail: 'fatma.demir@meb.gov.tr',
-                        userName: 'Fatma Demir',
-                        moduleProgress: { '1': 100, '2': 100, '3': 85, '4': 45 },
-                        lastActivity: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-                        createdAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
-                        updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
-                    },
-                    {
-                        userEmail: 'mehmet.ozkan@meb.gov.tr',
-                        userName: 'Mehmet Özkan',
-                        moduleProgress: { '1': 100, '2': 60 },
-                        lastActivity: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-                        createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-                        updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-                    },
-                    {
-                        userEmail: 'ayse.yilmaz@meb.gov.tr',
-                        userName: 'Ayşe Yılmaz',
-                        moduleProgress: { '1': 100, '2': 100, '3': 100, '4': 80, '5': 25 },
-                        lastActivity: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-                        createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-                        updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-                    }
-                ];
-
-                const sampleNotes = [
-                    {
-                        userEmail: 'ahmet.kaya@meb.gov.tr',
-                        title: 'Kriz Yönetimi Notları',
-                        content: 'Acil durum planları hakkında önemli notlar...',
-                        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-                    },
-                    {
-                        userEmail: 'fatma.demir@meb.gov.tr',
-                        title: 'Şifreleme Teknikleri',
-                        content: 'Şifreleme teknikleri ve uygulamaları...',
-                        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-                    },
-                    {
-                        userEmail: 'ayse.yilmaz@meb.gov.tr',
-                        title: 'Veli İletişimi',
-                        content: 'Kriz dönemlerinde etkili veli iletişimi teknikleri...',
-                        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-                    }
-                ];
-
-                // Save sample data to Firebase
-                for (const profile of sampleProfiles) {
-                    await DB.save('userProfiles', profile, profile.userEmail);
-                    console.log(`✅ Profil kaydedildi: ${profile.firstName} ${profile.lastName}`);
-                }
-
-                for (const progress of sampleProgress) {
-                    await DB.save('userProgress', progress, progress.userEmail);
-                    console.log(`✅ İlerleme kaydedildi: ${progress.userName}`);
-                }
-
-                for (const note of sampleNotes) {
-                    await DB.save('userNotes', note);
-                    console.log(`✅ Not kaydedildi: ${note.title}`);
-                }
-
-                console.log('✅ Tüm örnek veriler başarıyla kaydedildi');
-                
-            } catch (error) {
-                console.error('❌ Örnek veri oluşturma hatası:', error);
-                showError('Örnek veriler oluşturulurken hata oluştu: ' + error.message);
-            }
+            // Default students disabled - only real registered users will be shown
+            console.log('ℹ️ Default öğrenci oluşturma atlandı - sadece gerçek kayıtlı kullanıcılar gösterilecek');
         }
 
         // Helper functions
@@ -977,12 +759,9 @@
         }
 
         // View student detail
-        function viewStudentDetail(studentId) {
+        async function viewStudentDetail(studentId) {
             console.log('🔍 viewStudentDetail çağrıldı:', studentId);
             console.log('📊 allStudents:', allStudents.length, 'öğrenci');
-            
-            // Test alert
-            alert('Detay butonu çalışıyor! Öğrenci ID: ' + studentId);
             
             const student = allStudents.find(s => s.id === studentId);
             if (!student) {
@@ -1008,7 +787,86 @@
                 return;
             }
             
+            // Show loading
+            content.innerHTML = `
+                <div class="flex items-center justify-center py-12">
+                    <div class="w-10 h-10 border-4 border-cyber border-t-transparent rounded-full animate-spin mr-4"></div>
+                    <span class="text-lg text-gray-600">Öğrenci detayları yükleniyor...</span>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            
             console.log('🎯 Modal açılıyor...');
+            
+            try {
+                // Fetch video question answers
+                const videoQuestionAnswersResult = await DB.load('videoQuestionAnswers');
+                const videoQuestionAnswers = videoQuestionAnswersResult.success ? 
+                    videoQuestionAnswersResult.data.filter(a => a.userEmail === student.email) : [];
+                
+                console.log(`📝 ${videoQuestionAnswers.length} video soru cevabı bulundu`);
+                
+                // Fetch coordinator videos for context
+                const coordinatorVideosResult = await DB.load('coordinatorVideos');
+                const allCoordinatorVideos = coordinatorVideosResult.success ? coordinatorVideosResult.data : [];
+                
+                // Create video question answers HTML
+                let videoQuestionAnswersHtml = '';
+                if (videoQuestionAnswers.length > 0) {
+                    videoQuestionAnswersHtml = `
+                        <h3 class="text-lg font-semibold mb-3 mt-6">Video Soru Cevapları</h3>
+                        <div class="space-y-3">
+                            ${videoQuestionAnswers.map(answer => {
+                                const video = allCoordinatorVideos.find(v => v.id === answer.videoId);
+                                const videoTitle = video ? video.title : 'Bilinmeyen Video';
+                                const isCorrect = answer.isCorrect;
+                                const statusClass = isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                                const statusIcon = isCorrect ? 'fas fa-check-circle' : 'fas fa-times-circle';
+                                
+                                return `
+                                    <div class="bg-white p-4 rounded-lg border border-gray-200">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div class="flex-1">
+                                                <h4 class="font-medium text-gray-900">${videoTitle}</h4>
+                                                <p class="text-sm text-gray-600 mt-1">${answer.questionText}</p>
+                                            </div>
+                                            <span class="px-2 py-1 text-xs rounded-full ${statusClass} ml-3">
+                                                <i class="${statusIcon} mr-1"></i>${isCorrect ? 'Doğru' : 'Yanlış'}
+                                            </span>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <div class="flex items-start">
+                                                <span class="text-xs font-medium text-gray-500 w-20">Cevabı:</span>
+                                                <span class="text-sm text-gray-900">${answer.studentAnswer}</span>
+                                            </div>
+                                            ${!isCorrect && answer.correctAnswer ? `
+                                                <div class="flex items-start">
+                                                    <span class="text-xs font-medium text-gray-500 w-20">Doğru:</span>
+                                                    <span class="text-sm text-green-600">${answer.correctAnswer}</span>
+                                                </div>
+                                            ` : ''}
+                                            ${answer.explanation ? `
+                                                <div class="flex items-start">
+                                                    <span class="text-xs font-medium text-gray-500 w-20">Açıklama:</span>
+                                                    <span class="text-sm text-gray-600">${answer.explanation}</span>
+                                                </div>
+                                            ` : ''}
+                                            <div class="flex items-start">
+                                                <span class="text-xs font-medium text-gray-500 w-20">Tarih:</span>
+                                                <span class="text-xs text-gray-500">${formatDate(answer.answeredAt)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                } else {
+                    videoQuestionAnswersHtml = `
+                        <h3 class="text-lg font-semibold mb-3 mt-6">Video Soru Cevapları</h3>
+                        <p class="text-gray-500 text-sm">Henüz video sorularına cevap verilmemiş.</p>
+                    `;
+                }
             
             content.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1126,10 +984,22 @@
                         </p>
                     </div>
                 </div>
+                ${videoQuestionAnswersHtml}
             `;
             
             modal.classList.remove('hidden');
             console.log('Modal açıldı!');
+            
+            } catch (error) {
+                console.error('❌ Öğrenci detayları yüklenirken hata oluştu:', error);
+                content.innerHTML = `
+                    <div class="text-center py-12 text-red-600">
+                        <i class="fas fa-exclamation-triangle text-5xl mb-4"></i>
+                        <p class="text-lg">Detaylar yüklenirken bir hata oluştu.</p>
+                        <p class="text-sm">${error.message}</p>
+                    </div>
+                `;
+            }
         }
 
         // Close student modal

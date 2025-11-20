@@ -497,7 +497,7 @@
             }
             
             videoList.innerHTML = '';
-            
+
             module.videos.forEach((video, index) => {
                 const isActive = video.id === currentVideoId;
                 const videoProgress = userProgress[video.id] || {};
@@ -524,7 +524,7 @@
                                     ? `<i class="fas fa-play-circle ${isActive ? 'text-white' : 'text-blue-500'} flex-shrink-0"></i>`
                                     : `<i class="far fa-circle ${isActive ? 'text-white' : 'text-gray-400'} flex-shrink-0"></i>`
                                 }
-                            </div>
+                        </div>
                             ${video.duration ? `<p class="text-xs ${isActive ? 'text-blue-100' : 'text-gray-500'} mb-2">${video.duration}</p>` : ''}
                             
                             ${totalQuestions > 0 ? `
@@ -536,7 +536,7 @@
                                         <span class="text-xs font-semibold ${isActive ? 'text-white' : 'text-gray-700'}">
                                             ${progressPercent}%
                                         </span>
-                                    </div>
+                            </div>
                                     <div class="w-full bg-gray-200 rounded-full h-1.5 ${isActive ? 'bg-white/20' : ''}">
                                         <div class="bg-${isActive ? 'white' : 'primary'} h-1.5 rounded-full transition-all duration-300" 
                                              style="width: ${progressPercent}%"></div>
@@ -546,7 +546,7 @@
                         </div>
                     </div>
                 `;
-
+                
                 videoItem.addEventListener('click', () => {
                     currentVideoId = video.id;
                     const videoToLoad = moduleData[currentModule]?.videos?.find(v => v.id === currentVideoId);
@@ -556,7 +556,7 @@
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 });
-                
+
                 videoList.appendChild(videoItem);
             });
         }
@@ -575,7 +575,7 @@
             document.getElementById('video-title').textContent = video.title;
             document.getElementById('video-description').textContent = video.description;
             
-            const videoPlaceholder = document.getElementById('video-placeholder');
+                    const videoPlaceholder = document.getElementById('video-placeholder');
             
             // Check if we have a YouTube URL
             if (video.videoUrl && video.videoUrl !== '#') {
@@ -594,16 +594,16 @@
                     // Create YouTube embed iframe
                     videoPlaceholder.style.display = 'block';
                     videoPlaceholder.innerHTML = `
-                        <iframe 
-                            width="100%" 
-                            height="100%" 
+                            <iframe 
+                                width="100%" 
+                                height="100%" 
                             src="https://www.youtube.com/embed/${youtubeId}" 
-                            frameborder="0" 
+                                frameborder="0" 
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowfullscreen
+                                allowfullscreen
                             style="border-radius: 0.5rem;">
-                        </iframe>
-                    `;
+                            </iframe>
+                        `;
                     console.log('✅ YouTube video yüklendi:', youtubeId);
                     } else {
                     // No valid YouTube ID
@@ -617,7 +617,7 @@
                     `;
                     }
                 } else {
-                videoPlaceholder.style.display = 'flex';
+                        videoPlaceholder.style.display = 'flex';
                 videoPlaceholder.innerHTML = `
                     <div class="text-center">
                         <i class="fas fa-video-slash text-6xl mb-4 opacity-75"></i>
@@ -774,9 +774,12 @@
                 alert('Lütfen bir cevap yazın.');
                 return;
             }
-            
+
             const question = currentVideo.questions[questionIndex];
             if (!question) return;
+            
+            // Save open-ended answer
+            saveQuestionAnswer(questionIndex, question.question, answer, 'Açık uçlu soru', null, question.explanation);
             
             // Show feedback (for now, just show a message)
             alert('Cevabınız kaydedildi. Koordinatör tarafından değerlendirilecektir.');
@@ -833,6 +836,11 @@
             });
             
             const isCorrect = correctCount === correctAnswers.length;
+            const studentAnswerText = userAnswers.join(', ');
+            const correctAnswerText = correctAnswers.join(', ');
+            
+            // Save fill-blank answer
+            saveQuestionAnswer(questionIndex, question.question, studentAnswerText, correctAnswerText, isCorrect, question.explanation);
             
             // Get question div for explanation box
             const questionDiv = document.querySelector(`[data-question-index="${questionIndex}"]`);
@@ -887,9 +895,9 @@
                 const api = window.GroqAPI || window.GeminiAPI;
                 if (!api || typeof api.generateVideoRecommendation !== 'function') {
                     console.error('❌ Groq API veya generateVideoRecommendation fonksiyonu bulunamadı');
-                    return;
-                }
-                
+                return;
+            }
+
                 // Show loading
                 const loadingDiv = document.createElement('div');
                 loadingDiv.className = 'mt-4 p-4 bg-white/80 rounded-lg border border-blue-300';
@@ -948,14 +956,14 @@
                                         <i class="fas fa-video mr-2"></i>${recommendation.recommendedVideoTitle || 'Önerilen Video'}
                                     </p>
                                     <p class="text-xs text-gray-600">${recommendation.reason || ''}</p>
-                                </div>
+                                            </div>
                                 <button onclick="goToRecommendedVideo('${recommendation.recommendedVideoId}')" 
                                         class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105">
                                     <i class="fas fa-play-circle mr-2"></i>Bu Videoyu İzle
                     </button>
-                </div>
                         </div>
-                    `;
+                    </div>
+                `;
                     explanationBox.appendChild(recommendationDiv);
                 } else {
                     // Show generic feedback or error message
@@ -1025,14 +1033,22 @@
             // Mark selected option
             const selectedDiv = questionDiv.querySelector(`[data-option="${selectedOption}"]`);
             
-            if (selectedOption === correctAnswer) {
+            const question = currentVideo.questions[questionIndex];
+            const isCorrect = selectedOption === correctAnswer;
+            const studentAnswer = String.fromCharCode(65 + selectedOption);
+            const correctAnswerText = String.fromCharCode(65 + correctAnswer);
+            
+            if (isCorrect) {
                 // Correct answer
                 selectedDiv.classList.remove('border-gray-200', 'bg-white');
                 selectedDiv.classList.add('border-green-500', 'bg-green-50');
                 explanationBox.style.display = 'block';
                 explanationBox.classList.remove('border-red-200', 'bg-red-50');
                 explanationBox.classList.add('border-green-200', 'bg-green-50');
-                explanationText.innerHTML = '✅ Doğru cevap! ' + (currentVideo.questions[questionIndex].explanation || 'Tebrikler!');
+                explanationText.innerHTML = '✅ Doğru cevap! ' + (question.explanation || 'Tebrikler!');
+                
+                // Save correct answer
+                saveQuestionAnswer(questionIndex, question.question, studentAnswer, correctAnswerText, true, question.explanation);
                 
                 // Update progress
                 updateVideoProgress();
@@ -1049,7 +1065,10 @@
                 explanationBox.style.display = 'block';
                 explanationBox.classList.remove('border-green-200', 'bg-green-50');
                 explanationBox.classList.add('border-red-200', 'bg-red-50');
-                explanationText.innerHTML = '❌ Yanlış cevap. Doğru cevap: ' + String.fromCharCode(65 + correctAnswer) + '. ' + (currentVideo.questions[questionIndex].explanation || '');
+                explanationText.innerHTML = '❌ Yanlış cevap. Doğru cevap: ' + correctAnswerText + '. ' + (question.explanation || '');
+                
+                // Save wrong answer
+                saveQuestionAnswer(questionIndex, question.question, studentAnswer, correctAnswerText, false, question.explanation);
                 
                 // Get AI recommendation for wrong answer
                 getAIRecommendation(questionIndex, selectedOption, correctAnswer, explanationBox);
@@ -1186,7 +1205,7 @@
                     }
                     explanationBox.appendChild(feedbackDiv);
                 }
-                
+
             } catch (error) {
                 console.error('❌ AI öneri hatası:', error);
                 if (loadingDiv && loadingDiv.parentNode) {
@@ -1222,8 +1241,8 @@
                     loadVideo(video);
                     loadVideoList();
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                    return;
-                }
+                return;
+            }
             }
             
             // If not in current module, search in all modules
@@ -1322,6 +1341,33 @@
             console.log(`📊 Modül ilerleme: ${totalModuleCorrect}/${totalModuleQuestions} = ${moduleProgress}%`);
         }
         
+        // Save question answer to Firebase
+        async function saveQuestionAnswer(questionIndex, questionText, studentAnswer, correctAnswer, isCorrect, explanation) {
+            try {
+                const userEmail = localStorage.getItem('userEmail');
+                if (!userEmail || !window.DB) return;
+
+                const answerData = {
+                    userEmail: userEmail,
+                    videoId: currentVideoId,
+                    moduleId: currentModule,
+                    questionIndex: questionIndex,
+                    questionText: questionText,
+                    studentAnswer: studentAnswer,
+                    correctAnswer: correctAnswer,
+                    isCorrect: isCorrect,
+                    explanation: explanation,
+                    answeredAt: new Date().toISOString()
+                };
+
+                await window.DB.save('videoQuestionAnswers', answerData);
+                console.log('✅ Soru cevabı kaydedildi:', answerData);
+                
+            } catch (error) {
+                console.error('❌ Soru cevabı kaydetme hatası:', error);
+            }
+        }
+
         // Save progress to Firebase
         async function saveProgressToFirebase(moduleProgress, videoId, videoProgress) {
             try {
@@ -1354,21 +1400,22 @@
                     updatedAt: new Date().toISOString()
                 };
                 
-                // Update video-specific progress
-                if (videoId && videoProgress) {
-                    progressData.videoProgress[videoId] = {
-                        questionsAnswered: videoProgress.questionsAnswered,
-                        correctAnswers: videoProgress.correctAnswers,
-                        progressPercent: videoProgress.progressPercent,
-                        completed: videoProgress.completed,
-                        updatedAt: new Date().toISOString()
-                    };
-                }
+            // Update video-specific progress
+            if (videoId && videoProgress) {
+                progressData.videoProgress[videoId] = {
+                    questionsAnswered: videoProgress.questionsAnswered,
+                    correctAnswers: videoProgress.correctAnswers,
+                    progressPercent: videoProgress.progressPercent,
+                    completed: videoProgress.completed,
+                    questions: videoProgress.questions || [],
+                    updatedAt: new Date().toISOString()
+                };
+            }
                 
                 if (progressId) {
                     // Update existing progress
                     await window.DB.save('userProgress', progressData, progressId);
-                } else {
+            } else {
                     // Create new progress
                     await window.DB.save('userProgress', progressData);
                 }

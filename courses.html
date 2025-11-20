@@ -204,7 +204,10 @@
                 console.log('📹 Koordinatör videoları modüller için yükleniyor...');
                 
                 const coordinatorVideosResult = await DB.load('coordinatorVideos');
-                const coordinatorVideos = (coordinatorVideosResult && coordinatorVideosResult.success) ? coordinatorVideosResult.data : [];
+                const allCoordinatorVideos = (coordinatorVideosResult && coordinatorVideosResult.success) ? coordinatorVideosResult.data : [];
+                
+                // Filter out deleted videos (only show active videos)
+                const coordinatorVideos = allCoordinatorVideos.filter(video => video.status !== 'deleted');
                 
                 console.log(`📹 ${coordinatorVideos.length} koordinatör videosu bulundu`);
                 
@@ -254,7 +257,10 @@
                 
                 // Get coordinator videos to count videos per module
                 const videosResult = await window.DB.load('coordinatorVideos');
-                const videos = (videosResult && videosResult.success) ? videosResult.data : [];
+                const allVideos = (videosResult && videosResult.success) ? videosResult.data : [];
+                
+                // Filter out deleted videos (only show active videos)
+                const videos = allVideos.filter(video => video.status !== 'deleted');
                 
                 console.log(`📊 ${modules.length} modül, ${videos.length} video, ${myProgress.length} ilerleme kaydı bulundu`);
                 

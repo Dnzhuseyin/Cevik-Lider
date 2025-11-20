@@ -31,7 +31,8 @@ class FirebaseProductionDB {
             quizzes: 'quizzes',
             liveQuiz: 'live_quiz',
             quizResponses: 'quiz_responses',
-            downloads: 'downloads'
+            downloads: 'downloads',
+            videoQuestionAnswers: 'video_question_answers'
         };
         
         // Add caching for better performance
@@ -527,10 +528,13 @@ class FirebaseProductionDB {
             console.log('📹 Koordinatör videoları alınıyor...');
             
             const result = await this.load('coordinatorVideos');
-            const videos = (result && result.success) ? result.data : [];
+            const allVideos = (result && result.success) ? result.data : [];
             
-            console.log(`📹 ${videos.length} koordinatör videosu bulundu`);
-            return videos;
+            // Filter out deleted videos (only show active videos)
+            const activeVideos = allVideos.filter(video => video.status !== 'deleted');
+            
+            console.log(`📹 ${allVideos.length} toplam video, ${activeVideos.length} aktif video bulundu`);
+            return activeVideos;
             
         } catch (error) {
             console.error('❌ Koordinatör videoları alma hatası:', error);
