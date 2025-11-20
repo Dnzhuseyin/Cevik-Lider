@@ -1,13 +1,13 @@
-// Groq AI API Integration
+// OpenRouter AI API Integration (formerly Groq)
 class GroqAPI {
     constructor() {
-        // API Key'i buraya ekleyin: https://console.groq.com/
-        this.apiKey = 'gsk_YOUR_NEW_GROQ_API_KEY_HERE'; // Yeni API key gerekli
-        this.baseURL = 'https://api.groq.com/openai/v1/chat/completions';
-        this.model = 'llama-3.1-70b-versatile'; // Primary model
-        this.fallbackModels = ['mixtral-8x7b-32768', 'llama-3.1-8b-instant'];
+        // OpenRouter API Key
+        this.apiKey = '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';
+        this.baseURL = 'https://openrouter.ai/api/v1/chat/completions';
+        this.model = 'meta-llama/llama-3.1-70b-instruct'; // OpenRouter model
+        this.fallbackModels = ['meta-llama/llama-3.1-8b-instruct', 'mistralai/mixtral-8x7b-instruct'];
         this.lastRequestTime = 0;
-        this.minRequestInterval = 1000; // 1 second between requests (Groq is faster)
+        this.minRequestInterval = 1000; // 1 second between requests
         
         // Test API key on initialization
         this.testAPIKey();
@@ -15,12 +15,14 @@ class GroqAPI {
     
     async testAPIKey() {
         try {
-            console.log('🔑 Groq API key test ediliyor...');
+            console.log('🔑 OpenRouter API key test ediliyor...');
             const testResponse = await fetch(this.baseURL, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json',
+                    'HTTP-Referer': window.location.origin,
+                    'X-Title': 'Cevik-Lider-Platform'
                 },
                 body: JSON.stringify({
                     model: this.model,
@@ -30,13 +32,13 @@ class GroqAPI {
             });
             
             if (testResponse.ok) {
-                console.log('✅ Groq API key geçerli!');
+                console.log('✅ OpenRouter API key geçerli!');
             } else {
                 const testErrorText = await testResponse.text();
-                console.error('❌ Groq API key test hatası:', testResponse.status, testErrorText);
+                console.error('❌ OpenRouter API key test hatası:', testResponse.status, testErrorText);
             }
         } catch (error) {
-            console.error('❌ Groq API key test hatası:', error);
+            console.error('❌ OpenRouter API key test hatası:', error);
         }
     }
     
@@ -70,6 +72,8 @@ class GroqAPI {
                 headers: {
                     'Authorization': `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json',
+                    'HTTP-Referer': window.location.origin,
+                    'X-Title': 'Cevik-Lider-Platform'
                 },
                 body: JSON.stringify(requestBody)
             });
@@ -77,7 +81,7 @@ class GroqAPI {
             if (!response.ok) {
                 // Enhanced error logging
                 const errorText = await response.text();
-                console.error(`❌ Groq API Hatası (${response.status}):`, errorText);
+                console.error(`❌ OpenRouter API Hatası (${response.status}):`, errorText);
                 
                 // Handle rate limit (429)
                 if (response.status === 429) {
@@ -103,13 +107,13 @@ class GroqAPI {
                 
                 const apiErrorText = await response.text().catch(() => '');
                 console.error(`❌ API Hatası (${response.status}):`, apiErrorText);
-                throw new Error(`Groq API error: ${response.status} - ${apiErrorText.substring(0, 100)}`);
+                throw new Error(`OpenRouter API error: ${response.status} - ${apiErrorText.substring(0, 100)}`);
             }
             
             const data = await response.json();
             
             // Log response for debugging
-            console.log('📥 Groq API yanıtı:', data);
+            console.log('📥 OpenRouter API yanıtı:', data);
             
             if (data.choices && data.choices[0] && data.choices[0].message) {
                 const text = data.choices[0].message.content;
@@ -126,7 +130,7 @@ class GroqAPI {
             }
             
         } catch (error) {
-            console.error('❌ Groq API hatası:', error);
+            console.error('❌ OpenRouter API hatası:', error);
             return {
                 success: false,
                 error: error.message
@@ -216,14 +220,10 @@ SADECE JSON, BAŞKA HİÇBİR ŞEY YAZMA!`;
     
     // YENİ: Yanlış cevaplara göre kişiselleştirilmiş video önerisi
     async generateVideoRecommendation(wrongQuestion, wrongAnswer, correctAnswer, allModules, allVideos) {
-        // Check if API key is valid
-        if (!this.apiKey || this.apiKey.includes('YOUR_NEW_GROQ_API_KEY_HERE')) {
-            console.warn('⚠️ Groq API key bulunamadı, fallback cevap kullanılıyor');
-            return this.getFallbackRecommendation(wrongQuestion, wrongAnswer, correctAnswer);
-        }
+        console.log('🔑 API Key kullanılıyor:', this.apiKey ? this.apiKey.substring(0, 20) + '...' : 'yok');
         
         try {
-            const context = `Sen bir eğitim danışmanısın. Öğrencilerin yanlış cevapladığı sorulara göre hangi videoları izlemeleri gerektiğini öneriyorsun. Türkçe yanıt ver.`;
+            const context = `Sen bir eğitim danışmanısın. Türkçe yanıt ver. Kısa ve net ol.`;
             
             // Ensure arrays are valid
             const modules = Array.isArray(allModules) ? allModules : [];
@@ -244,28 +244,20 @@ SADECE JSON, BAŞKA HİÇBİR ŞEY YAZMA!`;
                 : 'Henüz video eklenmemiş.';
         
             const prompt = `
-Öğrenci şu soruyu yanlış cevapladı:
+Öğrenci yanlış cevap verdi:
 Soru: ${wrongQuestion}
-Öğrencinin Cevabı: ${wrongAnswer}
+Yanlış Cevap: ${wrongAnswer}
 Doğru Cevap: ${correctAnswer}
 
-Sistemdeki Modüller:
-${modulesInfo}
-
-Sistemdeki Videolar:
+Mevcut Videolar:
 ${videosInfo}
 
-Bu konuyu öğrenmesi için hangi videoyu izlemeli? Mevcut videolardan birini öner.
+Öğrenciye hangi videoyu izlemesini önerirsiniz? Mevcut videolardan en uygununu seçin.
 
-SADECE ŞU JSON FORMATINI DÖNDÜR:
-{
-    "feedback": "Kısa ve motive edici geri bildirim (2-3 cümle)",
-    "recommendedVideoId": "video_id_buraya",
-    "recommendedVideoTitle": "video_başlığı_buraya",
-    "reason": "Bu videoyu neden izlemeli (1 cümle)"
-}
+Sadece bu JSON formatında yanıt ver:
+{"feedback": "Kısa motivasyon mesajı","recommendedVideoId": "video_id","recommendedVideoTitle": "video_başlığı","reason": "Neden bu video"}
 
-SADECE JSON DÖNDÜR!`;
+SADECE JSON!`;
             
             const result = await this.generateContent(prompt, context);
             
@@ -372,9 +364,10 @@ SADECE JSON DÖNDÜR!`;
     }
 }
 
-// Initialize Groq API globally
+// Initialize OpenRouter API globally
 window.GroqAPI = new GroqAPI();
-// Keep GeminiAPI for backward compatibility (will be removed later)
+window.OpenRouterAPI = new GroqAPI();
+// Keep GeminiAPI for backward compatibility
 window.GeminiAPI = window.GroqAPI;
-console.log('✅ Groq API entegrasyonu hazır!');
+console.log('✅ OpenRouter API entegrasyonu hazır!');
 
