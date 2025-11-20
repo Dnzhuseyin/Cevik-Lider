@@ -37,7 +37,7 @@ class FirebaseProductionDB {
         
         // Add caching for better performance
         this.cache = new Map();
-        this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
+        this.cacheTimeout = 1000; // 1 second - very short cache for deleted videos
         
         console.log('🔥 Firebase Production DB başlatılıyor...');
         this.initialize();
@@ -527,6 +527,9 @@ class FirebaseProductionDB {
         try {
             console.log('📹 Koordinatör videoları alınıyor...');
             
+            // Clear cache for fresh data
+            this.clearCache('coordinatorVideos');
+            
             const result = await this.load('coordinatorVideos');
             const allVideos = (result && result.success) ? result.data : [];
             
@@ -539,6 +542,16 @@ class FirebaseProductionDB {
         } catch (error) {
             console.error('❌ Koordinatör videoları alma hatası:', error);
             return [];
+        }
+    }
+    
+    clearCache(collectionName = null) {
+        if (collectionName) {
+            this.cache.delete(collectionName);
+            console.log(`🗑️ Cache temizlendi: ${collectionName}`);
+        } else {
+            this.cache.clear();
+            console.log('🗑️ Tüm cache temizlendi');
         }
     }
 

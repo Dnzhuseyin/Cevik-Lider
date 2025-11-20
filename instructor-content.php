@@ -355,7 +355,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     
     <!-- Firebase Production DB -->
-    <script src="js/firebase-production.js?v=20241121001"></script>
+    <script src="js/firebase-production.js?v=<?php echo time(); ?>"></script>
     <script src="js/user-utils.js"></script>
     <script src="js/groq-api.js"></script>
     <script src="js/main.js"></script>
@@ -448,9 +448,6 @@
                 const result = await window.DB.save('coordinatorVideos', updatedVideo, videoId);
                 if (result && result.success) {
                     console.log('✅ Video başarıyla silindi (deleted olarak işaretlendi)');
-                    
-                    // Clear cache to ensure fresh data
-                    window.DB.clearCache('coordinatorVideos');
                     
                     // Reload videos and update stats
                     await loadVideos();
