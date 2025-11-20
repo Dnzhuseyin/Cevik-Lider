@@ -565,11 +565,17 @@ class FirebaseProductionDB {
         try {
             console.log('📹 Öğrenci videoları alınıyor...');
             
-            const result = await this.load('studentVideos');
-            const videos = (result && result.success) ? result.data : [];
+            // Clear cache for fresh data
+            this.clearCache('studentVideos');
             
-            console.log(`📹 ${videos.length} öğrenci videosu bulundu`);
-            return videos;
+            const result = await this.load('studentVideos');
+            const allVideos = (result && result.success) ? result.data : [];
+            
+            // Filter out deleted videos (only show active videos)
+            const activeVideos = allVideos.filter(video => video.status !== 'deleted');
+            
+            console.log(`📹 ${allVideos.length} toplam öğrenci videosu, ${activeVideos.length} aktif video bulundu`);
+            return activeVideos;
             
         } catch (error) {
             console.error('❌ Öğrenci videoları alma hatası:', error);

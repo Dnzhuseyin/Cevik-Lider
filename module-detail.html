@@ -339,9 +339,14 @@
                 const moduleStudentVideos = studentVideos.filter(video => {
                     const videoModuleId = String(video.moduleId).trim();
                     const currentModuleStr = String(currentModule).trim();
-                    return videoModuleId === currentModuleStr || 
+                    const moduleMatch = videoModuleId === currentModuleStr || 
                            video.moduleId == currentModule ||
                            parseInt(videoModuleId) === parseInt(currentModuleStr);
+                    
+                    // Also filter out deleted videos for students
+                    const isNotDeleted = video.status !== 'deleted';
+                    
+                    return moduleMatch && isNotDeleted;
                 });
 
                 // Combine all videos
