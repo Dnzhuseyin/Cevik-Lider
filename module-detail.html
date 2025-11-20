@@ -435,7 +435,9 @@
             loadVideoList();
             
             // Load first video or current video
-            const moduleVideos = moduleData[currentModule]?.videos || [];
+            const allModuleVideos = moduleData[currentModule]?.videos || [];
+            // Filter out deleted videos for students
+            const moduleVideos = allModuleVideos.filter(video => video.status !== 'deleted');
             if (moduleVideos.length > 0) {
                 let videoToLoad = moduleVideos.find(v => v.id === currentVideoId);
                 if (!videoToLoad) {
@@ -501,7 +503,10 @@
             
             videoList.innerHTML = '';
 
-            module.videos.forEach((video, index) => {
+            // Filter out deleted videos for students
+            const activeVideos = module.videos.filter(video => video.status !== 'deleted');
+            
+            activeVideos.forEach((video, index) => {
                 const isActive = video.id === currentVideoId;
                 const videoProgress = userProgress[video.id] || {};
                 const isCompleted = videoProgress.completed || false;
