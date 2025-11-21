@@ -33,7 +33,11 @@
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-production.js?v=<?php echo time(); ?>"></script>
+    <script>
+        // Cache busting for JS files
+        const cacheBuster = Date.now();
+        document.write('<script src="js/firebase-production.js?v=' + cacheBuster + '"><\/script>');
+    </script>
     <script src="js/user-utils.js"></script>
     <style>
         /* ULTRA STRONG SIDEBAR FIX - NEVER DISAPPEAR */

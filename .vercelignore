@@ -1,0 +1,16 @@
+# Development files
+server.js
+simple-server.js
+start-server.sh
+*.log
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+DEPLOYMENT.md
+HOSTINGER-DEPLOY.sh
+

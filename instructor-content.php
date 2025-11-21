@@ -355,7 +355,11 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     
     <!-- Firebase Production DB -->
-    <script src="js/firebase-production.js?v=<?php echo time(); ?>"></script>
+    <script>
+        // Cache busting for JS files
+        const cacheBuster = Date.now();
+        document.write('<script src="js/firebase-production.js?v=' + cacheBuster + '"><\/script>');
+    </script>
     <script src="js/user-utils.js"></script>
     <script src="js/groq-api.js"></script>
     <script src="js/main.js"></script>

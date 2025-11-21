@@ -1,0 +1,18 @@
+{
+  "name": "cevik-lider",
+  "version": "1.0.0",
+  "description": "Çevik Lider Online Eğitim Platformu",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "start": "vercel dev"
+  },
+  "keywords": [
+    "education",
+    "online-learning",
+    "firebase"
+  ],
+  "author": "Huseyin Deniz",
+  "license": "MIT"
+}
+
