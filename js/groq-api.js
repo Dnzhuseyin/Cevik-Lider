@@ -1,73 +1,57 @@
 // Groq AI API Integration
 class GroqAPI {
     constructor() {
-        // Groq API Key - Vercel Environment Variable'dan alınıyor
-        // Fallback: Eğer environment variable yoksa, eski key kullanılır (development için)
+        // Vercel API Proxy kullanılıyor - API key backend'de güvenli şekilde saklanıyor
         console.log('🚀 GroqAPI constructor başlatılıyor...');
-        this.apiKey = this.getAPIKey();
-        console.log('🔑 API Key alındı, uzunluk:', this.apiKey ? this.apiKey.length : 0);
-        console.log('🔑 API Key başlangıcı:', this.apiKey ? this.apiKey.substring(0, 25) + '...' : 'YOK');
-        this.baseURL = 'https://api.groq.com/openai/v1/chat/completions';
+        console.log('🔒 Güvenli API Proxy kullanılıyor (API key backend\'de)');
+        
+        // Vercel API route'u kullan (backend proxy)
+        // Production: https://your-domain.vercel.app/api/groq-proxy
+        // Development: http://localhost:3000/api/groq-proxy (vercel dev)
+        const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+        this.proxyURL = isProduction 
+            ? '/api/groq-proxy'  // Vercel production
+            : 'http://localhost:3000/api/groq-proxy';  // Local development (vercel dev)
+        
         this.model = 'llama-3.3-70b-versatile'; // Groq güncel model
         this.fallbackModels = ['llama-3.1-8b-instant', 'mixtral-8x7b-32768'];
         this.lastRequestTime = 0;
         this.minRequestInterval = 1000; // 1 second between requests
         
-        // Test API key on initialization
-        this.testAPIKey();
-    }
-    
-    // API Key'i environment variable'dan veya fallback'ten al
-    getAPIKey() {
-        // Build time'da inject edilen key (Vercel environment variable)
-        // Bu değer build.js script'i tarafından değiştirilir
-        const injectedKey = 'INJECTED_BY_BUILD_SCRIPT';
-        if (injectedKey && injectedKey !== 'INJECTED_BY_BUILD_SCRIPT' && injectedKey !== 'undefined' && injectedKey.trim() !== '') {
-            console.log('🔑 API Key build time\'da inject edildi (Vercel)');
-            console.log('🔑 Injected Key (ilk 30 karakter):', injectedKey.substring(0, 30) + '...');
-            console.log('🔑 Injected Key (son 10 karakter):', '...' + injectedKey.substring(injectedKey.length - 10));
-            return injectedKey;
-        }
+        console.log('🔗 Proxy URL:', this.proxyURL);
         
-        // Fallback: Development için (sadece local)
-        // NOT: Fallback key Vercel'de kullanılmayacak, sadece local development için
-        const fallbackKey = 'FALLBACK_KEY_PLACEHOLDER';
-        console.warn('⚠️ Environment variable bulunamadı, fallback key kullanılıyor (sadece development)');
-        console.warn('⚠️ Bu key muhtemelen geçersiz! Vercel\'de GROQ_API_KEY environment variable ekleyin!');
-        return fallbackKey;
+        // Test API connection on initialization
+        this.testAPIKey();
     }
     
     async testAPIKey() {
         try {
-            console.log('🔑 Groq API key test ediliyor...');
-            // Detaylı log
-            console.log('🔍 API Key Test Detayları:');
-            console.log('  - Key uzunluğu:', this.apiKey ? this.apiKey.length : 0);
-            console.log('  - Key başlangıcı:', this.apiKey ? this.apiKey.substring(0, 20) + '...' : 'yok');
-            console.log('  - Key sonu:', this.apiKey ? '...' + this.apiKey.substring(this.apiKey.length - 10) : 'yok');
-            console.log('  - Authorization header:', `Bearer ${this.apiKey ? this.apiKey.substring(0, 20) + '...' : 'yok'}`);
+            console.log('🔑 Groq API proxy test ediliyor...');
             
-            const testResponse = await fetch(this.baseURL, {
+            const testResponse = await fetch(this.proxyURL, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
+                    prompt: 'Test',
                     model: this.model,
-                    messages: [{ role: 'user', content: 'Test' }],
                     max_tokens: 10
                 })
             });
             
             if (testResponse.ok) {
-                console.log('✅ Groq API key geçerli!');
+                const data = await testResponse.json();
+                console.log('✅ Groq API proxy çalışıyor!');
+                console.log('✅ API bağlantısı başarılı');
             } else {
                 const testErrorText = await testResponse.text();
-                console.error('❌ Groq API key test hatası:', testResponse.status, testErrorText);
+                console.error('❌ Groq API proxy test hatası:', testResponse.status, testErrorText);
+                console.warn('⚠️ Vercel API route kontrol edin: /api/groq-proxy');
             }
         } catch (error) {
-            console.error('❌ Groq API key test hatası:', error);
+            console.error('❌ Groq API proxy test hatası:', error);
+            console.warn('⚠️ Vercel dev server çalışıyor mu? (vercel dev)');
         }
     }
     
@@ -101,19 +85,25 @@ class GroqAPI {
             console.log('  - Key uzunluğu:', this.apiKey ? this.apiKey.length : 0);
             console.log('  - Key başlangıcı:', this.apiKey ? this.apiKey.substring(0, 20) + '...' : 'yok');
             
-            const response = await fetch(this.baseURL, {
+            // Vercel API proxy kullan (API key backend'de güvenli)
+            const response = await fetch(this.proxyURL, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify({
+                    prompt: fullPrompt,
+                    context: context || '',
+                    model: this.model,
+                    temperature: 0.7,
+                    max_tokens: 2048
+                })
             });
             
             if (!response.ok) {
                 // Enhanced error logging
                 const errorText = await response.text();
-                console.error(`❌ Groq API Hatası (${response.status}):`, errorText);
+                console.error(`❌ Groq API Proxy Hatası (${response.status}):`, errorText);
                 
                 // Handle rate limit (429)
                 if (response.status === 429) {
@@ -138,11 +128,19 @@ class GroqAPI {
                 }
                 
                 const apiErrorText = await response.text().catch(() => '');
-                console.error(`❌ API Hatası (${response.status}):`, apiErrorText);
-                throw new Error(`Groq API error: ${response.status} - ${apiErrorText.substring(0, 100)}`);
+                console.error(`❌ API Proxy Hatası (${response.status}):`, apiErrorText);
+                throw new Error(`Groq API proxy error: ${response.status} - ${apiErrorText.substring(0, 100)}`);
             }
             
-            const data = await response.json();
+            const proxyResponse = await response.json();
+            
+            // Proxy response structure: { success: true, data: { ... } }
+            if (!proxyResponse.success || !proxyResponse.data) {
+                console.error('❌ Geçersiz proxy yanıtı:', proxyResponse);
+                throw new Error('Geçersiz proxy yanıtı');
+            }
+            
+            const data = proxyResponse.data;
             
             // Log response for debugging
             console.log('📥 Groq API yanıtı:', data);
@@ -252,10 +250,8 @@ SADECE JSON, BAŞKA HİÇBİR ŞEY YAZMA!`;
     
     // YENİ: Yanlış cevaplara göre kişiselleştirilmiş video önerisi
     async generateVideoRecommendation(wrongQuestion, wrongAnswer, correctAnswer, allModules, allVideos) {
-        console.log('🔑 API Key kullanılıyor:', this.apiKey ? this.apiKey.substring(0, 20) + '...' : 'yok');
-        console.log('🔑 API Key tam uzunluk:', this.apiKey ? this.apiKey.length : 0);
-        console.log('🔑 API Key başlangıcı:', this.apiKey ? this.apiKey.substring(0, 30) + '...' : 'YOK');
-        console.log('🔑 API Key sonu:', this.apiKey ? '...' + this.apiKey.substring(this.apiKey.length - 15) : 'YOK');
+        console.log('🔒 Güvenli API Proxy kullanılıyor (API key backend\'de)');
+        console.log('🔗 Proxy URL:', this.proxyURL);
         
         try {
             const context = `Sen bir eğitim danışmanısın. Türkçe yanıt ver. Kısa ve net ol.`;

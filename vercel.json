@@ -1,5 +1,4 @@
 {
-  "buildCommand": "node build.js && echo 'Build completed'",
   "outputDirectory": ".",
   "rewrites": [
     {
