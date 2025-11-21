@@ -21,18 +21,29 @@ class GroqAPI {
         const injectedKey = 'INJECTED_BY_BUILD_SCRIPT';
         if (injectedKey && injectedKey !== 'INJECTED_BY_BUILD_SCRIPT' && injectedKey !== 'undefined' && injectedKey.trim() !== '') {
             console.log('🔑 API Key build time\'da inject edildi (Vercel)');
+            console.log('🔑 Injected Key (ilk 30 karakter):', injectedKey.substring(0, 30) + '...');
+            console.log('🔑 Injected Key (son 10 karakter):', '...' + injectedKey.substring(injectedKey.length - 10));
             return injectedKey;
         }
         
         // Fallback: Development için (sadece local)
         const fallbackKey = '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';
         console.warn('⚠️ Environment variable bulunamadı, fallback key kullanılıyor (sadece development)');
+        console.warn('⚠️ Fallback Key (ilk 30 karakter):', fallbackKey.substring(0, 30) + '...');
+        console.warn('⚠️ Bu key muhtemelen geçersiz! Vercel\'de OPENROUTER_API_KEY environment variable ekleyin!');
         return fallbackKey;
     }
     
     async testAPIKey() {
         try {
             console.log('🔑 OpenRouter API key test ediliyor...');
+            // Detaylı log
+            console.log('🔍 API Key Test Detayları:');
+            console.log('  - Key uzunluğu:', this.apiKey ? this.apiKey.length : 0);
+            console.log('  - Key başlangıcı:', this.apiKey ? this.apiKey.substring(0, 20) + '...' : 'yok');
+            console.log('  - Key sonu:', this.apiKey ? '...' + this.apiKey.substring(this.apiKey.length - 10) : 'yok');
+            console.log('  - Authorization header:', `Bearer ${this.apiKey ? this.apiKey.substring(0, 20) + '...' : 'yok'}`);
+            
             const testResponse = await fetch(this.baseURL, {
                 method: 'POST',
                 headers: {
@@ -83,6 +94,11 @@ class GroqAPI {
             };
             
             this.lastRequestTime = Date.now();
+            
+            // Detaylı log
+            console.log('🔍 API Request Detayları:');
+            console.log('  - Key uzunluğu:', this.apiKey ? this.apiKey.length : 0);
+            console.log('  - Key başlangıcı:', this.apiKey ? this.apiKey.substring(0, 20) + '...' : 'yok');
             
             const response = await fetch(this.baseURL, {
                 method: 'POST',
