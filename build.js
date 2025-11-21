@@ -9,10 +9,10 @@ const fs = require('fs');
 const path = require('path');
 
 // Environment variable'ları oku
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 console.log('🔧 Build script başlatılıyor...');
-console.log('🔑 OPENROUTER_API_KEY var mı?', OPENROUTER_API_KEY ? 'EVET (ilk 20 karakter: ' + OPENROUTER_API_KEY.substring(0, 20) + '...)' : 'HAYIR');
+console.log('🔑 GROQ_API_KEY var mı?', GROQ_API_KEY ? 'EVET (ilk 20 karakter: ' + GROQ_API_KEY.substring(0, 20) + '...)' : 'HAYIR');
 
 // groq-api.js dosyasını oku
 const groqApiPath = path.join(__dirname, 'js', 'groq-api.js');
@@ -25,21 +25,24 @@ if (!fs.existsSync(groqApiPath)) {
 let groqApiContent = fs.readFileSync(groqApiPath, 'utf8');
 
 // API key'i replace et
-if (OPENROUTER_API_KEY && OPENROUTER_API_KEY.trim() !== '') {
+if (GROQ_API_KEY && GROQ_API_KEY.trim() !== '') {
     console.log('✅ Environment variable bulundu, inject ediliyor...');
     
     // getAPIKey() fonksiyonunu tamamen değiştir
     const newGetAPIKey = `    getAPIKey() {
         // Build time'da inject edilen key (Vercel environment variable)
-        const injectedKey = '${OPENROUTER_API_KEY}';
+        const injectedKey = '${GROQ_API_KEY}';
         if (injectedKey && injectedKey !== 'undefined' && injectedKey.trim() !== '') {
             console.log('🔑 API Key build time\\'da inject edildi (Vercel)');
+            console.log('🔑 Injected Key (ilk 30 karakter):', injectedKey.substring(0, 30) + '...');
+            console.log('🔑 Injected Key (son 10 karakter):', '...' + injectedKey.substring(injectedKey.length - 10));
             return injectedKey;
         }
         
         // Fallback: Development için (sadece local)
-        const fallbackKey = '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';
+        const fallbackKey = 'FALLBACK_KEY_PLACEHOLDER';
         console.warn('⚠️ Environment variable bulunamadı, fallback key kullanılıyor (sadece development)');
+        console.warn('⚠️ Bu key muhtemelen geçersiz! Vercel\\'de GROQ_API_KEY environment variable ekleyin!');
         return fallbackKey;
     }`;
     
@@ -56,9 +59,9 @@ if (OPENROUTER_API_KEY && OPENROUTER_API_KEY.trim() !== '') {
         process.exit(1);
     }
 } else {
-    console.warn('⚠️ OPENROUTER_API_KEY environment variable bulunamadı');
+    console.warn('⚠️ GROQ_API_KEY environment variable bulunamadı');
     console.warn('⚠️ Fallback key kullanılacak (sadece development için)');
-    console.warn('⚠️ Vercel\'de OPENROUTER_API_KEY environment variable eklemeyi unutmayın!');
+    console.warn('⚠️ Vercel\'de GROQ_API_KEY environment variable eklemeyi unutmayın!');
 }
 
 console.log('✅ Build script tamamlandı');

@@ -1,15 +1,15 @@
-// OpenRouter AI API Integration (formerly Groq)
+// Groq AI API Integration
 class GroqAPI {
     constructor() {
-        // OpenRouter API Key - Vercel Environment Variable'dan alınıyor
+        // Groq API Key - Vercel Environment Variable'dan alınıyor
         // Fallback: Eğer environment variable yoksa, eski key kullanılır (development için)
         console.log('🚀 GroqAPI constructor başlatılıyor...');
         this.apiKey = this.getAPIKey();
         console.log('🔑 API Key alındı, uzunluk:', this.apiKey ? this.apiKey.length : 0);
         console.log('🔑 API Key başlangıcı:', this.apiKey ? this.apiKey.substring(0, 25) + '...' : 'YOK');
-        this.baseURL = 'https://openrouter.ai/api/v1/chat/completions';
-        this.model = 'meta-llama/llama-3.1-70b-instruct'; // OpenRouter model
-        this.fallbackModels = ['meta-llama/llama-3.1-8b-instruct', 'mistralai/mixtral-8x7b-instruct'];
+        this.baseURL = 'https://api.groq.com/openai/v1/chat/completions';
+        this.model = 'llama-3.3-70b-versatile'; // Groq güncel model
+        this.fallbackModels = ['llama-3.1-8b-instant', 'mixtral-8x7b-32768'];
         this.lastRequestTime = 0;
         this.minRequestInterval = 1000; // 1 second between requests
         
@@ -30,16 +30,16 @@ class GroqAPI {
         }
         
         // Fallback: Development için (sadece local)
-        const fallbackKey = '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';
+        // NOT: Fallback key Vercel'de kullanılmayacak, sadece local development için
+        const fallbackKey = 'FALLBACK_KEY_PLACEHOLDER';
         console.warn('⚠️ Environment variable bulunamadı, fallback key kullanılıyor (sadece development)');
-        console.warn('⚠️ Fallback Key (ilk 30 karakter):', fallbackKey.substring(0, 30) + '...');
-        console.warn('⚠️ Bu key muhtemelen geçersiz! Vercel\'de OPENROUTER_API_KEY environment variable ekleyin!');
+        console.warn('⚠️ Bu key muhtemelen geçersiz! Vercel\'de GROQ_API_KEY environment variable ekleyin!');
         return fallbackKey;
     }
     
     async testAPIKey() {
         try {
-            console.log('🔑 OpenRouter API key test ediliyor...');
+            console.log('🔑 Groq API key test ediliyor...');
             // Detaylı log
             console.log('🔍 API Key Test Detayları:');
             console.log('  - Key uzunluğu:', this.apiKey ? this.apiKey.length : 0);
@@ -51,9 +51,7 @@ class GroqAPI {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${this.apiKey}`,
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': window.location.origin,
-                    'X-Title': 'Cevik-Lider-Platform'
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     model: this.model,
@@ -63,10 +61,10 @@ class GroqAPI {
             });
             
             if (testResponse.ok) {
-                console.log('✅ OpenRouter API key geçerli!');
+                console.log('✅ Groq API key geçerli!');
             } else {
                 const testErrorText = await testResponse.text();
-                console.error('❌ OpenRouter API key test hatası:', testResponse.status, testErrorText);
+                console.error('❌ Groq API key test hatası:', testResponse.status, testErrorText);
             }
         } catch (error) {
             console.error('❌ OpenRouter API key test hatası:', error);
@@ -107,9 +105,7 @@ class GroqAPI {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${this.apiKey}`,
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': window.location.origin,
-                    'X-Title': 'Cevik-Lider-Platform'
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(requestBody)
             });
@@ -143,13 +139,13 @@ class GroqAPI {
                 
                 const apiErrorText = await response.text().catch(() => '');
                 console.error(`❌ API Hatası (${response.status}):`, apiErrorText);
-                throw new Error(`OpenRouter API error: ${response.status} - ${apiErrorText.substring(0, 100)}`);
+                throw new Error(`Groq API error: ${response.status} - ${apiErrorText.substring(0, 100)}`);
             }
             
             const data = await response.json();
             
             // Log response for debugging
-            console.log('📥 OpenRouter API yanıtı:', data);
+            console.log('📥 Groq API yanıtı:', data);
             
             if (data.choices && data.choices[0] && data.choices[0].message) {
                 const text = data.choices[0].message.content;
@@ -166,7 +162,7 @@ class GroqAPI {
             }
             
         } catch (error) {
-            console.error('❌ OpenRouter API hatası:', error);
+            console.error('❌ Groq API hatası:', error);
             return {
                 success: false,
                 error: error.message
@@ -403,10 +399,10 @@ SADECE JSON!`;
     }
 }
 
-// Initialize OpenRouter API globally
+// Initialize Groq API globally
 window.GroqAPI = new GroqAPI();
-window.OpenRouterAPI = new GroqAPI();
-// Keep GeminiAPI for backward compatibility
+// Keep OpenRouterAPI and GeminiAPI for backward compatibility
+window.OpenRouterAPI = window.GroqAPI;
 window.GeminiAPI = window.GroqAPI;
-console.log('✅ OpenRouter API entegrasyonu hazır!');
+console.log('✅ Groq API entegrasyonu hazır!');
 
