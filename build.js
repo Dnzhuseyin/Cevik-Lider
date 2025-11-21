@@ -28,34 +28,38 @@ let groqApiContent = fs.readFileSync(groqApiPath, 'utf8');
 if (GROQ_API_KEY && GROQ_API_KEY.trim() !== '') {
     console.log('✅ Environment variable bulundu, inject ediliyor...');
     
-    // getAPIKey() fonksiyonunu tamamen değiştir
-    const newGetAPIKey = `    getAPIKey() {
-        // Build time'da inject edilen key (Vercel environment variable)
-        const injectedKey = '${GROQ_API_KEY}';
-        if (injectedKey && injectedKey !== 'undefined' && injectedKey.trim() !== '') {
-            console.log('🔑 API Key build time\\'da inject edildi (Vercel)');
-            console.log('🔑 Injected Key (ilk 30 karakter):', injectedKey.substring(0, 30) + '...');
-            console.log('🔑 Injected Key (son 10 karakter):', '...' + injectedKey.substring(injectedKey.length - 10));
-            return injectedKey;
-        }
-        
-        // Fallback: Development için (sadece local)
-        const fallbackKey = 'FALLBACK_KEY_PLACEHOLDER';
-        console.warn('⚠️ Environment variable bulunamadı, fallback key kullanılıyor (sadece development)');
-        console.warn('⚠️ Bu key muhtemelen geçersiz! Vercel\\'de GROQ_API_KEY environment variable ekleyin!');
-        return fallbackKey;
-    }`;
+    // Escape special characters in API key for safe string replacement
+    // Escape single quotes, backslashes, and dollar signs
+    const escapedKey = GROQ_API_KEY
+        .replace(/\\/g, '\\\\')  // Escape backslashes first
+        .replace(/'/g, "\\'")    // Escape single quotes
+        .replace(/\$/g, "\\$");   // Escape dollar signs
     
-    // Mevcut getAPIKey fonksiyonunu bul ve değiştir
-    const getAPIKeyRegex = /getAPIKey\(\)\s*\{[\s\S]*?\n\s*return fallbackKey;\s*\n\s*\}/;
+    // Placeholder'ı gerçek key ile değiştir (hem tek hem çift tırnak versiyonlarını kontrol et)
+    const placeholder1 = "'INJECTED_BY_BUILD_SCRIPT'";
+    const placeholder2 = '"INJECTED_BY_BUILD_SCRIPT"';
+    const replacement = `'${escapedKey}'`;
     
-    if (getAPIKeyRegex.test(groqApiContent)) {
-        groqApiContent = groqApiContent.replace(getAPIKeyRegex, newGetAPIKey);
+    let replaced = false;
+    if (groqApiContent.includes(placeholder1)) {
+        groqApiContent = groqApiContent.replace(placeholder1, replacement);
+        replaced = true;
+    } else if (groqApiContent.includes(placeholder2)) {
+        groqApiContent = groqApiContent.replace(placeholder2, replacement);
+        replaced = true;
+    }
+    
+    if (replaced) {
         fs.writeFileSync(groqApiPath, groqApiContent, 'utf8');
         console.log('✅ API Key build time\'da inject edildi');
         console.log('✅ groq-api.js dosyası güncellendi');
+        console.log('🔑 Injected Key (ilk 20 karakter):', GROQ_API_KEY.substring(0, 20) + '...');
+        console.log('🔑 Injected Key (son 10 karakter):', '...' + GROQ_API_KEY.substring(GROQ_API_KEY.length - 10));
     } else {
-        console.error('❌ getAPIKey() fonksiyonu bulunamadı, manuel kontrol gerekli');
+        console.error('❌ Placeholder "INJECTED_BY_BUILD_SCRIPT" bulunamadı!');
+        console.error('❌ groq-api.js dosyasında getAPIKey() fonksiyonunu kontrol edin');
+        console.error('❌ Aranan placeholder:', placeholder1);
+        console.error('❌ Dosya içeriği (ilk 500 karakter):', groqApiContent.substring(0, 500));
         process.exit(1);
     }
 } else {
