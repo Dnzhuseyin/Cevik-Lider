@@ -67,7 +67,7 @@ class GroqAPI {
                 console.error('❌ Groq API key test hatası:', testResponse.status, testErrorText);
             }
         } catch (error) {
-            console.error('❌ OpenRouter API key test hatası:', error);
+            console.error('❌ Groq API key test hatası:', error);
         }
     }
     
@@ -113,7 +113,7 @@ class GroqAPI {
             if (!response.ok) {
                 // Enhanced error logging
                 const errorText = await response.text();
-                console.error(`❌ OpenRouter API Hatası (${response.status}):`, errorText);
+                console.error(`❌ Groq API Hatası (${response.status}):`, errorText);
                 
                 // Handle rate limit (429)
                 if (response.status === 429) {
@@ -401,8 +401,7 @@ SADECE JSON!`;
 
 // Initialize Groq API globally
 window.GroqAPI = new GroqAPI();
-// Keep OpenRouterAPI and GeminiAPI for backward compatibility
-window.OpenRouterAPI = window.GroqAPI;
+// Keep GeminiAPI for backward compatibility (OpenRouter kaldırıldı)
 window.GeminiAPI = window.GroqAPI;
 console.log('✅ Groq API entegrasyonu hazır!');
 

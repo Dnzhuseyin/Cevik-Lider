@@ -1,38 +1,45 @@
-# 🔑 Yeni OpenRouter API Key - Vercel'e Ekleme
+# 🔑 Groq API - Vercel Environment Variable Kurulum Rehberi
 
-## ✅ Yeni API Key
-```
-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
-```
+## ✅ Groq API Key
+
+**NOT:** API key'i Vercel Dashboard'da environment variable olarak ekleyeceksiniz.  
+**Test Sonucu:** ✅ API Key geçerli (200 OK)
 
 ---
 
 ## 📋 VERCEL'E EKLEME ADIMLARI
 
-### ADIM 1: Vercel Dashboard
+### ADIM 1: Vercel Dashboard'a Giriş
 
-1. **https://vercel.com/dashboard** → Projeniz: `Cevik-Lider`
-2. **Settings** → **Environment Variables**
+1. **https://vercel.com/dashboard** adresine gidin
+2. **Projenizi seçin:** `Cevik-Lider`
 
-### ADIM 2: Environment Variable Güncelleme
+### ADIM 2: Environment Variables
 
-1. **`OPENROUTER_API_KEY`** satırını bulun
+1. **Settings** sekmesine tıklayın
+2. Sol menüden **"Environment Variables"** seçeneğine tıklayın
+
+### ADIM 3: Yeni Key Ekleme veya Güncelleme
+
+#### Eğer `GROQ_API_KEY` zaten varsa:
+1. **`GROQ_API_KEY`** satırını bulun
 2. **"Edit"** (kalem ikonu) butonuna tıklayın
 3. **Value** alanını tamamen silin
-4. **Yeni key'i yapıştırın:**
-   ```
-   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
-   ```
-5. **⚠️ DİKKAT:** 
-   - Başında/sonunda boşluk olmamalı!
-   - Tam key'i kopyalayın (68 karakter)
-6. **Environment'ları kontrol edin:**
-   - ✅ **Production** (işaretli olmalı)
-   - ✅ **Preview** (işaretli olmalı)
-   - ✅ **Development** (işaretli olmalı)
-7. **"Save"** butonuna tıklayın
+4. **Groq API key'inizi yapıştırın** (Vercel Dashboard'da ekleyeceksiniz)
+5. **⚠️ DİKKAT:** Başında/sonunda boşluk olmamalı!
+6. **"Save"** butonuna tıklayın
 
-### ADIM 3: Redeploy
+#### Eğer `GROQ_API_KEY` yoksa:
+1. **"Add New"** butonuna tıklayın
+2. **Name:** `GROQ_API_KEY`
+3. **Value:** Groq API key'inizi yapıştırın (Vercel Dashboard'da ekleyeceksiniz)
+4. **Environment'ları seçin:**
+   - ✅ **Production** (işaretleyin)
+   - ✅ **Preview** (işaretleyin)
+   - ✅ **Development** (işaretleyin)
+5. **"Save"** butonuna tıklayın
+
+### ADIM 4: Redeploy
 
 1. **Deployments** sekmesine gidin
 2. **Son deployment'ın yanındaki "..."** menüsüne tıklayın
@@ -54,7 +61,7 @@ VEYA
 2. Şu mesajları arayın:
    ```
    🔧 Build script başlatılıyor...
-   🔑 OPENROUTER_API_KEY var mı? EVET (ilk 20 karakter: sk-or-v1-c5a05f0847...)
+   🔑 GROQ_API_KEY var mı? EVET (ilk 20 karakter: gsk_5alDDzRkDGd2X63t...)
    ✅ Environment variable bulundu, inject ediliyor...
    ✅ API Key build time'da inject edildi
    ✅ groq-api.js dosyası güncellendi
@@ -74,10 +81,10 @@ Deploy sonrası:
    ```
    🚀 GroqAPI constructor başlatılıyor...
    🔑 API Key build time'da inject edildi (Vercel)
-   🔑 Injected Key (ilk 30 karakter): sk-or-v1-c5a05f0847d0e43f8e0d4c39e...
-   🔑 API Key alındı, uzunluk: 68
-   🔑 API Key başlangıcı: sk-or-v1-c5a05f0847d0e43f8e0d4c39e...
-   ✅ OpenRouter API key geçerli!
+   🔑 Injected Key (ilk 30 karakter): gsk_5alDDzRkDGd2X63tcVwSWGdyb3...
+   🔑 Groq API key test ediliyor...
+   ✅ Groq API key geçerli!
+   ✅ Groq API entegrasyonu hazır!
    ```
 
 **Eğer "fallback key" görüyorsanız:**
@@ -112,8 +119,8 @@ Sayfada bir AI özelliği kullanın (örneğin video önerisi):
 
 ## ✅ BAŞARI KONTROL LİSTESİ
 
-- [ ] Vercel'de `OPENROUTER_API_KEY` environment variable güncellendi
-- [ ] Value doğru (yeni key, boşluk yok)
+- [ ] Vercel'de `GROQ_API_KEY` environment variable var
+- [ ] Value doğru (Groq key, boşluk yok)
 - [ ] Production, Preview, Development hepsi işaretli
 - [ ] Redeploy yaptınız mı?
 - [ ] Build logs'da "EVET" görüyor musunuz?
@@ -126,7 +133,7 @@ Sayfada bir AI özelliği kullanın (örneğin video önerisi):
 ## 📝 ÖZET
 
 1. ✅ Vercel Dashboard → Settings → Environment Variables
-2. ✅ `OPENROUTER_API_KEY` güncelleyin
+2. ✅ `GROQ_API_KEY` ekleyin/güncelleyin
 3. ✅ Yeni key'i yapıştırın (boşluk olmadan)
 4. ✅ Production/Preview/Development işaretleyin
 5. ✅ Save
@@ -135,5 +142,5 @@ Sayfada bir AI özelliği kullanın (örneğin video önerisi):
 
 ---
 
-**✅ Hazır! Artık yeni API key kullanılıyor olmalı!**
+**✅ Hazır! Artık Groq API kullanılıyor!**
 
