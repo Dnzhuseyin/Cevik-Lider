@@ -699,23 +699,36 @@
                 `;
                 
                 // Multiple choice questions
-                if (questionType === 'multiple-choice' && q.options && Array.isArray(q.options)) {
+                if ((questionType === 'multiple-choice' || questionType === 'manual' || !questionType || questionType === 'ai') && q.options && Array.isArray(q.options) && q.options.length > 0) {
                     questionHTML += `
-                        <div class="space-y-3 ml-14">
+                        <div class="space-y-3 ml-14 mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-list-ul mr-2"></i>Bir seçenek seçin:
+                            </label>
                             ${q.options.map((option, optIndex) => `
                                 <div class="question-option group p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 cursor-pointer transition-all transform hover:scale-[1.02]" 
                                      data-question="${index}" 
                                      data-option="${optIndex}"
-                                     onclick="selectAnswer(${index}, ${optIndex}, ${q.correctAnswer || 0})">
+                                     onclick="selectAnswer(${index}, ${optIndex}, ${q.correctAnswer || q.correct || 0})">
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 border-gray-300 group-hover:border-primary flex items-center justify-center font-semibold text-gray-600 group-hover:text-primary mr-3">
                                             ${String.fromCharCode(65 + optIndex)}
-                            </div>
+                                        </div>
                                         <span class="text-gray-700 group-hover:text-gray-900">${option}</span>
-                        </div>
-                                            </div>
-                                        `).join('')}
                                     </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else if ((questionType === 'multiple-choice' || questionType === 'manual' || !questionType) && (!q.options || !Array.isArray(q.options) || q.options.length === 0)) {
+                    // Çoktan seçmeli soru ama options yok
+                    questionHTML += `
+                        <div class="ml-14 mt-4 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
+                            <p class="text-sm text-yellow-800">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Bu soru için seçenekler tanımlanmamış. Lütfen koordinatöre bildirin.
+                            </p>
+                        </div>
                     `;
                 }
                 // Open-ended questions
