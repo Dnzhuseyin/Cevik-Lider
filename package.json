@@ -4,7 +4,7 @@
   "description": "Çevik Lider Online Eğitim Platformu",
   "scripts": {
     "dev": "vercel dev",
-    "build": "node build.js && echo 'Build completed'",
+    "build": "echo '✅ Build: API Proxy kullanılıyor, build script gerekli değil'",
     "start": "vercel dev"
   },
   "keywords": [
