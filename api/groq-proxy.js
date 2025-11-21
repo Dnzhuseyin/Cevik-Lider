@@ -41,7 +41,7 @@ module.exports = async function handler(req, res) {
 
         // Prepare Groq API request
         const groqRequest = {
-            model: model || 'llama-3.3-70b-versatile',
+            model: model || 'mixtral-8x7b-32768',
             messages: [
                 ...(context ? [{ role: 'system', content: context }] : []),
                 { role: 'user', content: prompt }
