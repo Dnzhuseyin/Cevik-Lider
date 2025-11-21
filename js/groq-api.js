@@ -3,7 +3,10 @@ class GroqAPI {
     constructor() {
         // OpenRouter API Key - Vercel Environment Variable'dan alınıyor
         // Fallback: Eğer environment variable yoksa, eski key kullanılır (development için)
+        console.log('🚀 GroqAPI constructor başlatılıyor...');
         this.apiKey = this.getAPIKey();
+        console.log('🔑 API Key alındı, uzunluk:', this.apiKey ? this.apiKey.length : 0);
+        console.log('🔑 API Key başlangıcı:', this.apiKey ? this.apiKey.substring(0, 25) + '...' : 'YOK');
         this.baseURL = 'https://openrouter.ai/api/v1/chat/completions';
         this.model = 'meta-llama/llama-3.1-70b-instruct'; // OpenRouter model
         this.fallbackModels = ['meta-llama/llama-3.1-8b-instruct', 'mistralai/mixtral-8x7b-instruct'];
@@ -254,6 +257,9 @@ SADECE JSON, BAŞKA HİÇBİR ŞEY YAZMA!`;
     // YENİ: Yanlış cevaplara göre kişiselleştirilmiş video önerisi
     async generateVideoRecommendation(wrongQuestion, wrongAnswer, correctAnswer, allModules, allVideos) {
         console.log('🔑 API Key kullanılıyor:', this.apiKey ? this.apiKey.substring(0, 20) + '...' : 'yok');
+        console.log('🔑 API Key tam uzunluk:', this.apiKey ? this.apiKey.length : 0);
+        console.log('🔑 API Key başlangıcı:', this.apiKey ? this.apiKey.substring(0, 30) + '...' : 'YOK');
+        console.log('🔑 API Key sonu:', this.apiKey ? '...' + this.apiKey.substring(this.apiKey.length - 15) : 'YOK');
         
         try {
             const context = `Sen bir eğitim danışmanısın. Türkçe yanıt ver. Kısa ve net ol.`;
