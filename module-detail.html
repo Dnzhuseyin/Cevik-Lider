@@ -662,8 +662,11 @@
             console.log(`📝 ${video.questions.length} soru yükleniyor...`);
             
             questionsContainer.innerHTML = video.questions.map((q, index) => {
-                const questionType = q.type || 'multiple-choice';
+                // Soru tipini belirle - önce type field'ına bak, yoksa varsayılan olarak çoktan seçmeli
+                const questionType = q.type || q.questionType || 'multiple-choice';
                 const difficulty = q.difficulty || 'medium';
+                
+                console.log(`📋 Soru ${index + 1} - Tip: ${questionType}, Soru: ${q.question.substring(0, 50)}...`);
                 
                 let questionHTML = `
                     <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200 mb-6 hover:shadow-lg transition-shadow" data-question-index="${index}" data-question-type="${questionType}">
