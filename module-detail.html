@@ -869,9 +869,21 @@
         // Submit fill-in-the-blank answer
         async function submitFillBlankAnswer(questionIndex) {
             const question = currentVideo.questions[questionIndex];
-            if (!question || !question.correctAnswers) return;
+            if (!question) {
+                alert('Soru bulunamadı!');
+                return;
+            }
             
-            const correctAnswers = question.correctAnswers || [];
+            // correctAnswers array veya string olabilir
+            let correctAnswers = question.correctAnswers || [];
+            if (typeof correctAnswers === 'string') {
+                correctAnswers = correctAnswers.split(',').map(a => a.trim());
+            }
+            
+            if (correctAnswers.length === 0) {
+                alert('Bu soru için doğru cevaplar tanımlanmamış. Lütfen koordinatöre bildirin.');
+                return;
+            }
             const questionParts = question.question.split('___');
             const blankCount = Math.min(questionParts.length - 1, correctAnswers.length);
             
