@@ -82,8 +82,8 @@ class GroqAPI {
             
             // Detaylı log
             console.log('🔍 API Request Detayları:');
-            console.log('  - Key uzunluğu:', this.apiKey ? this.apiKey.length : 0);
-            console.log('  - Key başlangıcı:', this.apiKey ? this.apiKey.substring(0, 20) + '...' : 'yok');
+            console.log('  - Proxy URL:', this.proxyURL);
+            console.log('  - Model:', this.model);
             
             // Vercel API proxy kullan (API key backend'de güvenli)
             const response = await fetch(this.proxyURL, {
