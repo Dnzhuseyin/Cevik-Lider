@@ -1,8 +1,9 @@
 // OpenRouter AI API Integration (formerly Groq)
 class GroqAPI {
     constructor() {
-        // OpenRouter API Key
-        this.apiKey = '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';
+        // OpenRouter API Key - Vercel Environment Variable'dan alınıyor
+        // Fallback: Eğer environment variable yoksa, eski key kullanılır (development için)
+        this.apiKey = this.getAPIKey();
         this.baseURL = 'https://openrouter.ai/api/v1/chat/completions';
         this.model = 'meta-llama/llama-3.1-70b-instruct'; // OpenRouter model
         this.fallbackModels = ['meta-llama/llama-3.1-8b-instruct', 'mistralai/mixtral-8x7b-instruct'];
@@ -11,6 +12,21 @@ class GroqAPI {
         
         // Test API key on initialization
         this.testAPIKey();
+    }
+    
+    // API Key'i environment variable'dan veya fallback'ten al
+    getAPIKey() {
+        // Vercel'de environment variable'lar window objesine inject edilir
+        // Veya build time'da replace edilir
+        if (typeof window !== 'undefined' && window.OPENROUTER_API_KEY) {
+            console.log('🔑 API Key Vercel environment variable\'dan alındı');
+            return window.OPENROUTER_API_KEY;
+        }
+        
+        // Fallback: Development için eski key (Vercel'de kullanılmayacak)
+        const fallbackKey = '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';
+        console.warn('⚠️ Environment variable bulunamadı, fallback key kullanılıyor (sadece development)');
+        return fallbackKey;
     }
     
     async testAPIKey() {

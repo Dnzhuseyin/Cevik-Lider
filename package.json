@@ -4,7 +4,7 @@
   "description": "Çevik Lider Online Eğitim Platformu",
   "scripts": {
     "dev": "vercel dev",
-    "build": "echo 'No build step required'",
+    "build": "node build.js && echo 'Build completed'",
     "start": "vercel dev"
   },
   "keywords": [
