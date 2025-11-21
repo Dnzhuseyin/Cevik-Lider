@@ -16,14 +16,15 @@ class GroqAPI {
     
     // API Key'i environment variable'dan veya fallback'ten al
     getAPIKey() {
-        // Vercel'de environment variable'lar window objesine inject edilir
-        // Veya build time'da replace edilir
-        if (typeof window !== 'undefined' && window.OPENROUTER_API_KEY) {
-            console.log('🔑 API Key Vercel environment variable\'dan alındı');
-            return window.OPENROUTER_API_KEY;
+        // Build time'da inject edilen key (Vercel environment variable)
+        // Bu değer build.js script'i tarafından değiştirilir
+        const injectedKey = 'INJECTED_BY_BUILD_SCRIPT';
+        if (injectedKey && injectedKey !== 'INJECTED_BY_BUILD_SCRIPT' && injectedKey !== 'undefined' && injectedKey.trim() !== '') {
+            console.log('🔑 API Key build time\'da inject edildi (Vercel)');
+            return injectedKey;
         }
         
-        // Fallback: Development için eski key (Vercel'de kullanılmayacak)
+        // Fallback: Development için (sadece local)
         const fallbackKey = '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';
         console.warn('⚠️ Environment variable bulunamadı, fallback key kullanılıyor (sadece development)');
         return fallbackKey;
