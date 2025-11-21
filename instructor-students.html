@@ -918,9 +918,63 @@
                             ${videoQuestionAnswers.map(answer => {
                                 const video = allCoordinatorVideos.find(v => v.id === answer.videoId);
                                 const videoTitle = video ? video.title : 'Bilinmeyen Video';
+                                const questionType = answer.questionType || 'multiple-choice';
                                 const isCorrect = answer.isCorrect;
                                 const statusClass = isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
                                 const statusIcon = isCorrect ? 'fas fa-check-circle' : 'fas fa-times-circle';
+                                
+                                // Soru tipi badge
+                                const typeBadgeClass = questionType === 'open-ended' ? 'bg-green-100 text-green-800' :
+                                                      questionType === 'fill-blank' ? 'bg-orange-100 text-orange-800' :
+                                                      'bg-blue-100 text-blue-800';
+                                const typeBadgeText = questionType === 'open-ended' ? 'Açık Uçlu' :
+                                                     questionType === 'fill-blank' ? 'Boşluk Doldurma' :
+                                                     'Çoktan Seçmeli';
+                                
+                                // Açık uçlu sorular için özel görünüm
+                                const answerDisplay = questionType === 'open-ended' ? 
+                                    `<div class="mt-2">
+                                        <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+                                            <div class="flex items-center mb-2">
+                                                <i class="fas fa-comment-alt text-blue-600 mr-2"></i>
+                                                <span class="text-sm font-semibold text-blue-800">Öğrenci Cevabı:</span>
+                                            </div>
+                                            <textarea readonly class="w-full p-3 border-2 border-gray-300 rounded-lg bg-white text-sm text-gray-900 resize-none" rows="6">${answer.studentAnswer || 'Cevap verilmemiş'}</textarea>
+                                            ${answer.answeredAt ? `
+                                                <p class="text-xs text-gray-500 mt-2">
+                                                    <i class="fas fa-clock mr-1"></i>Cevaplandı: ${new Date(answer.answeredAt).toLocaleString('tr-TR')}
+                                                </p>
+                                            ` : ''}
+                                        </div>
+                                    </div>` :
+                                    questionType === 'fill-blank' ?
+                                    `<div class="mt-2">
+                                        <div class="bg-orange-50 border-2 border-orange-200 rounded-lg p-4">
+                                            <div class="flex items-center mb-2">
+                                                <i class="fas fa-edit text-orange-600 mr-2"></i>
+                                                <span class="text-sm font-semibold text-orange-800">Öğrenci Cevapları:</span>
+                                            </div>
+                                            <div class="bg-white p-3 rounded-lg border border-gray-300 mb-2">
+                                                <p class="text-sm text-gray-900 font-medium">${answer.studentAnswer || 'Cevap verilmemiş'}</p>
+                                            </div>
+                                            ${answer.correctAnswer ? `
+                                                <div class="bg-green-50 p-3 rounded-lg border border-green-300">
+                                                    <p class="text-sm text-green-800">
+                                                        <i class="fas fa-check-circle mr-1"></i>
+                                                        <strong>Doğru Cevap:</strong> ${answer.correctAnswer}
+                                                    </p>
+                                                </div>
+                                            ` : ''}
+                                            ${answer.answeredAt ? `
+                                                <p class="text-xs text-gray-500 mt-2">
+                                                    <i class="fas fa-clock mr-1"></i>Cevaplandı: ${new Date(answer.answeredAt).toLocaleString('tr-TR')}
+                                                </p>
+                                            ` : ''}
+                                        </div>
+                                    </div>` :
+                                    `<div class="bg-gray-50 p-3 rounded-lg border border-gray-300">
+                                        <span class="text-sm text-gray-900">${answer.studentAnswer || 'Cevap verilmemiş'}</span>
+                                    </div>`;
                                 
                                 return `
                                     <div class="bg-white p-4 rounded-lg border border-gray-200">
@@ -928,30 +982,43 @@
                                             <div class="flex-1">
                                                 <h4 class="font-medium text-gray-900">${videoTitle}</h4>
                                                 <p class="text-sm text-gray-600 mt-1">${answer.questionText}</p>
+                                                <span class="inline-block mt-2 px-2 py-1 text-xs rounded-full ${typeBadgeClass}">
+                                                    ${typeBadgeText}
+                                                </span>
                                             </div>
-                                            <span class="px-2 py-1 text-xs rounded-full ${statusClass} ml-3">
-                                                <i class="${statusIcon} mr-1"></i>${isCorrect ? 'Doğru' : 'Yanlış'}
-                                            </span>
+                                            <div class="flex flex-col items-end gap-2">
+                                                <span class="px-2 py-1 text-xs rounded-full ${statusClass}">
+                                                    <i class="${statusIcon} mr-1"></i>${isCorrect ? 'Doğru' : questionType === 'open-ended' ? 'Değerlendirilmeli' : 'Yanlış'}
+                                                </span>
+                                                ${questionType === 'open-ended' && !isCorrect ? `
+                                                    <button onclick="markOpenEndedAsCorrect('${answer.id || ''}', '${student.email}', ${answer.questionIndex || 0})" 
+                                                            class="text-xs bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition-colors">
+                                                        <i class="fas fa-check mr-1"></i>Doğru İşaretle
+                                                    </button>
+                                                ` : ''}
+                                            </div>
                                         </div>
                                         <div class="space-y-2">
                                             <div class="flex items-start">
-                                                <span class="text-xs font-medium text-gray-500 w-20">Cevabı:</span>
-                                                <span class="text-sm text-gray-900">${answer.studentAnswer}</span>
+                                                <span class="text-xs font-medium text-gray-500 w-24">Cevabı:</span>
+                                                <div class="flex-1">
+                                                    ${answerDisplay}
+                                                </div>
                                             </div>
-                                            ${!isCorrect && answer.correctAnswer ? `
+                                            ${!isCorrect && answer.correctAnswer && questionType !== 'open-ended' ? `
                                                 <div class="flex items-start">
-                                                    <span class="text-xs font-medium text-gray-500 w-20">Doğru:</span>
+                                                    <span class="text-xs font-medium text-gray-500 w-24">Doğru:</span>
                                                     <span class="text-sm text-green-600">${answer.correctAnswer}</span>
                                                 </div>
                                             ` : ''}
                                             ${answer.explanation ? `
                                                 <div class="flex items-start">
-                                                    <span class="text-xs font-medium text-gray-500 w-20">Açıklama:</span>
+                                                    <span class="text-xs font-medium text-gray-500 w-24">Açıklama:</span>
                                                     <span class="text-sm text-gray-600">${answer.explanation}</span>
                                                 </div>
                                             ` : ''}
                                             <div class="flex items-start">
-                                                <span class="text-xs font-medium text-gray-500 w-20">Tarih:</span>
+                                                <span class="text-xs font-medium text-gray-500 w-24">Tarih:</span>
                                                 <span class="text-xs text-gray-500">${formatDate(answer.answeredAt)}</span>
                                             </div>
                                         </div>
@@ -1134,6 +1201,61 @@
                     toast.remove();
                 }
             }, 5000);
+        }
+
+        // Mark open-ended answer as correct
+        async function markOpenEndedAsCorrect(answerId, userEmail, questionIndex) {
+            try {
+                if (!confirm('Bu açık uçlu cevabı doğru olarak işaretlemek istediğinizden emin misiniz?')) {
+                    return;
+                }
+
+                // Load all video question answers
+                const answersResult = await window.DB.load('videoQuestionAnswers');
+                if (!answersResult.success) {
+                    alert('Cevap bulunamadı!');
+                    return;
+                }
+
+                // Find the answer
+                const allAnswers = Array.isArray(answersResult.data) 
+                    ? answersResult.data 
+                    : Object.values(answersResult.data || {});
+                
+                const answer = allAnswers.find(a => 
+                    a.userEmail === userEmail && 
+                    a.questionIndex === questionIndex &&
+                    (answerId ? a.id === answerId : true)
+                );
+
+                if (!answer) {
+                    alert('Cevap bulunamadı!');
+                    return;
+                }
+
+                // Update answer
+                answer.isCorrect = true;
+                answer.evaluatedAt = new Date().toISOString();
+                answer.evaluatedBy = localStorage.getItem('userEmail');
+
+                // Save updated answer
+                const saveResult = await window.DB.save('videoQuestionAnswers', answer, answer.id || answerId);
+                
+                if (saveResult && saveResult.success) {
+                    showNotification('✅ Cevap doğru olarak işaretlendi!', 'success');
+                    
+                    // Reload student details to show updated status
+                    const currentStudentId = document.querySelector('[data-student-id]')?.dataset.studentId;
+                    if (currentStudentId) {
+                        await viewStudentDetail(currentStudentId);
+                    }
+                } else {
+                    throw new Error('Cevap güncellenemedi');
+                }
+            } catch (error) {
+                console.error('❌ Cevap işaretleme hatası:', error);
+                alert('Hata: ' + error.message);
+            }
         }
 
         // Logout function

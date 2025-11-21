@@ -718,16 +718,25 @@
                 // Open-ended questions
                 else if (questionType === 'open-ended') {
                     questionHTML += `
-                        <div class="ml-14">
+                        <div class="ml-14 mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-pencil-alt mr-2"></i>Cevabınızı yazın:
+                            </label>
                             <textarea id="open-ended-answer-${index}" 
-                                      class="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20" 
-                                      rows="4" 
-                                      placeholder="Cevabınızı buraya yazın..."></textarea>
-                            <button onclick="submitOpenEndedAnswer(${index})" 
-                                    class="mt-3 bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors">
-                                <i class="fas fa-check mr-2"></i>Cevabı Gönder
-                            </button>
-                                    </div>
+                                      class="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 resize-y" 
+                                      rows="5" 
+                                      placeholder="Cevabınızı detaylı bir şekilde buraya yazın..."></textarea>
+                            <div class="mt-3 flex items-center justify-between">
+                                <p class="text-xs text-gray-500">
+                                    <i class="fas fa-info-circle mr-1"></i>Cevabınız koordinatör tarafından değerlendirilecektir.
+                                </p>
+                                <button onclick="submitOpenEndedAnswer(${index})" 
+                                        id="open-ended-submit-${index}"
+                                        class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg">
+                                    <i class="fas fa-check mr-2"></i>Cevabı Gönder
+                                </button>
+                            </div>
+                        </div>
                     `;
                 }
                 // Fill in the blank questions
@@ -738,15 +747,18 @@
                     const blankCount = Math.min(questionParts.length - 1, correctAnswers.length);
                     
                     questionHTML += `
-                        <div class="ml-14">
-                            <div class="bg-white p-4 rounded-lg border-2 border-gray-300">
+                        <div class="ml-14 mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-edit mr-2"></i>Boşlukları doldurun:
+                            </label>
+                            <div class="bg-white p-4 rounded-lg border-2 border-gray-300 mb-3">
                                 ${questionParts.map((part, partIndex) => {
                                     let html = part;
                                     // Only create input if we have a corresponding correct answer
                                     if (partIndex < blankCount) {
                                         html += `<input type="text" 
                                                        id="fill-blank-${index}-${partIndex}" 
-                                                       class="inline-block mx-2 px-3 py-2 border-2 border-primary rounded-lg focus:ring-2 focus:ring-primary/20" 
+                                                       class="inline-block mx-2 px-4 py-2 border-2 border-primary rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary min-w-[120px]" 
                                                        placeholder="Boşluk ${partIndex + 1}" />`;
                                     } else if (partIndex < questionParts.length - 1) {
                                         // If there are more ___ than correctAnswers, show as text
@@ -754,14 +766,19 @@
                                     }
                                     return html;
                                 }).join('')}
-                                </div>
-                            <p class="text-xs text-gray-500 mt-2 ml-14">${blankCount} boşluk doldurmanız gerekiyor.</p>
-                            <button onclick="submitFillBlankAnswer(${index})" 
-                                    class="mt-3 ml-14 bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors">
-                                <i class="fas fa-check mr-2"></i>Cevabı Gönder
-                            </button>
-                    </div>
-                `;
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <p class="text-xs text-gray-500">
+                                    <i class="fas fa-info-circle mr-1"></i>${blankCount} boşluk doldurmanız gerekiyor.
+                                </p>
+                                <button onclick="submitFillBlankAnswer(${index})" 
+                                        id="fill-blank-submit-${index}"
+                                        class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg">
+                                    <i class="fas fa-check mr-2"></i>Cevabı Gönder
+                                </button>
+                            </div>
+                        </div>
+                    `;
                 }
                 
                 questionHTML += `
@@ -792,15 +809,29 @@
             if (!question) return;
             
             // Save open-ended answer
-            saveQuestionAnswer(questionIndex, question.question, answer, 'Açık uçlu soru', null, question.explanation);
+            saveQuestionAnswer(questionIndex, question.question, answer, 'Açık uçlu soru', null, question.explanation, 'open-ended');
             
             // Show feedback (for now, just show a message)
             alert('Cevabınız kaydedildi. Koordinatör tarafından değerlendirilecektir.');
             
             // Disable the textarea and button
             answerTextarea.disabled = true;
-            const button = answerTextarea.nextElementSibling;
-            if (button) button.disabled = true;
+            answerTextarea.classList.add('bg-gray-100', 'cursor-not-allowed');
+            const submitButton = document.getElementById(`open-ended-submit-${questionIndex}`);
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+                submitButton.innerHTML = '<i class="fas fa-check mr-2"></i>Cevap Gönderildi';
+            }
+            
+            // Show success message
+            const questionDiv = document.querySelector(`[data-question-index="${questionIndex}"]`);
+            if (questionDiv) {
+                const successMsg = document.createElement('div');
+                successMsg.className = 'mt-3 ml-14 p-3 bg-green-50 border-2 border-green-200 rounded-lg';
+                successMsg.innerHTML = '<i class="fas fa-check-circle text-green-600 mr-2"></i><span class="text-sm text-green-800">Cevabınız kaydedildi. Koordinatör tarafından değerlendirilecektir.</span>';
+                answerTextarea.parentElement.appendChild(successMsg);
+            }
         }
         
         // Submit fill-in-the-blank answer
@@ -853,7 +884,7 @@
             const correctAnswerText = correctAnswers.join(', ');
             
             // Save fill-blank answer
-            saveQuestionAnswer(questionIndex, question.question, studentAnswerText, correctAnswerText, isCorrect, question.explanation);
+            saveQuestionAnswer(questionIndex, question.question, studentAnswerText, correctAnswerText, isCorrect, question.explanation, 'fill-blank');
             
             // Get question div for explanation box
             const questionDiv = document.querySelector(`[data-question-index="${questionIndex}"]`);
@@ -887,10 +918,20 @@
                 }
             }
             
-            // Disable inputs
+            // Disable inputs and button
             for (let i = 0; i < questionParts.length - 1; i++) {
                 const input = document.getElementById(`fill-blank-${questionIndex}-${i}`);
-                if (input) input.disabled = true;
+                if (input) {
+                    input.disabled = true;
+                    input.classList.add('bg-gray-100', 'cursor-not-allowed');
+                }
+            }
+            
+            const submitButton = document.getElementById(`fill-blank-submit-${questionIndex}`);
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+                submitButton.innerHTML = '<i class="fas fa-check mr-2"></i>Cevap Gönderildi';
             }
         }
         
@@ -1057,7 +1098,7 @@
                 explanationText.innerHTML = '✅ Doğru cevap! ' + (question.explanation || 'Tebrikler!');
                 
                 // Save correct answer
-                saveQuestionAnswer(questionIndex, question.question, studentAnswer, correctAnswerText, true, question.explanation);
+                saveQuestionAnswer(questionIndex, question.question, studentAnswer, correctAnswerText, true, question.explanation, 'multiple-choice');
                 
                 // Update progress
                 updateVideoProgress();
@@ -1077,7 +1118,7 @@
                 explanationText.innerHTML = '❌ Yanlış cevap. Doğru cevap: ' + correctAnswerText + '. ' + (question.explanation || '');
                 
                 // Save wrong answer
-                saveQuestionAnswer(questionIndex, question.question, studentAnswer, correctAnswerText, false, question.explanation);
+                saveQuestionAnswer(questionIndex, question.question, studentAnswer, correctAnswerText, false, question.explanation, 'multiple-choice');
                 
                 // Get AI recommendation for wrong answer
                 getAIRecommendation(questionIndex, selectedOption, correctAnswer, explanationBox);
@@ -1399,7 +1440,7 @@
         }
         
         // Save question answer to Firebase
-        async function saveQuestionAnswer(questionIndex, questionText, studentAnswer, correctAnswer, isCorrect, explanation) {
+        async function saveQuestionAnswer(questionIndex, questionText, studentAnswer, correctAnswer, isCorrect, explanation, questionType = 'multiple-choice') {
             try {
                 const userEmail = localStorage.getItem('userEmail');
                 if (!userEmail || !window.DB) return;
@@ -1414,6 +1455,7 @@
                     correctAnswer: correctAnswer,
                     isCorrect: isCorrect,
                     explanation: explanation,
+                    questionType: questionType, // Soru tipi eklendi
                     answeredAt: new Date().toISOString()
                 };
 
