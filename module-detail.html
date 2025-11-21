@@ -743,43 +743,72 @@
                     `;
                 }
                 // Fill in the blank questions
-                else if (questionType === 'fill-blank') {
+                else if (questionType === 'fill-blank' || questionType === 'fill_blank') {
                     // Replace ___ with input fields - limit to correctAnswers count
                     const questionParts = q.question.split('___');
-                    const correctAnswers = q.correctAnswers || [];
+                    // correctAnswers array veya string olabilir
+                    let correctAnswers = q.correctAnswers || [];
+                    if (typeof correctAnswers === 'string') {
+                        correctAnswers = correctAnswers.split(',').map(a => a.trim());
+                    }
                     const blankCount = Math.min(questionParts.length - 1, correctAnswers.length);
                     
-                    questionHTML += `
-                        <div class="ml-14 mt-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-edit mr-2"></i>Boşlukları doldurun:
-                            </label>
-                            <div class="bg-white p-4 rounded-lg border-2 border-gray-300 mb-3">
-                                ${questionParts.map((part, partIndex) => {
-                                    let html = part;
-                                    // Only create input if we have a corresponding correct answer
-                                    if (partIndex < blankCount) {
-                                        html += `<input type="text" 
-                                                       id="fill-blank-${index}-${partIndex}" 
-                                                       class="inline-block mx-2 px-4 py-2 border-2 border-primary rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary min-w-[120px]" 
-                                                       placeholder="Boşluk ${partIndex + 1}" />`;
-                                    } else if (partIndex < questionParts.length - 1) {
-                                        // If there are more ___ than correctAnswers, show as text
-                                        html += `<span class="inline-block mx-2 px-3 py-2 bg-gray-100 rounded-lg text-gray-500">[Boşluk ${partIndex + 1}]</span>`;
-                                    }
-                                    return html;
-                                }).join('')}
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <p class="text-xs text-gray-500">
-                                    <i class="fas fa-info-circle mr-1"></i>${blankCount} boşluk doldurmanız gerekiyor.
+                    console.log(`🔍 Boşluk doldurma soru ${index + 1}: ${blankCount} boşluk, ${correctAnswers.length} doğru cevap`);
+                    
+                    if (blankCount === 0) {
+                        questionHTML += `
+                            <div class="ml-14 mt-4 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
+                                <p class="text-sm text-yellow-800">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    Bu soru için boşluk tanımlanmamış. Lütfen koordinatöre bildirin.
                                 </p>
-                                <button onclick="submitFillBlankAnswer(${index})" 
-                                        id="fill-blank-submit-${index}"
-                                        class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg">
-                                    <i class="fas fa-check mr-2"></i>Cevabı Gönder
-                                </button>
                             </div>
+                        `;
+                    } else {
+                        questionHTML += `
+                            <div class="ml-14 mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-edit mr-2"></i>Boşlukları doldurun:
+                                </label>
+                                <div class="bg-white p-4 rounded-lg border-2 border-gray-300 mb-3">
+                                    ${questionParts.map((part, partIndex) => {
+                                        let html = part;
+                                        // Only create input if we have a corresponding correct answer
+                                        if (partIndex < blankCount) {
+                                            html += `<input type="text" 
+                                                           id="fill-blank-${index}-${partIndex}" 
+                                                           class="inline-block mx-2 px-4 py-2 border-2 border-primary rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary min-w-[120px]" 
+                                                           placeholder="Boşluk ${partIndex + 1}" />`;
+                                        } else if (partIndex < questionParts.length - 1) {
+                                            // If there are more ___ than correctAnswers, show as text
+                                            html += `<span class="inline-block mx-2 px-3 py-2 bg-gray-100 rounded-lg text-gray-500">[Boşluk ${partIndex + 1}]</span>`;
+                                        }
+                                        return html;
+                                    }).join('')}
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <p class="text-xs text-gray-500">
+                                        <i class="fas fa-info-circle mr-1"></i>${blankCount} boşluk doldurmanız gerekiyor.
+                                    </p>
+                                    <button onclick="submitFillBlankAnswer(${index})" 
+                                            id="fill-blank-submit-${index}"
+                                            class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg">
+                                        <i class="fas fa-check mr-2"></i>Cevabı Gönder
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                // Eğer soru tipi tanımlı değilse veya bilinmiyorsa
+                else {
+                    console.warn(`⚠️ Bilinmeyen soru tipi: ${questionType} - Soru ${index + 1}`);
+                    questionHTML += `
+                        <div class="ml-14 mt-4 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
+                            <p class="text-sm text-red-800">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Bu soru tipi desteklenmiyor: ${questionType}. Lütfen koordinatöre bildirin.
+                            </p>
                         </div>
                     `;
                 }
