@@ -238,7 +238,7 @@
         document.write('<script src="js/firebase-production.js?v=' + cacheBuster + '"><\/script>');
     </script>
     <script src="js/user-utils.js"></script>
-    <script src="js/groq-api.js"></script>
+    <script src="js/groq-api.js?v=20241121150"></script>
     <script src="js/main.js"></script>
     
     <script>

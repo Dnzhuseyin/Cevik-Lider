@@ -16,6 +16,7 @@ class GroqAPI {
         // Tek model: Llama 3.3 (en yeni ve desteklenen model)
         this.model = 'llama-3.3-70b-versatile';
         // Fallback mekanizması kaldırıldı - sadece tek model kullanılıyor
+        console.log('✅ Model ayarlandı:', this.model);
         this.lastRequestTime = 0;
         this.minRequestInterval = 1000; // 1 second between requests
         
@@ -95,7 +96,7 @@ class GroqAPI {
                 body: JSON.stringify({
                     prompt: fullPrompt,
                     context: context || '',
-                    model: this.model,
+                    model: this.model, // Sadece llama-3.3-70b-versatile kullanılıyor
                     temperature: 0.7,
                     max_tokens: 2048
                 })
