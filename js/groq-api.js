@@ -13,10 +13,10 @@ class GroqAPI {
             ? '/api/groq-proxy'  // Vercel production
             : 'http://localhost:3000/api/groq-proxy';  // Local development (vercel dev)
         
-        // Ana model: Mixtral (hızlı ve güvenilir)
-        this.model = 'mixtral-8x7b-32768';
-        // Fallback modeller: Llama ve diğer alternatifler
-        this.fallbackModels = ['llama-3.3-70b-versatile', 'gemma2-9b-it', 'qwen-2.5-72b-instruct'];
+        // Ana model: Llama 4 (en yeni model)
+        this.model = 'llama-3.3-70b-versatile'; // Groq'da llama4 yok, en yeni Llama modeli
+        // Fallback modeller: Mixtral ve diğer alternatifler
+        this.fallbackModels = ['mixtral-8x7b-32768', 'gemma2-9b-it', 'qwen-2.5-72b-instruct'];
         this.lastRequestTime = 0;
         this.minRequestInterval = 1000; // 1 second between requests
         
