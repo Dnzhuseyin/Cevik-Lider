@@ -13,10 +13,9 @@ class GroqAPI {
             ? '/api/groq-proxy'  // Vercel production
             : 'http://localhost:3000/api/groq-proxy';  // Local development (vercel dev)
         
-        // Ana model: Llama 4 (en yeni model)
-        this.model = 'llama-3.3-70b-versatile'; // Groq'da llama4 yok, en yeni Llama modeli
-        // Fallback modeller: Mixtral ve diğer alternatifler
-        this.fallbackModels = ['mixtral-8x7b-32768', 'gemma2-9b-it', 'qwen-2.5-72b-instruct'];
+        // Tek model: Llama 3.3 (en yeni ve desteklenen model)
+        this.model = 'llama-3.3-70b-versatile';
+        // Fallback mekanizması kaldırıldı - sadece tek model kullanılıyor
         this.lastRequestTime = 0;
         this.minRequestInterval = 1000; // 1 second between requests
         
@@ -119,14 +118,12 @@ class GroqAPI {
                     }
                 }
                 
-                // Handle 404 or other errors - try fallback models
-                if ((response.status === 404 || response.status >= 500) && retryCount < this.fallbackModels.length) {
-                    console.warn(`⚠️ Model hatası, alternatif model deneniyor... (${retryCount + 1}/${this.fallbackModels.length})`);
-                    const originalModel = this.model;
-                    this.model = this.fallbackModels[retryCount];
-                    const result = await this.generateContent(prompt, context, retryCount + 1);
-                    this.model = originalModel; // Restore original
-                    return result;
+                // Model hatası - fallback yok, direkt hata döndür
+                if (response.status === 400 || response.status === 404) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMessage = errorData.message || errorData.error?.message || 'Model hatası';
+                    console.error(`❌ Model hatası (${response.status}):`, errorMessage);
+                    throw new Error(`Model hatası: ${errorMessage}`);
                 }
                 
                 const apiErrorText = await response.text().catch(() => '');
