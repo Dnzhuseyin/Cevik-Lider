@@ -153,6 +153,17 @@
                         </div>
                     </div>
 
+                    <!-- PDF Documents Section - Videonun Altında -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100" id="pdf-section" style="display: none;">
+                        <h3 class="text-xl font-semibold mb-6 flex items-center">
+                            <i class="fas fa-file-pdf mr-2 text-secondary"></i>
+                            Ek Dökümanlar ve Kaynaklar
+                        </h3>
+                        <div id="pdf-container" class="space-y-3">
+                            <!-- PDFs will be loaded here -->
+                        </div>
+                    </div>
+
                     <!-- Questions Section - Videonun Altında -->
                     <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
                         <h3 class="text-xl font-semibold mb-6 flex items-center">
@@ -232,6 +243,7 @@
     <!-- Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-production.js?v=20241121020"></script>
     <script src="js/user-utils.js"></script>
     <script src="js/groq-api.js?v=20241121150"></script>
@@ -309,6 +321,12 @@
                     return;
                 }
 
+                // Clear cache to get fresh data
+                if (window.DB.clearCache) {
+                    window.DB.clearCache('coordinatorVideos');
+                    console.log('🔄 coordinatorVideos cache temizlendi');
+                }
+
                 // Load videos - getCoordinatorVideos() already filters deleted videos
                 const coordinatorVideos = await window.DB.getCoordinatorVideos();
                 const studentVideos = await window.DB.getStudentVideos();
@@ -316,9 +334,11 @@
                 console.log('🔍 Tüm koordinatör videoları:', coordinatorVideos);
                 console.log('🔍 Aranan modül ID:', currentModule, 'Tip:', typeof currentModule);
                 
-                // Debug: Her videonun moduleId'sini kontrol et
+                // Debug: Her videonun moduleId'sini ve PDF'lerini kontrol et
                 coordinatorVideos.forEach((video, index) => {
                     console.log(`Video ${index + 1}: moduleId = "${video.moduleId}" (tip: ${typeof video.moduleId}), title = "${video.title}"`);
+                    console.log(`  → pdfs:`, video.pdfs);
+                    console.log(`  → questions:`, video.questions);
                 });
 
                 // Filter by current module - tüm olası tipleri kontrol et
@@ -366,7 +386,8 @@
                         videoUrl: video.youtubeUrl || video.videoUrl || '#',  // Try both fields
                         youtubeVideoId: video.youtubeVideoId || '',
                         completed: false,
-                        questions: video.questions || []
+                        questions: video.questions || [],
+                        pdfs: video.pdfs || []
                     }));
 
                     // Update module data
@@ -639,9 +660,12 @@
                     </div>
                 `;
             }
-            
+
             // Load questions for this video
             loadQuestions(video);
+
+            // Load PDFs for this video
+            loadPDFs(video);
         }
         
         function loadQuestions(video) {
@@ -839,7 +863,61 @@
                 return questionHTML;
             }).join('');
         }
-        
+
+        // Load PDFs for video
+        function loadPDFs(video) {
+            const pdfSection = document.getElementById('pdf-section');
+            const pdfContainer = document.getElementById('pdf-container');
+
+            console.log('📄 loadPDFs çağrıldı. Video:', video);
+            console.log('📄 video.pdfs:', video.pdfs);
+
+            if (!pdfSection || !pdfContainer) {
+                console.log('⚠️ PDF section veya container bulunamadı');
+                return;
+            }
+
+            // Check if video has PDFs
+            if (!video.pdfs || video.pdfs.length === 0) {
+                console.log('⚠️ Video\'da PDF yok');
+                pdfSection.style.display = 'none';
+                return;
+            }
+
+            // Show PDF section
+            pdfSection.style.display = 'block';
+
+            console.log(`📄 ${video.pdfs.length} PDF yükleniyor...`);
+
+            // Render PDFs
+            pdfContainer.innerHTML = video.pdfs.map((pdf, index) => `
+                <a href="${pdf.url}" download="${pdf.title}.pdf"
+                   class="block p-4 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-lg hover:shadow-lg hover:border-red-300 transition-all transform hover:scale-[1.02] group">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center flex-1">
+                            <div class="flex-shrink-0 w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4 group-hover:bg-red-200 transition-colors">
+                                <i class="fas fa-file-pdf text-2xl text-red-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-gray-900 group-hover:text-red-600 transition-colors">
+                                    ${pdf.title}
+                                </h4>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    <i class="fas fa-download mr-1"></i>
+                                    İndir
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0 ml-4">
+                            <i class="fas fa-external-link-alt text-gray-400 group-hover:text-red-600 transition-colors"></i>
+                        </div>
+                    </div>
+                </a>
+            `).join('');
+
+            console.log('✅ PDF\'ler yüklendi');
+        }
+
         // Submit open-ended answer
         function submitOpenEndedAnswer(questionIndex) {
             const answerTextarea = document.getElementById(`open-ended-answer-${questionIndex}`);

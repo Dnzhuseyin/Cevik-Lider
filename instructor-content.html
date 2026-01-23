@@ -99,7 +99,21 @@
                         <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Açıklama</label>
                         <textarea id="videoDescription" rows="3" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px;"></textarea>
                     </div>
-                    
+
+                    <!-- PDF Dökümanları -->
+                    <div style="margin-bottom: 20px; padding: 20px; background: #fef2f2; border-radius: 8px;">
+                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 15px;">
+                            <i class="fas fa-file-pdf" style="color: #dc2626;"></i> PDF Dökümanları
+                        </h3>
+                        <p style="font-size: 12px; color: #6b7280; margin-bottom: 15px;">
+                            <i class="fas fa-info-circle"></i> PDF'inizi Google Drive veya Dropbox'a yükleyip link'ini buraya yapıştırın
+                        </p>
+                        <div id="pdf-inputs"></div>
+                        <button type="button" onclick="addPDFInput()" style="background: #dc2626; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            <i class="fas fa-plus"></i> PDF Ekle
+                        </button>
+                    </div>
+
                     <!-- Sorular Bölümü -->
                     <div style="margin-bottom: 20px; padding: 20px; background: #f9fafb; border-radius: 8px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -141,6 +155,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-production.js"></script>
     <script>
         console.log('🚀 VIDEO YÖNETİMİ SAYFASI BAŞLATILIYOR...');
@@ -176,7 +191,11 @@
             try {
                 const result = await window.DB.load('modules');
                 const modules = (result && result.success) ? result.data : [];
-                
+
+                // Get moduleId from URL if present
+                const urlParams = new URLSearchParams(window.location.search);
+                const preselectedModuleId = urlParams.get('moduleId');
+
                 ['videoModule', 'filterModule'].forEach(id => {
                     const select = document.getElementById(id);
                     select.innerHTML = id === 'filterModule' ? '<option value="">Tüm Modüller</option>' : '<option value="">Modül seçin...</option>';
@@ -186,8 +205,14 @@
                         opt.textContent = m.title || 'İsimsiz';
                         select.appendChild(opt);
                     });
+
+                    // Pre-select module if moduleId in URL
+                    if (preselectedModuleId && id === 'videoModule') {
+                        select.value = preselectedModuleId;
+                        console.log('✅ Modül otomatik seçildi:', preselectedModuleId);
+                    }
                 });
-                
+
                 document.getElementById('active-modules').textContent = modules.length;
                 console.log('✅ Modüller:', modules.length);
             } catch (e) {
@@ -244,9 +269,135 @@
                 document.getElementById('videos-container').innerHTML = `<div style="text-align:center;padding:60px;color:#dc2626;">Hata: ${e.message}</div>`;
             }
         }
-        
+
         let questionCount = 0;
-        
+        let pdfsData = [];
+        let pdfCounter = 0;
+
+        // PDF Functions
+        async function addPDF() {
+            console.log('🔵 addPDF() fonksiyonu çağrıldı');
+
+            const title = document.getElementById('pdf-title').value.trim();
+            const fileInput = document.getElementById('pdf-file');
+            const file = fileInput.files[0];
+
+            console.log('📝 PDF Başlığı:', title);
+            console.log('📁 Seçilen dosya:', file);
+
+            if (!title) {
+                console.log('❌ PDF başlığı boş');
+                alert('PDF başlığı gereklidir');
+                return;
+            }
+
+            if (!file) {
+                alert('Lütfen bir PDF dosyası seçin');
+                return;
+            }
+
+            if (!file.type.includes('pdf')) {
+                alert('Sadece PDF dosyaları yüklenebilir');
+                return;
+            }
+
+            const maxSize = 10 * 1024 * 1024; //10MB
+            if (file.size > maxSize) {
+                alert('PDF boyutu 10MB\'dan küçük olmalıdır');
+                return;
+            }
+
+            const addButton = document.getElementById('add-pdf-btn');
+            const progressDiv = document.getElementById('pdf-upload-progress');
+            const progressBar = document.getElementById('upload-progress-bar');
+            const progressText = document.getElementById('upload-progress-text');
+
+            addButton.disabled = true;
+            progressDiv.style.display = 'block';
+
+            try {
+                console.log('📤 PDF yükleniyor:', file.name);
+
+                const result = await window.DB.uploadPDF(file, 'temp');
+
+                if (result.success) {
+                    const pdfId = `pdf_${Date.now()}_${pdfCounter++}`;
+                    pdfsData.push({
+                        id: pdfId,
+                        title: title,
+                        url: result.url,
+                        fileName: result.fileName,
+                        size: result.size,
+                        storagePath: result.storagePath
+                    });
+
+                    renderPDFList();
+                    document.getElementById('pdf-title').value = '';
+                    fileInput.value = '';
+
+                    alert(`✅ ${file.name} başarıyla yüklendi!`);
+                } else {
+                    throw new Error('PDF yüklenemedi');
+                }
+            } catch (error) {
+                console.error('❌ PDF yükleme hatası:', error);
+                alert('PDF yüklenirken hata oluştu: ' + error.message);
+            } finally {
+                addButton.disabled = false;
+                progressDiv.style.display = 'none';
+                progressBar.style.width = '0%';
+                progressText.textContent = '0%';
+            }
+        }
+
+        function renderPDFList() {
+            const container = document.getElementById('pdf-list');
+
+            if (pdfsData.length === 0) {
+                container.innerHTML = '<p style="font-size:12px;color:#6b7280;">Henüz PDF eklenmedi</p>';
+                return;
+            }
+
+            container.innerHTML = pdfsData.map(pdf => `
+                <div style="display:flex;align-items:center;justify-content:space-between;background:white;padding:10px;border-radius:4px;margin-bottom:5px;border:1px solid #e5e7eb;">
+                    <div style="display:flex;align-items:center;flex:1;">
+                        <i class="fas fa-file-pdf" style="color:#dc2626;font-size:18px;margin-right:8px;"></i>
+                        <div style="flex:1;">
+                            <span style="font-size:13px;font-weight:500;">${pdf.title}</span>
+                            ${pdf.size ? `<span style="font-size:11px;color:#6b7280;margin-left:8px;">${formatFileSize(pdf.size)}</span>` : ''}
+                        </div>
+                    </div>
+                    <button type="button" onclick="removePDF('${pdf.id}')" style="background:#dc2626;color:white;padding:4px 8px;border:none;border-radius:4px;cursor:pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        async function removePDF(pdfId) {
+            const pdf = pdfsData.find(p => p.id === pdfId);
+            if (!pdf) return;
+
+            if (pdf.storagePath && confirm('Bu PDF\'i silmek istediğinizden emin misiniz?')) {
+                try {
+                    await window.DB.deletePDF(pdf.storagePath);
+                } catch (error) {
+                    console.warn('⚠️ PDF Storage\'dan silinemedi:', error);
+                }
+            }
+
+            pdfsData = pdfsData.filter(p => p.id !== pdfId);
+            renderPDFList();
+        }
+
         function addQuestion() {
             questionCount++;
             const container = document.getElementById('questions-container');
@@ -366,7 +517,8 @@
             e.preventDefault();
             try {
                 const questions = collectQuestions();
-                
+                const pdfs = collectPDFs();
+
                 const data = {
                     title: document.getElementById('videoTitle').value,
                     youtubeUrl: document.getElementById('youtubeUrl').value,
@@ -375,18 +527,24 @@
                     difficulty: document.getElementById('difficulty').value,
                     description: document.getElementById('videoDescription').value,
                     questions: questions,
+                    pdfs: pdfs,
                     status: 'active',
                     createdAt: new Date().toISOString()
                 };
-                
+
+                console.log('💾 Kaydedilecek veri:', data);
+                console.log('📄 PDF sayısı:', pdfs.length);
+
                 const result = await window.DB.save('coordinatorVideos', data);
                 if (result && result.success) {
-                    alert('✅ Video ve sorular eklendi!');
+                    alert('✅ Video, sorular ve PDF\'ler eklendi!');
                     document.getElementById('videoForm').reset();
                     document.getElementById('questions-container').innerHTML = '';
+                    document.getElementById('pdf-inputs').innerHTML = '';
                     questionCount = 0;
-                        await loadVideos();
-                    } else {
+                    pdfCount = 0;
+                    await loadVideos();
+                } else {
                     throw new Error('Kayıt başarısız');
                 }
             } catch (e) {
@@ -404,6 +562,54 @@
             } catch (e) {
                 alert('❌ Hata: ' + e.message);
             }
+        }
+
+        // PDF Sistemi (URL ile - Basit)
+        let pdfCount = 0;
+
+        function addPDFInput() {
+            pdfCount++;
+            const container = document.getElementById('pdf-inputs');
+            const div = document.createElement('div');
+            div.id = `pdf-${pdfCount}`;
+            div.style.cssText = 'margin-bottom:12px;padding:12px;background:white;border-radius:6px;border:1px solid #fecaca;';
+            div.innerHTML = `
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                    <span style="font-weight:600;color:#dc2626;">PDF #${pdfCount}</span>
+                    <button type="button" onclick="removePDF(${pdfCount})" style="background:#fee2e2;color:#dc2626;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:12px;">
+                        <i class="fas fa-times"></i> Sil
+                    </button>
+                </div>
+                <input type="text" id="pdf-title-${pdfCount}" placeholder="PDF Başlığı" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:4px;margin-bottom:8px;font-size:13px;">
+                <input type="url" id="pdf-url-${pdfCount}" placeholder="PDF URL (Google Drive, Dropbox, vs.)" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">
+                <p style="font-size:11px;color:#6b7280;margin-top:4px;">
+                    <i class="fas fa-link"></i> Örnek: https://drive.google.com/file/d/.../view
+                </p>
+            `;
+            container.appendChild(div);
+        }
+
+        function removePDF(id) {
+            const element = document.getElementById(`pdf-${id}`);
+            if (element) element.remove();
+        }
+
+        function collectPDFs() {
+            const pdfs = [];
+            const container = document.getElementById('pdf-inputs');
+            const pdfDivs = container.querySelectorAll('[id^="pdf-"]');
+
+            pdfDivs.forEach(div => {
+                const id = div.id.split('-')[1];
+                const title = document.getElementById(`pdf-title-${id}`)?.value.trim();
+                const url = document.getElementById(`pdf-url-${id}`)?.value.trim();
+
+                if (title && url) {
+                    pdfs.push({ title, url });
+                }
+            });
+
+            return pdfs;
         }
     </script>
 </body>

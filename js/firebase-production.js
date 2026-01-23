@@ -56,7 +56,8 @@ class FirebaseProductionDB {
                 }
                 
                 this.db = firebase.firestore();
-                
+                this.storage = firebase.storage();
+
                 // Configure Firestore settings for better performance - use merge: true to avoid override warning
                 this.db.settings({
                     cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
@@ -385,7 +386,84 @@ class FirebaseProductionDB {
             throw error;
         }
     }
-    
+
+    // PDF Upload - Firebase Storage'a PDF yükleme
+    async uploadPDF(file, videoId) {
+        if (!this.isFirebaseReady || !this.storage) {
+            throw new Error('Firebase Storage hazır değil');
+        }
+
+        try {
+            // Dosya validasyonu
+            if (!file || !file.type.includes('pdf')) {
+                throw new Error('Sadece PDF dosyaları yüklenebilir');
+            }
+
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            if (file.size > maxSize) {
+                throw new Error('PDF boyutu 10MB\'dan küçük olmalıdır');
+            }
+
+            // Unique filename oluştur
+            const timestamp = Date.now();
+            const fileName = `${videoId}_${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+            const storageRef = this.storage.ref(`pdfs/${fileName}`);
+
+            console.log('📤 PDF yükleniyor:', fileName);
+
+            // Upload file
+            const uploadTask = storageRef.put(file);
+
+            // Progress tracking
+            return new Promise((resolve, reject) => {
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        console.log(`📊 Upload ilerleme: ${progress.toFixed(1)}%`);
+                    },
+                    (error) => {
+                        console.error('❌ PDF upload hatası:', error);
+                        reject(error);
+                    },
+                    async () => {
+                        // Upload tamamlandı, download URL al
+                        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                        console.log('✅ PDF başarıyla yüklendi:', downloadURL);
+
+                        resolve({
+                            success: true,
+                            url: downloadURL,
+                            fileName: file.name,
+                            size: file.size,
+                            storagePath: `pdfs/${fileName}`
+                        });
+                    }
+                );
+            });
+
+        } catch (error) {
+            console.error('❌ PDF upload hatası:', error);
+            throw error;
+        }
+    }
+
+    // PDF Silme - Firebase Storage'dan PDF silme
+    async deletePDF(storagePath) {
+        if (!this.isFirebaseReady || !this.storage) {
+            throw new Error('Firebase Storage hazır değil');
+        }
+
+        try {
+            const storageRef = this.storage.ref(storagePath);
+            await storageRef.delete();
+            console.log('🗑️ PDF silindi:', storagePath);
+            return { success: true };
+        } catch (error) {
+            console.error('❌ PDF silme hatası:', error);
+            throw error;
+        }
+    }
+
     // Modül yönetimi fonksiyonları
     async saveModule(moduleData, moduleId = null) {
         return await this.save('modules', moduleData, moduleId);

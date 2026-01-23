@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Test</title>
+</head>
+<body>
+    <h1>PDF Fonksiyon Testi</h1>
+
+    <button onclick="testFunction()">Test Et</button>
+
+    <div id="result"></div>
+
+    <script>
+        console.log('Script yüklendi');
+
+        function testFunction() {
+            console.log('testFunction çağrıldı');
+            document.getElementById('result').innerHTML = 'Fonksiyon çalıştı!';
+
+            if (typeof addPDF === 'function') {
+                document.getElementById('result').innerHTML += '<br>addPDF fonksiyonu VAR';
+            } else {
+                document.getElementById('result').innerHTML += '<br>addPDF fonksiyonu YOK';
+            }
+        }
+
+        // instructor-content.html'den kopyalanan addPDF fonksiyonu
+        let pdfsData = [];
+        let pdfCounter = 0;
+
+        async function addPDF() {
+            console.log('🔵 addPDF() fonksiyonu çağrıldı');
+            alert('addPDF çalışıyor!');
+        }
+
+        console.log('addPDF tanımlı mı?', typeof addPDF);
+    </script>
+</body>
+</html>

@@ -1,34 +1,28 @@
-// Groq AI API Integration
+
 class GroqAPI {
     constructor() {
-        // Vercel API Proxy kullanılıyor - API key backend'de güvenli şekilde saklanıyor
-        console.log('🚀 GroqAPI constructor başlatılıyor...');
-        console.log('🔒 Güvenli API Proxy kullanılıyor (API key backend\'de)');
+        console.log('GroqAPI constructor başlatılıyor...');
+        console.log('Güvenli API Proxy kullanılıyor ');
         
-        // Vercel API route'u kullan (backend proxy)
-        // Production: https://your-domain.vercel.app/api/groq-proxy
-        // Development: http://localhost:3000/api/groq-proxy (vercel dev)
+
         const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-        this.proxyURL = isProduction 
-            ? '/api/groq-proxy'  // Vercel production
-            : 'http://localhost:3000/api/groq-proxy';  // Local development (vercel dev)
-        
-        // Tek model: Llama 3.3 (en yeni ve desteklenen model)
+        this.proxyURL = isProduction
+            ? '/api/groq-proxy'
+            : 'http://localhost:5500/api/groq-proxy';  
         this.model = 'llama-3.3-70b-versatile';
-        // Fallback mekanizması kaldırıldı - sadece tek model kullanılıyor
         console.log('✅ Model ayarlandı:', this.model);
         this.lastRequestTime = 0;
-        this.minRequestInterval = 1000; // 1 second between requests
+        this.minRequestInterval = 1000; 
         
         console.log('🔗 Proxy URL:', this.proxyURL);
         
-        // Test API connection on initialization
+        
         this.testAPIKey();
     }
     
     async testAPIKey() {
         try {
-            console.log('🔑 Groq API proxy test ediliyor...');
+            console.log('Groq API proxy test ediliyor...');
             
             const testResponse = await fetch(this.proxyURL, {
                 method: 'POST',

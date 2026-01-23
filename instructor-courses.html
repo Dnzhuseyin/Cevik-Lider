@@ -30,6 +30,7 @@
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-production.js"></script>
     <script src="js/user-utils.js"></script>
     <style>
@@ -644,15 +645,21 @@
                                 <span>${module.completionRate || 0}% tamamlama</span>
                             </div>
                         </div>
-                        <div class="flex justify-between pt-4 border-t border-gray-200">
-                            <button onclick="editModule('${module.id}')" class="text-primary hover:text-primary/80 font-medium">
-                                <i class="fas fa-edit mr-1"></i>
-                                Düzenle
+                        <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                            <button onclick="manageModuleVideos('${module.id}')" class="text-accent hover:text-accent/80 font-medium">
+                                <i class="fas fa-video mr-1"></i>
+                                Videolar
                             </button>
-                            <button onclick="deleteModule('${module.id}')" class="text-red-600 hover:text-red-800 font-medium">
-                                <i class="fas fa-trash mr-1"></i>
-                                Sil
-                            </button>
+                            <div class="flex space-x-3">
+                                <button onclick="editModule('${module.id}')" class="text-primary hover:text-primary/80 font-medium">
+                                    <i class="fas fa-edit mr-1"></i>
+                                    Düzenle
+                                </button>
+                                <button onclick="deleteModule('${module.id}')" class="text-red-600 hover:text-red-800 font-medium">
+                                    <i class="fas fa-trash mr-1"></i>
+                                    Sil
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -970,6 +977,12 @@
             }, 5000);
         }
         
+        // Manage module videos - redirect to module-specific video management page
+        function manageModuleVideos(moduleId) {
+            console.log('🎥 Modül video yönetimi açılıyor:', moduleId);
+            window.location.href = `instructor-content.html?moduleId=${moduleId}`;
+        }
+
         // Logout function
         function logout() {
             if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
@@ -977,7 +990,7 @@
                 localStorage.removeItem('userEmail');
                 localStorage.removeItem('loginTime');
                 localStorage.removeItem('userRole');
-                
+
                 console.log('🚪 Koordinatör çıkışı yapıldı');
                 window.location.href = 'index.html';
             }

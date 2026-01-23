@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modül Video Yönetimi - Çevik Lider</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e40af',
+                        secondary: '#dc2626',
+                        accent: '#059669',
+                        cyber: '#6366f1',
+                        dark: '#0f172a'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Sidebar -->
+    <aside class="fixed left-0 top-0 w-64 h-screen bg-dark text-white p-4 overflow-y-auto z-50">
+        <a href="instructor-dashboard.html" class="font-bold text-xl text-secondary block mb-8 flex items-center">
+            <i class="fas fa-graduation-cap text-2xl mr-3"></i>
+            Çevik Lider Admin
+        </a>
+
+        <nav class="space-y-1">
+            <a href="instructor-dashboard.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-slate-800 text-white no-underline">
+                <i class="fas fa-tachometer-alt mr-3"></i>
+                <span>Genel Bakış</span>
+            </a>
+            <a href="instructor-courses.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-slate-800 text-white no-underline">
+                <i class="fas fa-graduation-cap mr-3"></i>
+                <span>Eğitim Modülleri</span>
+            </a>
+            <a href="instructor-content.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-slate-800 text-white no-underline">
+                <i class="fas fa-video mr-3"></i>
+                <span>Genel Video Yönetimi</span>
+            </a>
+            <a href="instructor-students.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-slate-800 text-white no-underline">
+                <i class="fas fa-users mr-3"></i>
+                <span>Öğrenci Yönetimi</span>
+            </a>
+        </nav>
+
+        <div class="absolute bottom-0 left-0 w-full p-4 border-t border-slate-800">
+            <button onclick="logout()" class="flex items-center text-gray-400 hover:text-white w-full text-left">
+                <i class="fas fa-sign-out-alt mr-3"></i>
+                <span>Çıkış Yap</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-64 p-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <a href="instructor-courses.html" class="text-gray-600 hover:text-gray-900 mb-2 inline-block">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Geri Dön
+                        </a>
+                        <h1 class="text-3xl font-bold text-gray-900 mb-2" id="module-title">Video Yönetimi</h1>
+                        <p class="text-gray-600" id="module-description">Bu modül için video ve PDF yönetimi</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-gray-600">Toplam Video</h3>
+                        <div class="h-10 w-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
+                            <i class="fas fa-video"></i>
+                        </div>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-900" id="total-videos">0</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-gray-600">Toplam Soru</h3>
+                        <div class="h-10 w-10 bg-accent/10 text-accent rounded-lg flex items-center justify-center">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-900" id="total-questions">0</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-gray-600">Toplam PDF</h3>
+                        <div class="h-10 w-10 bg-secondary/10 text-secondary rounded-lg flex items-center justify-center">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-900" id="total-pdfs">0</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-gray-600">Toplam Süre</h3>
+                        <div class="h-10 w-10 bg-cyber/10 text-cyber rounded-lg flex items-center justify-center">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-900" id="total-duration">0 dk</p>
+                </div>
+            </div>
+
+            <!-- Add Video Form -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-8">
+                <h2 class="text-xl font-semibold mb-6 flex items-center">
+                    <i class="fas fa-plus-circle text-primary mr-2"></i>
+                    Yeni Video Ekle
+                </h2>
+
+                <form id="video-form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Video Başlığı *</label>
+                            <input type="text" id="video-title" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Örn: Afet Yönetimi Temelleri">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">YouTube URL *</label>
+                            <input type="url" id="youtube-url" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="https://www.youtube.com/watch?v=...">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Süre (dakika) *</label>
+                            <input type="number" id="video-duration" required min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="15">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Zorluk Seviyesi</label>
+                            <select id="video-difficulty" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="beginner">Başlangıç</option>
+                                <option value="intermediate" selected>Orta</option>
+                                <option value="advanced">İleri</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Sıralama</label>
+                            <input type="number" id="video-order" min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="1">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Açıklama</label>
+                        <textarea id="video-description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Video hakkında kısa açıklama..."></textarea>
+                    </div>
+
+                    <!-- PDF Upload Section -->
+                    <div class="border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-file-pdf text-secondary mr-2"></i>
+                            PDF Dökümanları
+                        </h3>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">PDF Başlığı *</label>
+                                <input type="text" id="pdf-title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Örn: Afet Yönetimi El Kitabı">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">PDF Dosyası Seçin *</label>
+                                <input type="file" id="pdf-file" accept=".pdf" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-secondary file:text-white hover:file:bg-secondary/90 cursor-pointer">
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    PDF bilgisayarınızdan yüklenecek ve Firebase Storage'da güvenli şekilde saklanacak (Max: 10MB)
+                                </p>
+                            </div>
+
+                            <!-- Upload Progress -->
+                            <div id="pdf-upload-progress" class="mb-4 hidden">
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-medium text-blue-800">PDF yükleniyor...</span>
+                                        <span class="text-sm font-medium text-blue-800" id="upload-progress-text">0%</span>
+                                    </div>
+                                    <div class="w-full bg-blue-200 rounded-full h-2">
+                                        <div id="upload-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="pdf-list" class="space-y-2 mb-4"></div>
+                            <button type="button" onclick="addPDF()" class="bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" id="add-pdf-btn">
+                                <i class="fas fa-cloud-upload-alt mr-2"></i>
+                                PDF Yükle ve Ekle
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Questions Section -->
+                    <div class="border-t border-gray-200 pt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold flex items-center">
+                                <i class="fas fa-question-circle text-accent mr-2"></i>
+                                Sorular
+                            </h3>
+                            <button type="button" onclick="addQuestion()" class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-accent/90 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>
+                                Soru Ekle
+                            </button>
+                        </div>
+                        <div id="questions-container" class="space-y-4"></div>
+                    </div>
+
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" onclick="window.location.href='instructor-courses.html'" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
+                            İptal
+                        </button>
+                        <button type="submit" class="px-6 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:from-primary/90 hover:to-accent/90 transition-all">
+                            <i class="fas fa-save mr-2"></i>
+                            Videoyu Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Videos List -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h2 class="text-xl font-semibold mb-6 flex items-center">
+                    <i class="fas fa-video text-primary mr-2"></i>
+                    Modül Videoları
+                </h2>
+                <div id="videos-container" class="space-y-4">
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
+                        <p>Videolar yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Firebase & Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-production.js"></script>
+    <script src="js/user-utils.js"></script>
+
+    <script>
+        let currentModuleId = null;
+        let currentModule = null;
+        let questionsData = [];
+        let pdfsData = [];
+        let questionCounter = 0;
+        let pdfCounter = 0;
+
+        // Get moduleId from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        currentModuleId = urlParams.get('moduleId');
+
+        if (!currentModuleId) {
+            alert('Modül ID bulunamadı!');
+            window.location.href = 'instructor-courses.html';
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('📹 Video yönetimi başlatılıyor - Modül:', currentModuleId);
+
+            // Wait for Firebase
+            let attempts = 0;
+            while ((!window.DB || !window.DB.isFirebaseReady) && attempts < 50) {
+                await new Promise(r => setTimeout(r, 100));
+                attempts++;
+            }
+
+            if (!window.DB || !window.DB.isFirebaseReady) {
+                alert('Firebase bağlanamadı!');
+                return;
+            }
+
+            await loadModule();
+            await loadVideos();
+
+            document.getElementById('video-form').addEventListener('submit', handleVideoSubmit);
+        });
+
+        // Load module info
+        async function loadModule() {
+            try {
+                const result = await window.DB.load('modules', currentModuleId);
+                if (result.success && result.data) {
+                    currentModule = result.data;
+                    document.getElementById('module-title').textContent = `${currentModule.title} - Video Yönetimi`;
+                    document.getElementById('module-description').textContent = currentModule.description || 'Bu modül için video ve PDF yönetimi';
+                } else {
+                    throw new Error('Modül bulunamadı');
+                }
+            } catch (error) {
+                console.error('❌ Modül yükleme hatası:', error);
+                showNotification('Modül yüklenemedi', 'error');
+            }
+        }
+
+        // Load videos for this module
+        async function loadVideos() {
+            try {
+                const result = await window.DB.load('coordinatorVideos');
+                const allVideos = result.success ? result.data : [];
+
+                // Filter videos for this module
+                const moduleVideos = allVideos.filter(v => v.moduleId === currentModuleId && v.status !== 'deleted');
+
+                // Update stats
+                document.getElementById('total-videos').textContent = moduleVideos.length;
+
+                let totalQuestions = 0;
+                let totalPDFs = 0;
+                let totalDuration = 0;
+
+                moduleVideos.forEach(video => {
+                    totalQuestions += video.questions ? video.questions.length : 0;
+                    totalPDFs += video.pdfs ? video.pdfs.length : 0;
+                    totalDuration += parseInt(video.duration) || 0;
+                });
+
+                document.getElementById('total-questions').textContent = totalQuestions;
+                document.getElementById('total-pdfs').textContent = totalPDFs;
+                document.getElementById('total-duration').textContent = `${totalDuration} dk`;
+
+                // Render videos
+                renderVideos(moduleVideos);
+
+            } catch (error) {
+                console.error('❌ Video yükleme hatası:', error);
+                document.getElementById('videos-container').innerHTML = `
+                    <div class="text-center py-12 text-red-500">
+                        <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+                        <p>Videolar yüklenirken hata oluştu</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Render videos
+        function renderVideos(videos) {
+            const container = document.getElementById('videos-container');
+
+            if (videos.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fas fa-video text-6xl mb-4"></i>
+                        <p class="text-lg font-medium mb-2">Henüz video yok</p>
+                        <p class="text-sm">Yukarıdaki formu kullanarak ilk videonuzu ekleyin</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = videos.map(video => `
+                <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">${video.title}</h3>
+                            <p class="text-sm text-gray-600 mb-4">${video.description || 'Açıklama yok'}</p>
+
+                            <div class="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
+                                <span><i class="fas fa-clock text-primary mr-1"></i> ${video.duration} dakika</span>
+                                <span><i class="fas fa-signal text-accent mr-1"></i> ${getDifficultyText(video.difficulty)}</span>
+                                <span><i class="fas fa-question-circle text-accent mr-1"></i> ${video.questions ? video.questions.length : 0} soru</span>
+                                <span><i class="fas fa-file-pdf text-secondary mr-1"></i> ${video.pdfs ? video.pdfs.length : 0} PDF</span>
+                            </div>
+
+                            ${video.pdfs && video.pdfs.length > 0 ? `
+                                <div class="mb-4">
+                                    <p class="text-sm font-medium text-gray-700 mb-2">PDF Dökümanları:</p>
+                                    <div class="space-y-1">
+                                        ${video.pdfs.map(pdf => `
+                                            <a href="${pdf.url}" target="_blank" class="text-sm text-secondary hover:text-secondary/80 flex items-center">
+                                                <i class="fas fa-file-pdf mr-2"></i>
+                                                ${pdf.title}
+                                            </a>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <a href="${video.youtubeUrl}" target="_blank" class="text-sm text-primary hover:underline">
+                                <i class="fab fa-youtube mr-1"></i>
+                                Videoyu YouTube'da İzle
+                            </a>
+                        </div>
+
+                        <div class="flex flex-col space-y-2 ml-4">
+                            <button onclick="editVideo('${video.id}')" class="text-primary hover:text-primary/80 px-3 py-1 rounded border border-primary hover:bg-primary/10">
+                                <i class="fas fa-edit mr-1"></i> Düzenle
+                            </button>
+                            <button onclick="deleteVideo('${video.id}')" class="text-red-600 hover:text-red-800 px-3 py-1 rounded border border-red-600 hover:bg-red-50">
+                                <i class="fas fa-trash mr-1"></i> Sil
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Get difficulty text
+        function getDifficultyText(difficulty) {
+            const map = {
+                'beginner': 'Başlangıç',
+                'intermediate': 'Orta',
+                'advanced': 'İleri'
+            };
+            return map[difficulty] || difficulty;
+        }
+
+        // Add PDF - Firebase Storage'a yükle
+        async function addPDF() {
+            const title = document.getElementById('pdf-title').value.trim();
+            const fileInput = document.getElementById('pdf-file');
+            const file = fileInput.files[0];
+
+            // Validasyon
+            if (!title) {
+                showNotification('PDF başlığı gereklidir', 'warning');
+                return;
+            }
+
+            if (!file) {
+                showNotification('Lütfen bir PDF dosyası seçin', 'warning');
+                return;
+            }
+
+            if (!file.type.includes('pdf')) {
+                showNotification('Sadece PDF dosyaları yüklenebilir', 'error');
+                return;
+            }
+
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            if (file.size > maxSize) {
+                showNotification('PDF boyutu 10MB\'dan küçük olmalıdır', 'error');
+                return;
+            }
+
+            // UI'ı güncelle
+            const addButton = document.getElementById('add-pdf-btn');
+            const progressDiv = document.getElementById('pdf-upload-progress');
+            const progressBar = document.getElementById('upload-progress-bar');
+            const progressText = document.getElementById('upload-progress-text');
+
+            addButton.disabled = true;
+            progressDiv.classList.remove('hidden');
+
+            try {
+                console.log('📤 PDF yükleniyor:', file.name);
+
+                // Temporary video ID (henüz video kaydedilmedi)
+                const tempVideoId = currentModuleId || 'temp';
+
+                // Firebase Storage'a yükle
+                const result = await window.DB.uploadPDF(file, tempVideoId);
+
+                if (result.success) {
+                    // PDF'i listeye ekle
+                    const pdfId = `pdf_${Date.now()}_${pdfCounter++}`;
+                    pdfsData.push({
+                        id: pdfId,
+                        title: title,
+                        url: result.url,
+                        fileName: result.fileName,
+                        size: result.size,
+                        storagePath: result.storagePath
+                    });
+
+                    renderPDFList();
+
+                    // Form temizle
+                    document.getElementById('pdf-title').value = '';
+                    fileInput.value = '';
+
+                    showNotification(`✅ ${file.name} başarıyla yüklendi!`, 'success');
+                    console.log('✅ PDF eklendi:', result.url);
+                } else {
+                    throw new Error('PDF yüklenemedi');
+                }
+
+            } catch (error) {
+                console.error('❌ PDF yükleme hatası:', error);
+                showNotification('PDF yüklenirken hata oluştu: ' + error.message, 'error');
+            } finally {
+                // UI'ı geri yükle
+                addButton.disabled = false;
+                progressDiv.classList.add('hidden');
+                progressBar.style.width = '0%';
+                progressText.textContent = '0%';
+            }
+        }
+
+        // Render PDF list
+        function renderPDFList() {
+            const container = document.getElementById('pdf-list');
+
+            if (pdfsData.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500">Henüz PDF eklenmedi</p>';
+                return;
+            }
+
+            container.innerHTML = pdfsData.map(pdf => `
+                <div class="flex items-center justify-between bg-white p-3 rounded border border-gray-200">
+                    <div class="flex items-center flex-1">
+                        <i class="fas fa-file-pdf text-secondary mr-2 text-xl"></i>
+                        <div class="flex-1">
+                            <span class="text-sm font-medium block">${pdf.title}</span>
+                            ${pdf.size ? `<span class="text-xs text-gray-500">${formatFileSize(pdf.size)}</span>` : ''}
+                        </div>
+                    </div>
+                    <button type="button" onclick="removePDF('${pdf.id}')" class="text-red-600 hover:text-red-800 ml-2" title="PDF'i kaldır">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Remove PDF
+        async function removePDF(pdfId) {
+            const pdf = pdfsData.find(p => p.id === pdfId);
+
+            if (!pdf) return;
+
+            // Eğer PDF Firebase'e yüklenmişse, oradaki dosyayı da sil
+            if (pdf.storagePath && confirm('Bu PDF\'i silmek istediğinizden emin misiniz?')) {
+                try {
+                    await window.DB.deletePDF(pdf.storagePath);
+                    console.log('✅ PDF Firebase Storage\'dan silindi');
+                } catch (error) {
+                    console.warn('⚠️ PDF Storage\'dan silinemedi (belki zaten silinmiş):', error);
+                }
+            }
+
+            // Listeden kaldır
+            pdfsData = pdfsData.filter(p => p.id !== pdfId);
+            renderPDFList();
+            showNotification('PDF kaldırıldı', 'info');
+        }
+
+        // Add question
+        function addQuestion() {
+            const questionId = `q_${Date.now()}_${questionCounter++}`;
+            questionsData.push({
+                id: questionId,
+                question: '',
+                options: ['', '', '', ''],
+                correct: 0
+            });
+            renderQuestions();
+        }
+
+        // Render questions
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+
+            if (questionsData.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500">Henüz soru eklenmedi. "Soru Ekle" butonuna tıklayarak başlayın.</p>';
+                return;
+            }
+
+            container.innerHTML = questionsData.map((q, index) => `
+                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-medium text-gray-700">Soru ${index + 1}</h4>
+                        <button type="button" onclick="removeQuestion('${q.id}')" class="text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Soru</label>
+                        <input type="text" value="${q.question}" onchange="updateQuestion('${q.id}', 'question', this.value)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent" placeholder="Sorunuzu yazın">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        ${q.options.map((opt, i) => `
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Şık ${String.fromCharCode(65 + i)}</label>
+                                <input type="text" value="${opt}" onchange="updateQuestionOption('${q.id}', ${i}, this.value)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:border-transparent" placeholder="Şık ${String.fromCharCode(65 + i)}">
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Doğru Cevap</label>
+                        <select onchange="updateQuestion('${q.id}', 'correct', parseInt(this.value))" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent">
+                            <option value="0" ${q.correct === 0 ? 'selected' : ''}>Şık A</option>
+                            <option value="1" ${q.correct === 1 ? 'selected' : ''}>Şık B</option>
+                            <option value="2" ${q.correct === 2 ? 'selected' : ''}>Şık C</option>
+                            <option value="3" ${q.correct === 3 ? 'selected' : ''}>Şık D</option>
+                        </select>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update question
+        function updateQuestion(questionId, field, value) {
+            const question = questionsData.find(q => q.id === questionId);
+            if (question) {
+                question[field] = value;
+            }
+        }
+
+        // Update question option
+        function updateQuestionOption(questionId, optionIndex, value) {
+            const question = questionsData.find(q => q.id === questionId);
+            if (question) {
+                question.options[optionIndex] = value;
+            }
+        }
+
+        // Remove question
+        function removeQuestion(questionId) {
+            questionsData = questionsData.filter(q => q.id !== questionId);
+            renderQuestions();
+            showNotification('Soru kaldırıldı', 'info');
+        }
+
+        // Handle video form submit
+        async function handleVideoSubmit(e) {
+            e.preventDefault();
+
+            try {
+                // Validate questions
+                const validQuestions = questionsData.filter(q =>
+                    q.question.trim() &&
+                    q.options.every(opt => opt.trim())
+                );
+
+                if (validQuestions.length === 0) {
+                    showNotification('En az bir geçerli soru eklemelisiniz', 'warning');
+                    return;
+                }
+
+                // Extract YouTube video ID
+                const youtubeUrl = document.getElementById('youtube-url').value;
+                const youtubeVideoId = extractYouTubeId(youtubeUrl);
+
+                if (!youtubeVideoId) {
+                    showNotification('Geçersiz YouTube URL', 'error');
+                    return;
+                }
+
+                const videoData = {
+                    title: document.getElementById('video-title').value,
+                    youtubeUrl: youtubeUrl,
+                    youtubeVideoId: youtubeVideoId,
+                    moduleId: currentModuleId,
+                    duration: document.getElementById('video-duration').value,
+                    difficulty: document.getElementById('video-difficulty').value,
+                    description: document.getElementById('video-description').value,
+                    order: parseInt(document.getElementById('video-order').value) || 999,
+                    questions: validQuestions.map(q => ({
+                        question: q.question,
+                        options: q.options,
+                        correct: q.correct
+                    })),
+                    pdfs: pdfsData.map(pdf => ({
+                        title: pdf.title,
+                        url: pdf.url
+                    })),
+                    status: 'active',
+                    createdAt: new Date().toISOString()
+                };
+
+                const result = await window.DB.save('coordinatorVideos', videoData);
+
+                if (result.success) {
+                    showNotification('Video başarıyla kaydedildi!', 'success');
+
+                    // Reset form
+                    document.getElementById('video-form').reset();
+                    questionsData = [];
+                    pdfsData = [];
+                    renderQuestions();
+                    renderPDFList();
+
+                    // Reload videos
+                    await loadVideos();
+                } else {
+                    throw new Error('Video kaydedilemedi');
+                }
+
+            } catch (error) {
+                console.error('❌ Video kaydetme hatası:', error);
+                showNotification('Video kaydedilirken hata oluştu: ' + error.message, 'error');
+            }
+        }
+
+        // Extract YouTube ID from URL
+        function extractYouTubeId(url) {
+            const patterns = [
+                /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
+                /youtube\.com\/embed\/([^&\n?#]+)/
+            ];
+
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) {
+                    return match[1];
+                }
+            }
+            return null;
+        }
+
+        // Edit video (placeholder)
+        function editVideo(videoId) {
+            showNotification('Düzenleme özelliği yakında eklenecek', 'info');
+        }
+
+        // Delete video
+        async function deleteVideo(videoId) {
+            if (!confirm('Bu videoyu silmek istediğinizden emin misiniz?')) {
+                return;
+            }
+
+            try {
+                const result = await window.DB.delete('coordinatorVideos', videoId);
+
+                if (result.success) {
+                    showNotification('Video başarıyla silindi!', 'success');
+                    await loadVideos();
+                } else {
+                    throw new Error('Video silinemedi');
+                }
+            } catch (error) {
+                console.error('❌ Video silme hatası:', error);
+                showNotification('Video silinirken hata oluştu: ' + error.message, 'error');
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white transition-all duration-300 transform translate-x-full`;
+
+            switch (type) {
+                case 'success':
+                    notification.classList.add('bg-green-500');
+                    break;
+                case 'error':
+                    notification.classList.add('bg-red-500');
+                    break;
+                case 'warning':
+                    notification.classList.add('bg-yellow-500');
+                    break;
+                default:
+                    notification.classList.add('bg-blue-500');
+            }
+
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
+                localStorage.clear();
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>
