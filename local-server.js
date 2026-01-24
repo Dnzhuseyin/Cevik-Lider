@@ -33,7 +33,7 @@ function loadEnv() {
 
 loadEnv();
 
-const PORT = 5500;
+const PORT = 8080;
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 // MIME types
