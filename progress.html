@@ -126,22 +126,14 @@
                     <div class="bg-gradient-to-r from-cyber to-primary h-4 rounded-full transition-all duration-500" style="width: 25%" id="progress-bar"></div>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="text-center">
-                        <div class="text-2xl font-bold text-accent" id="completed-modules">2</div>
-                        <div class="text-sm text-gray-600">Tamamlanan</div>
+                        <div class="text-2xl font-bold text-accent" id="completed-modules-header">0</div>
+                        <div class="text-sm text-gray-600">Tamamlanan Modül</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-2xl font-bold text-cyber" id="current-modules">1</div>
-                        <div class="text-sm text-gray-600">Devam Eden</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-gray-400" id="locked-modules">5</div>
-                        <div class="text-sm text-gray-600">Kilitli</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-primary" id="avg-score">85</div>
-                        <div class="text-sm text-gray-600">Ortalama Puan</div>
+                        <div class="text-2xl font-bold text-cyber" id="current-modules">0</div>
+                        <div class="text-sm text-gray-600">Devam Eden Modül</div>
                     </div>
                         </div>
                     </div>
@@ -309,11 +301,15 @@
                 // Calculate statistics
                 const totalModules = modules.length || 8;
                 const completedModules = userProgressData.filter(p => p.completionRate >= 100).length;
-                const totalVideos = videos.length;
-                const watchedVideos = userProgressData.reduce((sum, p) => sum + (p.watchedVideos || 0), 0);
-                const totalExamScore = userProgressData.reduce((sum, p) => sum + (p.examScore || 0), 0);
-                const averageScore = userProgressData.length > 0 ? Math.round(totalExamScore / userProgressData.length) : 0;
-                const overallProgress = Math.round((completedModules / totalModules) * 100);
+                const totalVideos = videos.filter(v => v.status !== 'deleted').length;
+
+                // Get watched videos from watchedVideos collection
+                const watchedVideosResult = await window.DB.load('watchedVideos');
+                const watchedVideosData = (watchedVideosResult && watchedVideosResult.success) ? watchedVideosResult.data : [];
+                const userWatchedVideos = watchedVideosData.filter(w => w.userEmail === userEmail);
+                const watchedVideos = userWatchedVideos.length;
+
+                const overallProgress = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
                 
                 // Update UI with real data
                 await updateProgressDisplay(userProgressData, modules, {
@@ -321,7 +317,6 @@
                     completedModules,
                     totalVideos,
                     watchedVideos,
-                    averageScore,
                     overallProgress,
                     userProfile
                 });
@@ -404,8 +399,15 @@
             if (moduleProgressPercentEl) moduleProgressPercentEl.textContent = `${moduleProgressPercent}%`;
             if (moduleProgressBarEl) moduleProgressBarEl.style.width = `${moduleProgressPercent}%`;
 
-            if (currentModulesEl) currentModulesEl.textContent = Math.max(1, currentModules);
-            if (lockedModulesEl) lockedModulesEl.textContent = lockedModules;
+            // Update header module counts
+            const completedModulesHeaderEl = document.getElementById('completed-modules-header');
+            const currentModulesEl = document.getElementById('current-modules');
+
+            if (completedModulesHeaderEl) completedModulesHeaderEl.textContent = stats.completedModules;
+            if (currentModulesEl) {
+                const inProgressModules = userProgressData.filter(p => p.completionRate > 0 && p.completionRate < 100).length;
+                currentModulesEl.textContent = inProgressModules;
+            }
         }
 
         // Update user info in sidebar

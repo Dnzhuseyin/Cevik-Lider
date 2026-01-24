@@ -171,16 +171,18 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Modül</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Modül <span class="text-xs text-gray-500">(Opsiyonel)</span>
+                            </label>
                             <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyber focus:border-transparent"
                                     id="note-module">
-                                <option value="">Modül Seçin</option>
+                                <option value="">Modül Seçilmedi</option>
                             </select>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Etiketler</label>
-                            <input type="text" placeholder="etiket1, etiket2" 
+                            <input type="text" placeholder="etiket1, etiket2"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyber focus:border-transparent"
                                    id="note-tags">
                         </div>
@@ -282,18 +284,29 @@
                         <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
                             <div class="p-6">
                                 <div class="flex items-start justify-between mb-3">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="flex-shrink-0">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                                                Modül ${note.moduleId || 1}
-                                            </span>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            ${note.moduleId ? `
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                                    <i class="fas fa-book mr-1"></i>
+                                                    ${note.moduleName || getModuleName(note.moduleId)}
+                                                </span>
+                                            ` : `
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                    <i class="fas fa-sticky-note mr-1"></i>
+                                                    Genel Not
+                                                </span>
+                                            `}
+                                            ${note.videoId ? `
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyber/10 text-cyber">
+                                                    <i class="fas fa-video mr-1"></i>
+                                                    Video ${note.videoId}
+                                                </span>
+                                            ` : ''}
                                         </div>
-                                        <div>
-                                            <h3 class="text-sm font-medium text-gray-900">${note.moduleName || getModuleName(note.moduleId || 1)}</h3>
-                                            <p class="text-xs text-gray-500">${note.title || `Video ${note.videoId || 1}`}</p>
-                                        </div>
+                                        <h3 class="text-base font-semibold text-gray-900 mb-1">${note.title || 'Başlıksız Not'}</h3>
                                     </div>
-                                    <div class="flex items-center space-x-2">
+                                    <div class="flex items-center space-x-2 ml-4">
                                         <span class="text-xs text-gray-400">${formatDate(note.timestamp || note.createdAt)}</span>
                                         <button onclick="openNoteModal('${note.id}')" class="text-gray-400 hover:text-primary transition-colors">
                                             <i class="fas fa-edit text-sm"></i>
@@ -303,16 +316,27 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div class="prose prose-sm max-w-none">
+                                <div class="prose prose-sm max-w-none mb-3">
                                     <p class="text-gray-700 whitespace-pre-wrap">${note.content}</p>
                                 </div>
-                                <div class="mt-4 pt-4 border-t border-gray-100">
-                                    <a href="module-detail.html?module=${note.moduleId || 1}&video=${note.videoId || 1}" class="inline-flex items-center text-sm text-primary hover:text-blue-700">
-                                        <i class="fas fa-play mr-1"></i>
-                                        Videoyu İzle
-                                    </a>
-                                    ${note.videoTime ? `<span class="ml-4 text-xs text-gray-500">Zaman: ${Math.floor(note.videoTime / 60)}:${(note.videoTime % 60).toString().padStart(2, '0')}</span>` : ''}
-                                </div>
+                                ${note.tags && note.tags.length > 0 ? `
+                                    <div class="flex flex-wrap gap-1 mb-3">
+                                        ${note.tags.map(tag => `
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-accent/10 text-accent">
+                                                <i class="fas fa-tag mr-1 text-xs"></i>${tag}
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
+                                ${note.moduleId && note.videoId ? `
+                                    <div class="pt-3 border-t border-gray-100">
+                                        <a href="module-detail.html?module=${note.moduleId}&video=${note.videoId}" class="inline-flex items-center text-sm text-primary hover:text-blue-700">
+                                            <i class="fas fa-play mr-1"></i>
+                                            Videoyu İzle
+                                        </a>
+                                        ${note.videoTime ? `<span class="ml-4 text-xs text-gray-500">Zaman: ${Math.floor(note.videoTime / 60)}:${(note.videoTime % 60).toString().padStart(2, '0')}</span>` : ''}
+                                    </div>
+                                ` : ''}
                             </div>
                         </div>
                     `).join('');
@@ -329,23 +353,30 @@
                 function filterNotes() {
                     const searchTerm = searchInput.value.toLowerCase();
                     const selectedModule = moduleFilter.value;
-                    
+
                     let filteredNotes = allNotes;
-                    
+
                     if (searchTerm) {
-                        filteredNotes = filteredNotes.filter(note => 
+                        filteredNotes = filteredNotes.filter(note =>
                             note.content.toLowerCase().includes(searchTerm) ||
                             (note.moduleName || '').toLowerCase().includes(searchTerm) ||
-                            (note.title || '').toLowerCase().includes(searchTerm)
+                            (note.title || '').toLowerCase().includes(searchTerm) ||
+                            (note.tags && note.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
                         );
                     }
-                    
+
                     if (selectedModule) {
-                        filteredNotes = filteredNotes.filter(note => 
-                            (note.moduleId || 1).toString() === selectedModule
-                        );
+                        if (selectedModule === 'general') {
+                            // Show only notes without module
+                            filteredNotes = filteredNotes.filter(note => !note.moduleId);
+                        } else {
+                            // Show notes from specific module
+                            filteredNotes = filteredNotes.filter(note =>
+                                note.moduleId && note.moduleId.toString() === selectedModule
+                            );
+                        }
                     }
-                    
+
                     renderNotes(filteredNotes);
                 }
                 
@@ -387,8 +418,8 @@
                 const noteModuleSelect = document.getElementById('note-module');
                 
                 if (filterModuleSelect) {
-                    filterModuleSelect.innerHTML = '<option value="">Tüm Modüller</option>';
-                    
+                    filterModuleSelect.innerHTML = '<option value="">Tüm Notlar</option><option value="general">Genel Notlar</option>';
+
                     if (modules && modules.length > 0) {
                         modules.forEach(module => {
                             const option = document.createElement('option');
@@ -596,24 +627,23 @@
                 return;
             }
 
-            if (!noteModule) {
-                showError('Lütfen bir modül seçin');
-                return;
-            }
-
             try {
                 const now = new Date().toISOString();
 
                 const noteData = {
                     userEmail: userEmail,
                     content: noteContent,
-                    moduleId: parseInt(noteModule),
-                    moduleName: document.getElementById('note-module').options[document.getElementById('note-module').selectedIndex].text,
                     title: noteTitle || 'Başlıksız Not',
                     tags: noteTags ? noteTags.split(',').map(t => t.trim()).filter(t => t) : [],
                     timestamp: now,
                     createdAt: now
                 };
+
+                // Add module info if selected
+                if (noteModule) {
+                    noteData.moduleId = parseInt(noteModule);
+                    noteData.moduleName = document.getElementById('note-module').options[document.getElementById('note-module').selectedIndex].text;
+                }
 
                 if (currentEditingNoteId) {
                     // Mevcut notu güncelle
