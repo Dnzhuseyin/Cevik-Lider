@@ -299,6 +299,36 @@
             loadModule();
             setupEventListeners();
             loadSavedNotes();
+
+            // Load and display current progress
+            await loadCurrentModuleProgress();
+        }
+
+        // Load current module progress on page load
+        async function loadCurrentModuleProgress() {
+            try {
+                const userEmail = localStorage.getItem('userEmail');
+                if (!userEmail || !window.DB) return;
+
+                const progressResult = await window.DB.load('userProgress');
+                if (!progressResult || !progressResult.success) return;
+
+                const allProgress = Array.isArray(progressResult.data)
+                    ? progressResult.data
+                    : Object.values(progressResult.data || {});
+
+                const moduleProgress = allProgress.find(p =>
+                    p.userEmail === userEmail && p.moduleId == currentModule
+                );
+
+                if (moduleProgress && moduleProgress.completionRate !== undefined) {
+                    updateModuleProgressDisplay(moduleProgress.completionRate);
+                    console.log('✅ Modül ilerlemesi yüklendi:', moduleProgress.completionRate + '%');
+                }
+
+            } catch (error) {
+                console.error('❌ İlerleme yükleme hatası:', error);
+            }
         }
         
         async function loadCoordinatorVideos() {
@@ -600,14 +630,17 @@
                 showNoVideosMessage();
                 return;
             }
-            
+
             // Store current video globally
             currentVideo = video;
-            
+
             console.log('🎬 Video yükleniyor:', video);
-            
+
             document.getElementById('video-title').textContent = video.title;
             document.getElementById('video-description').textContent = video.description;
+
+            // Mark video as watched when loaded
+            markVideoAsWatched(video.id);
             
                     const videoPlaceholder = document.getElementById('video-placeholder');
             
@@ -1574,13 +1607,190 @@
             explanationBox.insertAdjacentHTML('beforeend', recommendationHtml);
         }
         
-        // Save question answer to Firebase
+        // Mark video as watched
+        async function markVideoAsWatched(videoId) {
+            try {
+                const userEmail = localStorage.getItem('userEmail');
+                if (!userEmail || !window.DB) return;
+
+                // Get existing watched videos
+                const watchedVideosResult = await window.DB.load('watchedVideos');
+                let watchedVideos = [];
+
+                if (watchedVideosResult && watchedVideosResult.success) {
+                    watchedVideos = Array.isArray(watchedVideosResult.data)
+                        ? watchedVideosResult.data
+                        : Object.values(watchedVideosResult.data || {});
+                }
+
+                // Check if already watched
+                const alreadyWatched = watchedVideos.some(w =>
+                    w.userEmail === userEmail &&
+                    w.videoId === videoId &&
+                    w.moduleId === currentModule
+                );
+
+                if (!alreadyWatched) {
+                    const watchData = {
+                        id: `watch_${userEmail}_${currentModule}_${videoId}_${Date.now()}`,
+                        userEmail: userEmail,
+                        moduleId: currentModule,
+                        videoId: videoId,
+                        watchedAt: new Date().toISOString()
+                    };
+
+                    await window.DB.save('watchedVideos', watchData);
+                    console.log('✅ Video izlendi olarak işaretlendi:', videoId);
+
+                    // Update user progress with watched video count
+                    await updateUserProgressWithWatchedVideo();
+                }
+
+            } catch (error) {
+                console.error('❌ Video izleme kaydı hatası:', error);
+            }
+        }
+
+        // Update user progress with watched video count
+        async function updateUserProgressWithWatchedVideo() {
+            try {
+                const userEmail = localStorage.getItem('userEmail');
+                if (!userEmail || !window.DB) return;
+
+                // Get all watched videos for this user and module
+                const watchedVideosResult = await window.DB.load('watchedVideos');
+                let watchedVideos = [];
+
+                if (watchedVideosResult && watchedVideosResult.success) {
+                    watchedVideos = Array.isArray(watchedVideosResult.data)
+                        ? watchedVideosResult.data
+                        : Object.values(watchedVideosResult.data || {});
+                }
+
+                const userWatchedInModule = watchedVideos.filter(w =>
+                    w.userEmail === userEmail && w.moduleId === currentModule
+                );
+
+                // Get total videos in module
+                const videosResult = await window.DB.load('coordinatorVideos');
+                let allVideos = [];
+
+                if (videosResult && videosResult.success) {
+                    allVideos = Array.isArray(videosResult.data)
+                        ? videosResult.data
+                        : Object.values(videosResult.data || {});
+                }
+
+                const moduleVideos = allVideos.filter(v => v.moduleId === currentModule);
+                const totalVideos = moduleVideos.length;
+                const watchedCount = userWatchedInModule.length;
+
+                // Get quiz results count
+                const quizResultsData = await window.DB.load('quizResults');
+                let quizResults = [];
+
+                if (quizResultsData && quizResultsData.success) {
+                    quizResults = Array.isArray(quizResultsData.data)
+                        ? quizResultsData.data
+                        : Object.values(quizResultsData.data || {});
+                }
+
+                const userQuizInModule = quizResults.filter(q =>
+                    q.userEmail === userEmail && q.moduleId === currentModule
+                );
+
+                // Count total questions in module
+                let totalQuestions = 0;
+                moduleVideos.forEach(v => {
+                    if (v.questions && Array.isArray(v.questions)) {
+                        totalQuestions += v.questions.length;
+                    }
+                });
+
+                const solvedQuestions = userQuizInModule.length;
+
+                // Calculate completion rate (50% videos, 50% quizzes)
+                const videoProgress = totalVideos > 0 ? (watchedCount / totalVideos) * 50 : 0;
+                const quizProgress = totalQuestions > 0 ? (solvedQuestions / totalQuestions) * 50 : 0;
+                const completionRate = Math.round(videoProgress + quizProgress);
+
+                // Update user progress
+                const progressResult = await window.DB.load('userProgress');
+                let existingProgress = null;
+                let progressId = null;
+
+                if (progressResult && progressResult.success) {
+                    const allProgress = Array.isArray(progressResult.data)
+                        ? progressResult.data
+                        : Object.values(progressResult.data || {});
+
+                    existingProgress = allProgress.find(p =>
+                        p.userEmail === userEmail && p.moduleId === currentModule
+                    );
+
+                    if (existingProgress && existingProgress.id) {
+                        progressId = existingProgress.id;
+                    }
+                }
+
+                const progressData = {
+                    userEmail: userEmail,
+                    moduleId: currentModule,
+                    completionRate: completionRate,
+                    completedVideos: watchedCount,
+                    totalVideos: totalVideos,
+                    solvedQuestions: solvedQuestions,
+                    totalQuestions: totalQuestions,
+                    lastAccessedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                if (progressId) {
+                    progressData.id = progressId;
+                    await window.DB.save('userProgress', progressData);
+                } else {
+                    progressData.id = `progress_${userEmail}_${currentModule}_${Date.now()}`;
+                    await window.DB.save('userProgress', progressData);
+                }
+
+                console.log('✅ Kullanıcı ilerlemesi güncellendi:', {
+                    completionRate,
+                    watchedCount,
+                    totalVideos,
+                    solvedQuestions,
+                    totalQuestions
+                });
+
+                // Update progress bar on page
+                updateModuleProgressDisplay(completionRate);
+
+            } catch (error) {
+                console.error('❌ İlerleme güncelleme hatası:', error);
+            }
+        }
+
+        // Update module progress display
+        function updateModuleProgressDisplay(completionRate) {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('module-progress');
+
+            if (progressBar) {
+                progressBar.style.width = `${completionRate}%`;
+            }
+
+            if (progressText) {
+                progressText.textContent = `${completionRate}%`;
+            }
+        }
+
+        // Save question answer to Firebase (updated to use quizResults collection)
         async function saveQuestionAnswer(questionIndex, questionText, studentAnswer, correctAnswer, isCorrect, explanation, questionType = 'multiple-choice') {
             try {
                 const userEmail = localStorage.getItem('userEmail');
                 if (!userEmail || !window.DB) return;
 
                 const answerData = {
+                    id: `quiz_${userEmail}_${currentModule}_${currentVideoId}_${questionIndex}_${Date.now()}`,
                     userEmail: userEmail,
                     videoId: currentVideoId,
                     moduleId: currentModule,
@@ -1590,13 +1800,16 @@
                     correctAnswer: correctAnswer,
                     isCorrect: isCorrect,
                     explanation: explanation,
-                    questionType: questionType, // Soru tipi eklendi
+                    questionType: questionType,
                     answeredAt: new Date().toISOString()
                 };
 
-                await window.DB.save('videoQuestionAnswers', answerData);
+                await window.DB.save('quizResults', answerData);
                 console.log('✅ Soru cevabı kaydedildi:', answerData);
-                
+
+                // Update progress after answering question
+                await updateUserProgressWithWatchedVideo();
+
             } catch (error) {
                 console.error('❌ Soru cevabı kaydetme hatası:', error);
             }
