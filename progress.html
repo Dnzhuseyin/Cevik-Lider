@@ -146,56 +146,100 @@
                         </div>
                     </div>
                     
-            <!-- Module Progress -->
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-100">
-                <h2 class="text-xl font-semibold mb-6 flex items-center">
-                    <i class="fas fa-graduation-cap text-primary mr-2"></i>
-                    Modül İlerlemesi
-                </h2>
-                
-                <div class="space-y-6" id="module-progress-container">
-                    <!-- Module progress items will be loaded here -->
-                </div>
-            </div>
-            
-            <!-- Statistics -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Learning Stats -->
+            <!-- Statistics Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Stat Card 1 -->
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                    <h3 class="text-lg font-semibold mb-4 flex items-center">
-                        <i class="fas fa-brain text-cyber mr-2"></i>
-                        Öğrenme İstatistikleri
-                    </h3>
-                    
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">İzlenen Video</span>
-                            <span class="font-semibold" id="watched-videos">12/24</span>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">İzlenen Video</p>
+                            <p class="text-2xl font-bold text-primary" id="watched-videos">0/0</p>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Çözülen Soru</span>
-                            <span class="font-semibold" id="solved-questions">45/80</span>
+                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-video text-primary text-xl"></i>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Alınan Not</span>
-                            <span class="font-semibold" id="total-notes">18</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 2 -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">Çözülen Soru</p>
+                            <p class="text-2xl font-bold text-accent" id="solved-questions">0/0</p>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Toplam Süre</span>
-                            <span class="font-semibold" id="study-time">24 saat</span>
+                        <div class="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-question-circle text-accent text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stat Card 3 -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">Alınan Not</p>
+                            <p class="text-2xl font-bold text-cyber" id="total-notes">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-cyber/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-sticky-note text-cyber text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stat Card 4 -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">Tamamlanan Modül</p>
+                            <p class="text-2xl font-bold text-secondary" id="completed-modules">0/0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-check-circle text-secondary text-xl"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-                <!-- Achievement -->
-                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                    <h3 class="text-lg font-semibold mb-4 flex items-center">
-                        <i class="fas fa-medal text-accent mr-2"></i>
-                        Başarılar
-                    </h3>
-                    
-                    <div class="space-y-3" id="achievements-container">
-                        <!-- Achievements will be loaded here -->
+
+            <!-- Detailed Progress -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h3 class="text-lg font-semibold mb-6 flex items-center">
+                    <i class="fas fa-chart-line text-primary mr-2"></i>
+                    Detaylı İlerleme
+                </h3>
+
+                <div class="space-y-6">
+                    <!-- Video Progress -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-gray-700">Video İzleme</span>
+                            <span class="text-sm font-bold text-primary" id="video-progress-percent">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-primary to-blue-600 h-3 rounded-full transition-all duration-500" style="width: 0%" id="video-progress-bar"></div>
+                        </div>
+                    </div>
+
+                    <!-- Quiz Progress -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-gray-700">Soru Çözme</span>
+                            <span class="text-sm font-bold text-accent" id="quiz-progress-percent">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-accent to-green-600 h-3 rounded-full transition-all duration-500" style="width: 0%" id="quiz-progress-bar"></div>
+                        </div>
+                    </div>
+
+                    <!-- Module Progress -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-gray-700">Modül Tamamlama</span>
+                            <span class="text-sm font-bold text-secondary" id="module-progress-percent">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-secondary to-red-600 h-3 rounded-full transition-all duration-500" style="width: 0%" id="module-progress-bar"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -293,67 +337,73 @@
         // Update progress display with real data
         async function updateProgressDisplay(userProgressData, modules, stats) {
             // Update header statistics
-            updateHeaderStats(stats);
-            
+            updateHeaderStats(stats, userProgressData);
+
             // Update user info
             updateUserInfo(stats.userProfile);
-            
-            // Update module progress list
-            updateModuleProgressList(userProgressData, modules);
-            
-            // Update achievement section
-            updateAchievements(stats.completedModules, stats.averageScore);
-            
-            // Update progress chart/visualization
+
+            // Update progress visualization
             updateProgressVisualization(userProgressData, modules);
         }
 
         // Update header statistics
-        function updateHeaderStats(stats) {
-            // Update progress cards
-            const completedModulesEl = document.getElementById('completed-modules');
-            const totalModulesEl = document.getElementById('total-modules');
-            const watchedVideosEl = document.getElementById('watched-videos');
-            const totalVideosEl = document.getElementById('total-videos');
-            const avgScoreEl = document.getElementById('avg-score');
+        async function updateHeaderStats(stats, userProgressData) {
+            // Header progress bar and percentage
             const overallProgressEl = document.getElementById('overall-progress');
             const progressBarEl = document.getElementById('progress-bar');
-            
-            // Update main progress cards
-            if (completedModulesEl) completedModulesEl.textContent = stats.completedModules;
-            if (totalModulesEl) totalModulesEl.textContent = stats.totalModules;
-            if (avgScoreEl) avgScoreEl.textContent = stats.averageScore;
+
             if (overallProgressEl) overallProgressEl.textContent = `${stats.overallProgress}%`;
             if (progressBarEl) progressBarEl.style.width = `${stats.overallProgress}%`;
-            
-            // Update learning statistics section
-            if (watchedVideosEl) watchedVideosEl.textContent = `${stats.watchedVideos}/${stats.totalVideos}`;
-            
-            // Update other learning stats
+
+            // Get notes from database
+            const notesResult = await window.DB.load('userNotes');
+            const allNotes = (notesResult && notesResult.success) ? notesResult.data : [];
+            const userEmail = localStorage.getItem('userEmail');
+            const userNotes = allNotes.filter(n => n.userEmail === userEmail);
+
+            // Get quiz results from database
+            const quizResultsData = await window.DB.load('quizResults');
+            const quizResults = (quizResultsData && quizResultsData.success) ? quizResultsData.data : [];
+            const userQuizResults = quizResults.filter(q => q.userEmail === userEmail);
+
+            // Calculate real statistics
+            const totalQuestions = userQuizResults.length;
+            const solvedQuestions = userQuizResults.filter(q => q.isCorrect).length;
+
+            // Update stat cards
+            const watchedVideosEl = document.getElementById('watched-videos');
             const solvedQuestionsEl = document.getElementById('solved-questions');
             const totalNotesEl = document.getElementById('total-notes');
-            const studyTimeEl = document.getElementById('study-time');
-            
-            // Calculate solved questions based on completed modules and average score
-            const estimatedQuestions = stats.completedModules * 10; // Assume 10 questions per module
-            const totalPossibleQuestions = stats.totalModules * 10;
-            if (solvedQuestionsEl) solvedQuestionsEl.textContent = `${estimatedQuestions}/${totalPossibleQuestions}`;
-            
-            // Estimate notes based on modules
-            const estimatedNotes = stats.completedModules * 3; // Assume 3 notes per completed module
-            if (totalNotesEl) totalNotesEl.textContent = estimatedNotes;
-            
-            // Calculate study time based on watched videos (assume 30 min per video)
-            const estimatedHours = Math.round((stats.watchedVideos * 30) / 60);
-            if (studyTimeEl) studyTimeEl.textContent = `${estimatedHours} saat`;
-            
-            // Update current and locked modules
-            const currentModulesEl = document.getElementById('current-modules');
-            const lockedModulesEl = document.getElementById('locked-modules');
-            
-            const currentModules = stats.totalModules - stats.completedModules;
-            const lockedModules = Math.max(0, stats.totalModules - stats.completedModules - 1); // Assume next module is unlocked
-            
+            const completedModulesEl = document.getElementById('completed-modules');
+
+            if (watchedVideosEl) watchedVideosEl.textContent = `${stats.watchedVideos}/${stats.totalVideos}`;
+            if (solvedQuestionsEl) solvedQuestionsEl.textContent = `${solvedQuestions}/${totalQuestions}`;
+            if (totalNotesEl) totalNotesEl.textContent = userNotes.length;
+            if (completedModulesEl) completedModulesEl.textContent = `${stats.completedModules}/${stats.totalModules}`;
+
+            // Update detailed progress bars
+            const videoProgressPercent = stats.totalVideos > 0 ? Math.round((stats.watchedVideos / stats.totalVideos) * 100) : 0;
+            const quizProgressPercent = totalQuestions > 0 ? Math.round((solvedQuestions / totalQuestions) * 100) : 0;
+            const moduleProgressPercent = stats.totalModules > 0 ? Math.round((stats.completedModules / stats.totalModules) * 100) : 0;
+
+            // Video progress
+            const videoProgressPercentEl = document.getElementById('video-progress-percent');
+            const videoProgressBarEl = document.getElementById('video-progress-bar');
+            if (videoProgressPercentEl) videoProgressPercentEl.textContent = `${videoProgressPercent}%`;
+            if (videoProgressBarEl) videoProgressBarEl.style.width = `${videoProgressPercent}%`;
+
+            // Quiz progress
+            const quizProgressPercentEl = document.getElementById('quiz-progress-percent');
+            const quizProgressBarEl = document.getElementById('quiz-progress-bar');
+            if (quizProgressPercentEl) quizProgressPercentEl.textContent = `${quizProgressPercent}%`;
+            if (quizProgressBarEl) quizProgressBarEl.style.width = `${quizProgressPercent}%`;
+
+            // Module progress
+            const moduleProgressPercentEl = document.getElementById('module-progress-percent');
+            const moduleProgressBarEl = document.getElementById('module-progress-bar');
+            if (moduleProgressPercentEl) moduleProgressPercentEl.textContent = `${moduleProgressPercent}%`;
+            if (moduleProgressBarEl) moduleProgressBarEl.style.width = `${moduleProgressPercent}%`;
+
             if (currentModulesEl) currentModulesEl.textContent = Math.max(1, currentModules);
             if (lockedModulesEl) lockedModulesEl.textContent = lockedModules;
         }

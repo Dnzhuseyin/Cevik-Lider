@@ -285,11 +285,13 @@
             if (!container) return;
             
             container.innerHTML = modules.map((module, index) => {
-                // Calculate module progress
+                // Calculate module progress from database
                 const moduleVideos = videos.filter(v => v.moduleId === module.id);
-                const moduleProgress = userProgress.filter(p => p.moduleId === module.id);
-                const completedVideos = moduleProgress.filter(p => p.completed).length;
-                const progressPercentage = moduleVideos.length > 0 ? (completedVideos / moduleVideos.length) * 100 : 0;
+                const moduleProgressData = userProgress.find(p => p.moduleId === module.id);
+
+                // Use completionRate from database (includes video watching + quiz solving)
+                const progressPercentage = moduleProgressData ? (moduleProgressData.completionRate || 0) : 0;
+                const completedVideos = moduleProgressData ? (moduleProgressData.completedVideos || 0) : 0;
                 
                 // All modules are always accessible - no locking
                 let status = 'active';
