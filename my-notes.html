@@ -295,6 +295,9 @@
                                     </div>
                                     <div class="flex items-center space-x-2">
                                         <span class="text-xs text-gray-400">${formatDate(note.timestamp || note.createdAt)}</span>
+                                        <button onclick="openNoteModal('${note.id}')" class="text-gray-400 hover:text-primary transition-colors">
+                                            <i class="fas fa-edit text-sm"></i>
+                                        </button>
                                         <button onclick="deleteNote('${note.id}')" class="text-gray-400 hover:text-red-500 transition-colors">
                                             <i class="fas fa-trash text-sm"></i>
                                         </button>
@@ -538,14 +541,143 @@
             }, 5000);
         }
         
+        // Modal açma/kapama işlemleri
+        let currentEditingNoteId = null;
+
+        function openNoteModal(noteId = null) {
+            const modal = document.getElementById('note-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const noteTitle = document.getElementById('note-title');
+            const noteModule = document.getElementById('note-module');
+            const noteTags = document.getElementById('note-tags');
+            const noteContent = document.getElementById('note-content');
+
+            currentEditingNoteId = noteId;
+
+            if (noteId) {
+                // Düzenleme modu
+                const note = allNotes.find(n => n.id === noteId);
+                if (note) {
+                    modalTitle.textContent = 'Not Düzenle';
+                    noteTitle.value = note.title || '';
+                    noteModule.value = note.moduleId || '';
+                    noteTags.value = note.tags ? note.tags.join(', ') : '';
+                    noteContent.value = note.content || '';
+                }
+            } else {
+                // Yeni not modu
+                modalTitle.textContent = 'Yeni Not Ekle';
+                noteTitle.value = '';
+                noteModule.value = '';
+                noteTags.value = '';
+                noteContent.value = '';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeNoteModal() {
+            const modal = document.getElementById('note-modal');
+            modal.classList.add('hidden');
+            currentEditingNoteId = null;
+        }
+
+        // Not kaydetme
+        async function saveNote() {
+            const noteTitle = document.getElementById('note-title').value.trim();
+            const noteModule = document.getElementById('note-module').value;
+            const noteTags = document.getElementById('note-tags').value.trim();
+            const noteContent = document.getElementById('note-content').value.trim();
+            const userEmail = localStorage.getItem('userEmail');
+
+            // Validasyon
+            if (!noteContent) {
+                showError('Not içeriği boş olamaz');
+                return;
+            }
+
+            if (!noteModule) {
+                showError('Lütfen bir modül seçin');
+                return;
+            }
+
+            try {
+                const now = new Date().toISOString();
+
+                const noteData = {
+                    userEmail: userEmail,
+                    content: noteContent,
+                    moduleId: parseInt(noteModule),
+                    moduleName: document.getElementById('note-module').options[document.getElementById('note-module').selectedIndex].text,
+                    title: noteTitle || 'Başlıksız Not',
+                    tags: noteTags ? noteTags.split(',').map(t => t.trim()).filter(t => t) : [],
+                    timestamp: now,
+                    createdAt: now
+                };
+
+                if (currentEditingNoteId) {
+                    // Mevcut notu güncelle
+                    noteData.id = currentEditingNoteId;
+                    await DB.save('userNotes', noteData);
+                    showNotification('Not başarıyla güncellendi', 'success');
+                    console.log('✅ Not güncellendi:', currentEditingNoteId);
+                } else {
+                    // Yeni not ekle
+                    noteData.id = 'note_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    await DB.save('userNotes', noteData);
+                    showNotification('Not başarıyla kaydedildi', 'success');
+                    console.log('✅ Yeni not eklendi:', noteData.id);
+                }
+
+                closeNoteModal();
+                await loadNotes();
+
+            } catch (error) {
+                console.error('❌ Not kaydedilirken hata:', error);
+                showError('Not kaydedilirken hata oluştu: ' + error.message);
+            }
+        }
+
         // Sayfa yüklendiğinde notları yükle
         document.addEventListener('DOMContentLoaded', async function() {
             // Initialize user info
             const isLoggedIn = await UserUtils.initializeUserInfo();
             if (!isLoggedIn) return;
-            
+
             // Load notes
             await loadNotes();
+
+            // Modal event listeners
+            const addNoteBtn = document.getElementById('add-new-note');
+            const closeModalBtn = document.getElementById('close-modal');
+            const cancelNoteBtn = document.getElementById('cancel-note');
+            const saveNoteBtn = document.getElementById('save-note');
+            const modal = document.getElementById('note-modal');
+
+            if (addNoteBtn) {
+                addNoteBtn.addEventListener('click', () => openNoteModal());
+            }
+
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', closeNoteModal);
+            }
+
+            if (cancelNoteBtn) {
+                cancelNoteBtn.addEventListener('click', closeNoteModal);
+            }
+
+            if (saveNoteBtn) {
+                saveNoteBtn.addEventListener('click', saveNote);
+            }
+
+            // Modal dışına tıklandığında kapat
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeNoteModal();
+                    }
+                });
+            }
         });
         
         // Logout function
