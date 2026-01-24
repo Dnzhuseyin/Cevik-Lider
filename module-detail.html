@@ -891,7 +891,7 @@
 
             // Render PDFs
             pdfContainer.innerHTML = video.pdfs.map((pdf, index) => `
-                <a href="${pdf.url}" download="${pdf.title}.pdf"
+                <a href="${pdf.url}" target="_blank" rel="noopener noreferrer"
                    class="block p-4 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-lg hover:shadow-lg hover:border-red-300 transition-all transform hover:scale-[1.02] group">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center flex-1">
@@ -903,8 +903,8 @@
                                     ${pdf.title}
                                 </h4>
                                 <p class="text-sm text-gray-600 mt-1">
-                                    <i class="fas fa-download mr-1"></i>
-                                    İndir
+                                    <i class="fas fa-external-link-alt mr-1"></i>
+                                    Görüntüle veya İndir
                                 </p>
                             </div>
                         </div>
