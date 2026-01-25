@@ -162,10 +162,10 @@ class GroqAPI {
         }
     }
     
-    // Siber güvenlik eğitimi için özel promptlar
+    // Eğitim için özel promptlar
     async generateSecurityAdvice(situation) {
-        const context = `Sen bir siber güvenlik uzmanısın. Öğrencilere bilgi güvenliği konusunda tavsiyelerde bulunuyorsun. Türkçe yanıt ver.`;
-        const prompt = `Bu durumda siber güvenlik prensiplerini kullanarak nasıl hareket etmeliyim: ${situation}`;
+        const context = `Sen bir eğitim uzmanısın. Öğrencilere bilgi güvenliği konusunda tavsiyelerde bulunuyorsun. Türkçe yanıt ver.`;
+        const prompt = `Bu durumda doğru prensipleri kullanarak nasıl hareket etmeliyim: ${situation}`;
         
         return await this.generateContent(prompt, context);
     }
@@ -229,14 +229,14 @@ SADECE JSON, BAŞKA HİÇBİR ŞEY YAZMA!`;
     }
     
     async generateModuleSummary(moduleContent) {
-        const context = `Sen bir eğitim içeriği uzmanısın. Siber güvenlik modüllerinin özetlerini hazırlıyorsun. Türkçe yanıt ver.`;
+        const context = `Sen bir eğitim içeriği uzmanısın. Eğitim modüllerinin özetlerini hazırlıyorsun. Türkçe yanıt ver.`;
         const prompt = `Bu modül içeriğinin özetini hazırla: ${moduleContent}`;
         
         return await this.generateContent(prompt, context);
     }
     
     async generatePersonalizedFeedback(userProgress, completedModules) {
-        const context = `Sen bir siber güvenlik koçusun. Öğrencilerin ilerlemesine göre kişiselleştirilmiş geri bildirimler veriyorsun. Türkçe yanıt ver.`;
+        const context = `Sen bir eğitim koçusun. Öğrencilerin ilerlemesine göre kişiselleştirilmiş geri bildirimler veriyorsun. Türkçe yanıt ver.`;
         const prompt = `Kullanıcının genel ilerlemesi: %${userProgress}, tamamladığı modüller: ${completedModules.join(', ')}. Bu bilgilere göre kişiselleştirilmiş bir geri bildirim ve gelişim önerileri hazırla.`;
         
         return await this.generateContent(prompt, context);
