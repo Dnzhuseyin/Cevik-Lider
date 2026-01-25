@@ -561,8 +561,18 @@
 
             // Filter out deleted videos for students
             const activeVideos = module.videos.filter(video => video.status !== 'deleted');
-            
-            activeVideos.forEach((video, index) => {
+
+            // Sort videos: oldest first (new videos go to the end)
+            const sortedVideos = [...activeVideos].sort((a, b) => {
+                // If both have createdAt, use that
+                if (a.createdAt && b.createdAt) {
+                    return new Date(a.createdAt) - new Date(b.createdAt);
+                }
+                // Otherwise use id (assuming lower ids are older)
+                return (a.id || 0) - (b.id || 0);
+            });
+
+            sortedVideos.forEach((video, index) => {
                 const isActive = video.id === currentVideoId;
                 const videoProgress = userProgress[video.id] || {};
                 const isCompleted = videoProgress.completed || false;
@@ -1930,35 +1940,87 @@
             });
         }
 
-        function saveVideoNote(noteText) {
-            const timestamp = new Date().toLocaleString('tr-TR');
-            const module = moduleData[currentModule];
-            const currentVideo = module?.videos?.find(v => v.id === currentVideoId);
-            
-            const note = {
-                id: Date.now(),
-                text: noteText,
-                timestamp: timestamp,
-                videoTitle: currentVideo?.title || 'Bilinmeyen Video',
-                moduleTitle: module?.title || 'Bilinmeyen Modül'
-            };
+        async function saveVideoNote(noteText) {
+            try {
+                const userEmail = localStorage.getItem('userEmail');
+                if (!userEmail || !window.DB) {
+                    alert('Not kaydedilirken hata oluştu');
+                    return;
+                }
 
-            let notes = JSON.parse(localStorage.getItem('video-notes') || '[]');
-            notes.unshift(note);
-            localStorage.setItem('video-notes', JSON.stringify(notes));
+                const module = moduleData[currentModule];
+                const currentVideo = module?.videos?.find(v => v.id === currentVideoId);
+                const now = new Date().toISOString();
 
-            displaySavedNotes();
+                const noteData = {
+                    id: 'note_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    userEmail: userEmail,
+                    content: noteText,
+                    title: `${currentVideo?.title || 'Video'} - Not`,
+                    moduleId: parseInt(currentModule),
+                    moduleName: module?.title || 'Bilinmeyen Modül',
+                    videoId: currentVideoId,
+                    videoTitle: currentVideo?.title || 'Bilinmeyen Video',
+                    timestamp: now,
+                    createdAt: now
+                };
+
+                await window.DB.save('userNotes', noteData);
+                console.log('✅ Video notu kaydedildi:', noteData);
+
+                // Show success notification
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                notification.innerHTML = '<i class="fas fa-check mr-2"></i>Not başarıyla kaydedildi!';
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 3000);
+
+                displaySavedNotes();
+
+            } catch (error) {
+                console.error('❌ Not kaydetme hatası:', error);
+                alert('Not kaydedilirken hata oluştu: ' + error.message);
+            }
         }
 
-        function saveQuickNote(noteText) {
-            const timestamp = new Date().toLocaleString('tr-TR');
-            
-            const note = {
-                id: Date.now(),
-                text: noteText,
-                timestamp: timestamp,
-                type: 'quick'
-            };
+        async function saveQuickNote(noteText) {
+            try {
+                const userEmail = localStorage.getItem('userEmail');
+                if (!userEmail || !window.DB) {
+                    alert('Not kaydedilirken hata oluştu');
+                    return;
+                }
+
+                const module = moduleData[currentModule];
+                const now = new Date().toISOString();
+
+                const noteData = {
+                    id: 'note_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    userEmail: userEmail,
+                    content: noteText,
+                    title: 'Hızlı Not',
+                    moduleId: parseInt(currentModule),
+                    moduleName: module?.title || 'Bilinmeyen Modül',
+                    timestamp: now,
+                    createdAt: now
+                };
+
+                await window.DB.save('userNotes', noteData);
+                console.log('✅ Hızlı not kaydedildi:', noteData);
+
+                // Show success notification
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                notification.innerHTML = '<i class="fas fa-check mr-2"></i>Not başarıyla kaydedildi!';
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 3000);
+
+                const note = {
+                    id: Date.now(),
+                    text: noteText,
+                    timestamp: now,
+                    type: 'quick'
+                };
 
             let notes = JSON.parse(localStorage.getItem('quick-notes') || '[]');
             notes.unshift(note);

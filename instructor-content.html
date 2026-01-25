@@ -252,6 +252,7 @@
                     </div>
                                 <div style="display:flex;gap:8px;">
                                     ${v.youtubeUrl ? `<a href="${v.youtubeUrl}" target="_blank" style="background:#dc2626;color:white;padding:6px 12px;border-radius:4px;text-decoration:none;font-size:12px;"><i class="fab fa-youtube"></i> YouTube</a>` : ''}
+                                    <button onclick="editVideo('${v.id}')" style="background:#6366f1;color:white;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;font-size:12px;"><i class="fas fa-edit"></i> Düzenle</button>
                                     <button onclick="deleteVideo('${v.id}')" style="background:#dc2626;color:white;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;font-size:12px;"><i class="fas fa-trash"></i> Sil</button>
                         </div>
                         </div>
@@ -528,21 +529,37 @@
                     description: document.getElementById('videoDescription').value,
                     questions: questions,
                     pdfs: pdfs,
-                    status: 'active',
-                    createdAt: new Date().toISOString()
+                    status: 'active'
                 };
 
                 console.log('💾 Kaydedilecek veri:', data);
                 console.log('📄 PDF sayısı:', pdfs.length);
 
-                const result = await window.DB.save('coordinatorVideos', data);
+                let result;
+                if (editingVideoId) {
+                    // Update existing video
+                    data.id = editingVideoId;
+                    data.updatedAt = new Date().toISOString();
+                    result = await window.DB.save('coordinatorVideos', data);
+                    if (result && result.success) {
+                        alert('✅ Video başarıyla güncellendi!');
+                    }
+                } else {
+                    // Create new video
+                    data.createdAt = new Date().toISOString();
+                    result = await window.DB.save('coordinatorVideos', data);
+                    if (result && result.success) {
+                        alert('✅ Video, sorular ve PDF\'ler eklendi!');
+                    }
+                }
+
                 if (result && result.success) {
-                    alert('✅ Video, sorular ve PDF\'ler eklendi!');
                     document.getElementById('videoForm').reset();
                     document.getElementById('questions-container').innerHTML = '';
                     document.getElementById('pdf-inputs').innerHTML = '';
                     questionCount = 0;
                     pdfCount = 0;
+                    cancelEdit(); // Reset edit mode
                     await loadVideos();
                 } else {
                     throw new Error('Kayıt başarısız');
@@ -562,6 +579,81 @@
             } catch (e) {
                 alert('❌ Hata: ' + e.message);
             }
+        }
+
+        let editingVideoId = null;
+
+        async function editVideo(id) {
+            try {
+                editingVideoId = id;
+
+                // Load video data
+                const result = await window.DB.load('coordinatorVideos');
+                const videos = (result && result.success) ? result.data : [];
+                const video = videos.find(v => v.id === id);
+
+                if (!video) {
+                    alert('Video bulunamadı');
+                    return;
+                }
+
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Fill form fields
+                document.getElementById('videoModule').value = video.moduleId || '';
+                document.getElementById('videoTitle').value = video.title || '';
+                document.getElementById('videoDescription').value = video.description || '';
+                document.getElementById('videoDuration').value = video.duration || '';
+                document.getElementById('difficulty').value = video.difficulty || 'medium';
+                document.getElementById('youtubeUrl').value = video.youtubeUrl || video.videoUrl || '';
+
+                // TODO: Load questions and PDFs (complex - for now just show warning)
+                if (video.questions && video.questions.length > 0) {
+                    console.warn('⚠️ Bu videoda sorular var ama şu anda düzenleme desteklenmiyor');
+                }
+                if (video.pdfs && video.pdfs.length > 0) {
+                    console.warn('⚠️ Bu videoda PDF\'ler var ama şu anda düzenleme desteklenmiyor');
+                }
+
+                // Change submit button to update mode
+                const submitBtn = document.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Videoyu Güncelle';
+                submitBtn.style.background = '#6366f1';
+
+                // Add cancel button
+                let cancelBtn = document.getElementById('cancel-edit-btn');
+                if (!cancelBtn) {
+                    cancelBtn = document.createElement('button');
+                    cancelBtn.id = 'cancel-edit-btn';
+                    cancelBtn.type = 'button';
+                    cancelBtn.innerHTML = '<i class="fas fa-times mr-2"></i>İptal';
+                    cancelBtn.style.cssText = 'background:#6b7280;color:white;padding:12px;border:none;border-radius:6px;cursor:pointer;font-size:14px;margin-left:10px;';
+                    cancelBtn.onclick = cancelEdit;
+                    submitBtn.parentNode.appendChild(cancelBtn);
+                }
+
+                alert('Video düzenleme moduna alındı. Aşağıdaki formu düzenleyin ve "Videoyu Güncelle" butonuna tıklayın.');
+
+            } catch (e) {
+                alert('❌ Hata: ' + e.message);
+            }
+        }
+
+        function cancelEdit() {
+            editingVideoId = null;
+
+            // Reset form
+            document.getElementById('videoForm').reset();
+
+            // Reset submit button
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Kaydet';
+            submitBtn.style.background = '#059669';
+
+            // Remove cancel button
+            const cancelBtn = document.getElementById('cancel-edit-btn');
+            if (cancelBtn) cancelBtn.remove();
         }
 
         // PDF Sistemi (URL ile - Basit)
