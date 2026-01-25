@@ -294,11 +294,11 @@
 
             // Load coordinator videos
             await loadCoordinatorVideos();
-            
+
             // Load module content
-            loadModule();
+            await loadModule();
             setupEventListeners();
-            loadSavedNotes();
+            await loadSavedNotes();
 
             // Load and display current progress
             await loadCurrentModuleProgress();
@@ -488,8 +488,8 @@
             }
 
             // Load video list
-            loadVideoList();
-            
+            await loadVideoList();
+
             // Load first video or current video
             const allModuleVideos = moduleData[currentModule]?.videos || [];
             // Filter out deleted videos for students
@@ -2015,59 +2015,90 @@
                 document.body.appendChild(notification);
                 setTimeout(() => notification.remove(), 3000);
 
-                const note = {
-                    id: Date.now(),
-                    text: noteText,
-                    timestamp: now,
-                    type: 'quick'
-                };
+                // Refresh notes display
+                await displaySavedNotes();
 
-            let notes = JSON.parse(localStorage.getItem('quick-notes') || '[]');
-            notes.unshift(note);
-            localStorage.setItem('quick-notes', JSON.stringify(notes));
-
-            displaySavedNotes();
+            } catch (error) {
+                console.error('❌ Not kaydetme hatası:', error);
+                alert('Not kaydedilirken hata oluştu: ' + error.message);
+            }
         }
 
-        function loadSavedNotes() {
-            displaySavedNotes();
+        async function loadSavedNotes() {
+            await displaySavedNotes();
         }
 
-        function displaySavedNotes() {
+        async function displaySavedNotes() {
             const savedNotesContainer = document.getElementById('saved-notes');
-            const quickNotes = JSON.parse(localStorage.getItem('quick-notes') || '[]');
-            const videoNotes = JSON.parse(localStorage.getItem('video-notes') || '[]');
-            
-            const allNotes = [...quickNotes, ...videoNotes].sort((a, b) => b.id - a.id);
-            
-            if (allNotes.length === 0) {
-                savedNotesContainer.innerHTML = '<p class="text-gray-500 text-sm">Henüz not yok</p>';
+
+            try {
+                const userEmail = localStorage.getItem('userEmail');
+                if (!userEmail || !window.DB) {
+                    savedNotesContainer.innerHTML = '<p class="text-gray-500 text-sm">Henüz not yok</p>';
                     return;
                 }
-                
-            savedNotesContainer.innerHTML = '';
-            
-            allNotes.slice(0, 3).forEach(note => {
-                const noteElement = document.createElement('div');
-                noteElement.className = 'bg-gray-50 p-2 rounded text-sm';
-                noteElement.innerHTML = `
-                    <p class="text-gray-800">${note.text}</p>
-                    <p class="text-gray-500 text-xs mt-1">${note.timestamp}</p>
-                    ${note.videoTitle ? `<p class="text-blue-600 text-xs">${note.videoTitle}</p>` : ''}
-                `;
-                savedNotesContainer.appendChild(noteElement);
-            });
 
-            if (allNotes.length > 3) {
-                const moreNotesElement = document.createElement('div');
-                moreNotesElement.className = 'text-center';
-                moreNotesElement.innerHTML = `
-                    <a href="my-notes.html" class="text-cyber text-sm hover:underline">
-                        +${allNotes.length - 3} daha fazla not görüntüle
-                    </a>
-                `;
-                savedNotesContainer.appendChild(moreNotesElement);
+                // Load notes from Firebase
+                const notesResult = await window.DB.load('userNotes');
+                let allNotes = [];
+
+                if (notesResult && notesResult.success) {
+                    const notes = Array.isArray(notesResult.data)
+                        ? notesResult.data
+                        : Object.values(notesResult.data || {});
+
+                    // Filter user's notes from current module
+                    allNotes = notes.filter(n =>
+                        n.userEmail === userEmail &&
+                        n.moduleId == currentModule
+                    ).sort((a, b) => new Date(b.timestamp || b.createdAt) - new Date(a.timestamp || a.createdAt));
+                }
+
+                if (allNotes.length === 0) {
+                    savedNotesContainer.innerHTML = '<p class="text-gray-500 text-sm">Henüz not yok</p>';
+                    return;
+                }
+
+                savedNotesContainer.innerHTML = '';
+
+                allNotes.slice(0, 3).forEach(note => {
+                    const noteElement = document.createElement('div');
+                    noteElement.className = 'bg-gray-50 p-2 rounded text-sm';
+                    noteElement.innerHTML = `
+                        <p class="text-gray-800">${note.content || note.text || ''}</p>
+                        <p class="text-gray-500 text-xs mt-1">${formatNoteDate(note.timestamp || note.createdAt)}</p>
+                        ${note.videoId ? `<p class="text-blue-600 text-xs">Video ${note.videoId}</p>` : ''}
+                    `;
+                    savedNotesContainer.appendChild(noteElement);
+                });
+
+                if (allNotes.length > 3) {
+                    const moreNotesElement = document.createElement('div');
+                    moreNotesElement.className = 'text-center mt-2';
+                    moreNotesElement.innerHTML = `
+                        <a href="my-notes.html" class="text-cyber text-sm hover:underline">
+                            <i class="fas fa-arrow-right mr-1"></i>+${allNotes.length - 3} not daha
+                        </a>
+                    `;
+                    savedNotesContainer.appendChild(moreNotesElement);
+                }
+
+            } catch (error) {
+                console.error('❌ Notlar yüklenirken hata:', error);
+                savedNotesContainer.innerHTML = '<p class="text-red-500 text-sm">Notlar yüklenemedi</p>';
             }
+        }
+
+        function formatNoteDate(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+
+            if (diffMins < 1) return 'Az önce';
+            if (diffMins < 60) return `${diffMins} dk önce`;
+            if (diffMins < 1440) return `${Math.floor(diffMins / 60)} saat önce`;
+            return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
         }
         
         // Logout function

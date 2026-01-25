@@ -253,19 +253,20 @@
                 // Firebase'den notları al
                 let notesData = [];
                 try {
-                    notesData = await DB.load('userNotes') || [];
-                    console.log('✅ Notes data yüklendi:', notesData.length);
+                    const result = await DB.load('userNotes');
+                    if (result && result.success) {
+                        notesData = Array.isArray(result.data)
+                            ? result.data
+                            : Object.values(result.data || {});
+                        console.log('✅ Notes data yüklendi:', notesData.length);
+                    } else {
+                        console.warn('⚠️ Notes load başarısız:', result);
+                    }
                 } catch (error) {
                     console.warn('⚠️ Notes data yüklenemedi:', error);
                     notesData = [];
                 }
-                
-                // Ensure data is array
-                if (!Array.isArray(notesData)) {
-                    console.warn('⚠️ Notes data array değil, düzeltiliyor');
-                    notesData = [];
-                }
-                
+
                 // Filter user's notes
                 allNotes = notesData.filter(note => note.userEmail === userEmail);
                 
