@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kullanıcı Kontrolü - Debug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-bold mb-8">🔍 Kullanıcı Veritabanı Kontrolü</h1>
+
+        <!-- Actions -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <button onclick="checkLocalStorage()" class="bg-blue-600 hover:bg-blue-700 px-4 py-3 rounded-lg font-semibold">
+                localStorage Kontrol Et
+            </button>
+            <button onclick="initializeUsers()" class="bg-green-600 hover:bg-green-700 px-4 py-3 rounded-lg font-semibold">
+                Kullanıcıları Başlat
+            </button>
+            <button onclick="clearAll()" class="bg-red-600 hover:bg-red-700 px-4 py-3 rounded-lg font-semibold">
+                Hepsini Temizle
+            </button>
+            <button onclick="testLogin()" class="bg-purple-600 hover:bg-purple-700 px-4 py-3 rounded-lg font-semibold">
+                Giriş Testi
+            </button>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="space-y-6">
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4">📊 Sonuçlar:</h3>
+                <pre id="output" class="bg-black p-4 rounded overflow-x-auto text-sm"></pre>
+            </div>
+
+            <!-- Coordinators -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-purple-400">👨‍💼 Koordinatörler:</h3>
+                <div id="coordinators-list" class="space-y-2"></div>
+            </div>
+
+            <!-- Students -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-400">👨‍🎓 Öğrenciler:</h3>
+                <div id="students-list" class="space-y-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Local Auth System -->
+    <script src="js/local-auth.js"></script>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+
+        function clearOutput() {
+            document.getElementById('output').textContent = '';
+        }
+
+        function checkLocalStorage() {
+            clearOutput();
+            log('=== localStorage İÇERİĞİ ===\n');
+
+            // Check all localStorage keys
+            log('Toplam localStorage anahtarı: ' + localStorage.length);
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                log(`\nKey: ${key}`);
+
+                if (key === 'local_coordinators' || key === 'local_students') {
+                    try {
+                        const parsed = JSON.parse(value);
+                        log(`  Değer (${parsed.length} kayıt):`);
+                        parsed.forEach((item, index) => {
+                            log(`    ${index + 1}. ${item.email} / ${item.password}`);
+                        });
+                    } catch (e) {
+                        log(`  Değer: ${value}`);
+                    }
+                } else {
+                    log(`  Değer: ${value}`);
+                }
+            }
+
+            // Display coordinators
+            displayCoordinators();
+            displayStudents();
+        }
+
+        function displayCoordinators() {
+            const container = document.getElementById('coordinators-list');
+            const coordinators = window.LocalAuth.getCoordinators();
+
+            if (coordinators.length === 0) {
+                container.innerHTML = '<p class="text-red-400">❌ Hiç koordinatör bulunamadı!</p>';
+                return;
+            }
+
+            container.innerHTML = coordinators.map((c, i) => `
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-bold">${i + 1}. ${c.firstName} ${c.lastName}</p>
+                            <p class="text-sm text-gray-400">Email: ${c.email}</p>
+                            <p class="text-sm text-gray-400">Şifre: ${c.password}</p>
+                            <p class="text-sm ${c.isActive ? 'text-green-400' : 'text-red-400'}">
+                                Durum: ${c.isActive ? 'Aktif' : 'Pasif'}
+                            </p>
+                        </div>
+                        <button onclick="testSpecificLogin('coordinator', '${c.email}', '${c.password}')"
+                            class="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded text-sm">
+                            Test Et
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayStudents() {
+            const container = document.getElementById('students-list');
+            const students = window.LocalAuth.getStudents();
+
+            if (students.length === 0) {
+                container.innerHTML = '<p class="text-red-400">❌ Hiç öğrenci bulunamadı!</p>';
+                return;
+            }
+
+            container.innerHTML = students.map((s, i) => `
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-bold">${i + 1}. ${s.firstName} ${s.lastName}</p>
+                            <p class="text-sm text-gray-400">Email: ${s.email}</p>
+                            <p class="text-sm text-gray-400">Şifre: ${s.password}</p>
+                            <p class="text-sm ${s.isActive ? 'text-green-400' : 'text-red-400'}">
+                                Durum: ${s.isActive ? 'Aktif' : 'Pasif'}
+                            </p>
+                        </div>
+                        <button onclick="testSpecificLogin('student', '${s.email}', '${s.password}')"
+                            class="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded text-sm">
+                            Test Et
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function initializeUsers() {
+            clearOutput();
+            log('=== KULLANICILAR BAŞLATILIYOR ===\n');
+
+            // Clear existing
+            localStorage.removeItem('local_coordinators');
+            localStorage.removeItem('local_students');
+            log('✅ Eski veriler temizlendi\n');
+
+            // Create default users
+            const coordinators = [
+                {
+                    email: 'koordinator@ceviklider.com',
+                    password: 'CevikLider2024!',
+                    firstName: 'Sistem',
+                    lastName: 'Koordinatörü',
+                    role: 'coordinator',
+                    title: 'Eğitim Koordinatörü',
+                    department: 'Eğitim Koordinasyonu',
+                    isActive: true
+                },
+                {
+                    email: 'admin@ceviklider.com',
+                    password: 'admin123',
+                    firstName: 'Admin',
+                    lastName: 'User',
+                    role: 'coordinator',
+                    title: 'Yönetici',
+                    department: 'Yönetim',
+                    isActive: true
+                }
+            ];
+
+            const students = [
+                {
+                    email: 'test@student.com',
+                    password: 'test123',
+                    firstName: 'Test',
+                    lastName: 'Öğrenci',
+                    role: 'student',
+                    department: 'Test Departmanı',
+                    isActive: true
+                },
+                {
+                    email: 'ahmet.yilmaz@meb.gov.tr',
+                    password: 'ahmet123',
+                    firstName: 'Ahmet',
+                    lastName: 'Yılmaz',
+                    role: 'student',
+                    department: 'Öğretmen',
+                    isActive: true
+                }
+            ];
+
+            // Save to localStorage
+            localStorage.setItem('local_coordinators', JSON.stringify(coordinators));
+            localStorage.setItem('local_students', JSON.stringify(students));
+
+            log('✅ Koordinatörler kaydedildi: ' + coordinators.length);
+            coordinators.forEach(c => {
+                log(`   - ${c.email} / ${c.password}`);
+            });
+
+            log('\n✅ Öğrenciler kaydedildi: ' + students.length);
+            students.forEach(s => {
+                log(`   - ${s.email} / ${s.password}`);
+            });
+
+            log('\n🎉 Kullanıcılar başarıyla oluşturuldu!');
+
+            // Refresh display
+            displayCoordinators();
+            displayStudents();
+        }
+
+        function clearAll() {
+            if (confirm('TÜM VERİLERİ SİLMEK İSTEDİĞİNİZE EMİN MİSİNİZ?')) {
+                clearOutput();
+                localStorage.clear();
+                log('🗑️ Tüm localStorage temizlendi!');
+                displayCoordinators();
+                displayStudents();
+            }
+        }
+
+        function testLogin() {
+            clearOutput();
+            log('=== GİRİŞ TESTLERİ ===\n');
+
+            // Test coordinator login
+            log('1️⃣ Koordinatör Girişi Test Ediliyor...');
+            const coordResult = window.LocalAuth.loginCoordinator('koordinator@ceviklider.com', 'CevikLider2024!');
+            log(`   Sonuç: ${coordResult.success ? '✅ BAŞARILI' : '❌ BAŞARISIZ - ' + coordResult.error}\n`);
+
+            // Clear login state
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userRole');
+
+            // Test student login
+            log('2️⃣ Öğrenci Girişi Test Ediliyor...');
+            const studentResult = window.LocalAuth.loginStudent('test@student.com', 'test123');
+            log(`   Sonuç: ${studentResult.success ? '✅ BAŞARILI' : '❌ BAŞARISIZ - ' + studentResult.error}\n`);
+
+            // Clear login state
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userRole');
+
+            // Test wrong password
+            log('3️⃣ Hatalı Şifre Test Ediliyor...');
+            const wrongResult = window.LocalAuth.loginStudent('test@student.com', 'wrongpassword');
+            log(`   Sonuç: ${wrongResult.success ? '⚠️ SORUN VAR!' : '✅ DOĞRU - ' + wrongResult.error}\n`);
+        }
+
+        function testSpecificLogin(type, email, password) {
+            clearOutput();
+            log(`=== ${type === 'coordinator' ? 'KOORDINATÖR' : 'ÖĞRENCİ'} GİRİŞ TESTİ ===\n`);
+            log(`Email: ${email}`);
+            log(`Şifre: ${password}\n`);
+
+            let result;
+            if (type === 'coordinator') {
+                result = window.LocalAuth.loginCoordinator(email, password);
+            } else {
+                result = window.LocalAuth.loginStudent(email, password);
+            }
+
+            if (result.success) {
+                log('✅ GİRİŞ BAŞARILI!');
+                log(`Kullanıcı: ${result.user.firstName} ${result.user.lastName}`);
+                log(`Email: ${result.user.email}`);
+                log(`Rol: ${result.user.role}`);
+
+                // Clear login for next test
+                setTimeout(() => {
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('userRole');
+                    log('\n(Oturum test için temizlendi)');
+                }, 1000);
+            } else {
+                log('❌ GİRİŞ BAŞARISIZ!');
+                log(`Hata: ${result.error}`);
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Sayfa yüklendi\n');
+            checkLocalStorage();
+        });
+    </script>
+</body>
+</html>

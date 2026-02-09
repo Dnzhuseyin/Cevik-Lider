@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silinen Videoları Temizle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl font-bold mb-8">🧹 Silinen Videoları Temizle</h1>
+
+        <div class="bg-yellow-900/50 border border-yellow-500 p-4 rounded-lg mb-6">
+            <p class="text-yellow-300">
+                ⚠️ Bu araç <code>status: 'deleted'</code> olan videoları veritabanından kalıcı olarak siler.
+            </p>
+        </div>
+
+        <!-- Status -->
+        <div id="status" class="mb-6 p-4 rounded-lg bg-gray-800">
+            <p>Durum: Bekleniyor...</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-4 mb-6">
+            <button onclick="scanDeletedVideos()" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold">
+                1. Silinen Videoları Tara
+            </button>
+            <button onclick="cleanDeletedVideos()" class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg font-semibold">
+                2. Kalıcı Olarak Sil
+            </button>
+            <button onclick="clearAll()" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold">
+                3. Tüm Videoları Sil (Dikkat!)
+            </button>
+        </div>
+
+        <!-- Results -->
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h3 class="text-xl font-bold mb-4">📊 Sonuçlar:</h3>
+            <div id="results" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-production.js"></script>
+
+    <script>
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const colors = {
+                info: 'bg-blue-900 text-blue-300',
+                success: 'bg-green-900 text-green-300',
+                error: 'bg-red-900 text-red-300',
+                warning: 'bg-yellow-900 text-yellow-300'
+            };
+            statusDiv.className = `mb-6 p-4 rounded-lg ${colors[type]}`;
+            statusDiv.innerHTML = `<p>${message}</p>`;
+        }
+
+        function addResult(message, color = 'text-gray-300') {
+            const resultsDiv = document.getElementById('results');
+            const p = document.createElement('p');
+            p.className = color;
+            p.textContent = message;
+            resultsDiv.appendChild(p);
+            console.log(message);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function waitForFirebase() {
+            updateStatus('Firebase bekleniyor...', 'info');
+            let attempts = 0;
+            while ((!window.DB || !window.DB.isFirebaseReady) && attempts < 100) {
+                await new Promise(r => setTimeout(r, 100));
+                attempts++;
+            }
+
+            if (!window.DB || !window.DB.isFirebaseReady) {
+                throw new Error('Firebase başlatılamadı!');
+            }
+            updateStatus('Firebase hazır!', 'success');
+        }
+
+        async function scanDeletedVideos() {
+            clearResults();
+            try {
+                await waitForFirebase();
+
+                updateStatus('Videolar taranıyor...', 'info');
+
+                // Clear cache
+                if (window.DB.clearCache) {
+                    window.DB.clearCache('coordinatorVideos');
+                }
+
+                const result = await window.DB.load('coordinatorVideos');
+                const allVideos = (result && result.success) ? result.data : [];
+
+                const deletedVideos = allVideos.filter(v => v.status === 'deleted');
+                const activeVideos = allVideos.filter(v => v.status !== 'deleted');
+
+                addResult(`📊 Toplam video: ${allVideos.length}`, 'text-white font-bold');
+                addResult(`✅ Aktif video: ${activeVideos.length}`, 'text-green-400');
+                addResult(`🗑️ Silinmiş video: ${deletedVideos.length}`, 'text-red-400');
+                addResult('');
+
+                if (deletedVideos.length > 0) {
+                    addResult('Silinecek videolar:', 'text-yellow-400 font-bold');
+                    deletedVideos.forEach((v, i) => {
+                        addResult(`${i + 1}. ${v.title} (ID: ${v.id})`, 'text-gray-400');
+                    });
+
+                    updateStatus(`${deletedVideos.length} silinen video bulundu. "Kalıcı Olarak Sil" butonuna tıklayın.`, 'warning');
+                } else {
+                    updateStatus('Silinen video bulunamadı. Veritabanı temiz!', 'success');
+                }
+
+            } catch (error) {
+                updateStatus('Hata: ' + error.message, 'error');
+                addResult('❌ ' + error.message, 'text-red-400');
+            }
+        }
+
+        async function cleanDeletedVideos() {
+            if (!confirm('Silinen videoları kalıcı olarak silmek istediğinizden emin misiniz?')) {
+                return;
+            }
+
+            clearResults();
+
+            try {
+                await waitForFirebase();
+
+                updateStatus('Silinen videolar temizleniyor...', 'info');
+
+                // Clear cache
+                if (window.DB.clearCache) {
+                    window.DB.clearCache('coordinatorVideos');
+                }
+
+                const result = await window.DB.load('coordinatorVideos');
+                const allVideos = (result && result.success) ? result.data : [];
+
+                const deletedVideos = allVideos.filter(v => v.status === 'deleted');
+
+                if (deletedVideos.length === 0) {
+                    updateStatus('Silinen video bulunamadı!', 'info');
+                    return;
+                }
+
+                addResult(`🗑️ ${deletedVideos.length} video siliniyor...`, 'text-yellow-400 font-bold');
+                addResult('');
+
+                let successCount = 0;
+                let errorCount = 0;
+
+                for (const video of deletedVideos) {
+                    try {
+                        const deleteResult = await window.DB.delete('coordinatorVideos', video.id);
+                        if (deleteResult && deleteResult.success) {
+                            addResult(`✅ ${video.title} (${video.id})`, 'text-green-400');
+                            successCount++;
+                        } else {
+                            addResult(`❌ ${video.title} (${video.id}) - Silinemedi`, 'text-red-400');
+                            errorCount++;
+                        }
+                    } catch (error) {
+                        addResult(`❌ ${video.title} - Hata: ${error.message}`, 'text-red-400');
+                        errorCount++;
+                    }
+
+                    // Small delay to avoid rate limiting
+                    await new Promise(r => setTimeout(r, 100));
+                }
+
+                addResult('');
+                addResult(`✅ Başarılı: ${successCount}`, 'text-green-400 font-bold');
+                addResult(`❌ Başarısız: ${errorCount}`, 'text-red-400 font-bold');
+
+                // Clear cache
+                if (window.DB.clearCache) {
+                    window.DB.clearCache('coordinatorVideos');
+                }
+
+                updateStatus(`Temizleme tamamlandı! ${successCount} video silindi.`, 'success');
+
+            } catch (error) {
+                updateStatus('Hata: ' + error.message, 'error');
+                addResult('❌ ' + error.message, 'text-red-400');
+            }
+        }
+
+        async function clearAll() {
+            const confirmation = prompt('DİKKAT! TÜM VİDEOLARI SİLECEKSİNİZ!\n\nDevam etmek için "SIFIRLA" yazın:');
+
+            if (confirmation !== 'SIFIRLA') {
+                alert('İptal edildi.');
+                return;
+            }
+
+            clearResults();
+
+            try {
+                await waitForFirebase();
+
+                updateStatus('TÜM VIDEOLAR SİLİNİYOR...', 'error');
+
+                // Clear cache
+                if (window.DB.clearCache) {
+                    window.DB.clearCache('coordinatorVideos');
+                }
+
+                const result = await window.DB.load('coordinatorVideos');
+                const allVideos = (result && result.success) ? result.data : [];
+
+                addResult(`🗑️ ${allVideos.length} video siliniyor...`, 'text-red-400 font-bold');
+                addResult('');
+
+                let successCount = 0;
+
+                for (const video of allVideos) {
+                    try {
+                        await window.DB.delete('coordinatorVideos', video.id);
+                        addResult(`✅ ${video.title}`, 'text-green-400');
+                        successCount++;
+                        await new Promise(r => setTimeout(r, 100));
+                    } catch (error) {
+                        addResult(`❌ ${video.title} - ${error.message}`, 'text-red-400');
+                    }
+                }
+
+                addResult('');
+                addResult(`✅ ${successCount} video silindi`, 'text-green-400 font-bold');
+
+                // Clear cache
+                if (window.DB.clearCache) {
+                    window.DB.clearCache('coordinatorVideos');
+                }
+
+                updateStatus('Tüm videolar silindi!', 'success');
+
+            } catch (error) {
+                updateStatus('Hata: ' + error.message, 'error');
+                addResult('❌ ' + error.message, 'text-red-400');
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await waitForFirebase();
+                updateStatus('Hazır! "Silinen Videoları Tara" butonuna tıklayın.', 'success');
+            } catch (error) {
+                updateStatus('Firebase bağlantı hatası: ' + error.message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basit Giriş - Çevik Lider</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-4xl w-full">
+        <h1 class="text-4xl font-bold text-white text-center mb-8">🎓 Çevik Lider - Giriş Sistemi</h1>
+
+        <!-- Status -->
+        <div id="status" class="mb-6 p-4 rounded-lg bg-green-500/20 text-green-300 text-center">
+            ✅ Sistem hazır! (localStorage tabanlı)
+        </div>
+
+        <!-- Login Forms Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Coordinator Login -->
+            <div class="bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl border border-white/20">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl">👨‍💼</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Koordinatör Girişi</h2>
+                    <p class="text-gray-300 text-sm">Yönetim paneline erişim</p>
+                </div>
+
+                <form id="coord-form" class="space-y-4">
+                    <div id="coord-error" class="hidden bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg text-sm"></div>
+
+                    <div>
+                        <label class="block text-gray-300 text-sm mb-2">E-posta</label>
+                        <input type="email" id="coord-email" required
+                            placeholder="koordinator@ceviklider.com"
+                            class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-300 text-sm mb-2">Şifre</label>
+                        <input type="password" id="coord-password" required
+                            placeholder="••••••••"
+                            class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                        Koordinatör Girişi
+                    </button>
+                </form>
+
+                <div class="mt-4 p-3 bg-white/5 rounded-lg text-xs text-gray-400">
+                    <p class="font-semibold mb-1">Test Hesapları:</p>
+                    <p>koordinator@ceviklider.com / CevikLider2024!</p>
+                    <p>admin@ceviklider.com / admin123</p>
+                </div>
+            </div>
+
+            <!-- Student Login -->
+            <div class="bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl border border-white/20">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl">👨‍🎓</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Öğrenci Girişi</h2>
+                    <p class="text-gray-300 text-sm">Eğitim platformuna erişim</p>
+                </div>
+
+                <form id="student-form" class="space-y-4">
+                    <div id="student-error" class="hidden bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg text-sm"></div>
+
+                    <div>
+                        <label class="block text-gray-300 text-sm mb-2">E-posta</label>
+                        <input type="email" id="student-email" required
+                            placeholder="test@student.com"
+                            class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-300 text-sm mb-2">Şifre</label>
+                        <input type="password" id="student-password" required
+                            placeholder="••••••••"
+                            class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                        Öğrenci Girişi
+                    </button>
+                </form>
+
+                <div class="mt-4 p-3 bg-white/5 rounded-lg text-xs text-gray-400">
+                    <p class="font-semibold mb-1">Test Hesapları:</p>
+                    <p>test@student.com / test123</p>
+                    <p>ahmet.yilmaz@meb.gov.tr / ahmet123</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Info -->
+        <div class="mt-8 text-center text-gray-400 text-sm">
+            <p>💡 Bu sayfa Firebase olmadan localStorage ile çalışır</p>
+            <p class="mt-2">Sorun yaşıyorsanız: F12 > Console > Hataları kontrol edin</p>
+        </div>
+    </div>
+
+    <!-- Local Auth System -->
+    <script src="js/local-auth.js"></script>
+
+    <script>
+        // Coordinator Login
+        document.getElementById('coord-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('coord-email').value;
+            const password = document.getElementById('coord-password').value;
+            const errorDiv = document.getElementById('coord-error');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+
+            // Clear previous errors
+            errorDiv.classList.add('hidden');
+
+            // Validation
+            if (!email || !password) {
+                errorDiv.textContent = '⚠️ E-posta ve şifre gereklidir';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            // Show loading
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Giriş yapılıyor...';
+            submitBtn.disabled = true;
+
+            // Login
+            const result = window.LocalAuth.loginCoordinator(email, password);
+
+            if (result.success) {
+                console.log('✅ Koordinatör girişi başarılı:', email);
+                errorDiv.className = 'bg-green-500/20 border border-green-500/30 text-green-300 px-4 py-3 rounded-lg text-sm';
+                errorDiv.textContent = '✅ Giriş başarılı! Yönlendiriliyor...';
+                errorDiv.classList.remove('hidden');
+
+                setTimeout(() => {
+                    window.location.href = 'instructor-dashboard.html';
+                }, 1000);
+            } else {
+                console.error('❌ Giriş hatası:', result.error);
+                errorDiv.className = 'bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg text-sm';
+                errorDiv.textContent = '❌ ' + result.error;
+                errorDiv.classList.remove('hidden');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Student Login
+        document.getElementById('student-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('student-email').value;
+            const password = document.getElementById('student-password').value;
+            const errorDiv = document.getElementById('student-error');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+
+            // Clear previous errors
+            errorDiv.classList.add('hidden');
+
+            // Validation
+            if (!email || !password) {
+                errorDiv.textContent = '⚠️ E-posta ve şifre gereklidir';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            // Show loading
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Giriş yapılıyor...';
+            submitBtn.disabled = true;
+
+            // Login
+            const result = window.LocalAuth.loginStudent(email, password);
+
+            if (result.success) {
+                console.log('✅ Öğrenci girişi başarılı:', email);
+                errorDiv.className = 'bg-green-500/20 border border-green-500/30 text-green-300 px-4 py-3 rounded-lg text-sm';
+                errorDiv.textContent = '✅ Giriş başarılı! Yönlendiriliyor...';
+                errorDiv.classList.remove('hidden');
+
+                setTimeout(() => {
+                    window.location.href = 'student-dashboard.html';
+                }, 1000);
+            } else {
+                console.error('❌ Giriş hatası:', result.error);
+                errorDiv.className = 'bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg text-sm';
+                errorDiv.textContent = '❌ ' + result.error;
+                errorDiv.classList.remove('hidden');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Check system status on load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔐 Local Auth System durumu:');
+            console.log('✅ Koordinatörler:', window.LocalAuth.getCoordinators().length);
+            console.log('✅ Öğrenciler:', window.LocalAuth.getStudents().length);
+
+            // Show available accounts in console
+            console.log('\n📋 Mevcut Hesaplar:');
+            console.log('Koordinatörler:');
+            window.LocalAuth.getCoordinators().forEach(c => {
+                console.log(`  - ${c.email} / ${c.password}`);
+            });
+            console.log('Öğrenciler:');
+            window.LocalAuth.getStudents().forEach(s => {
+                console.log(`  - ${s.email} / ${s.password}`);
+            });
+        });
+    </script>
+</body>
+</html>

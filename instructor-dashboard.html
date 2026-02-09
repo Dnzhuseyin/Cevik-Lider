@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genel Bakış - Çevik Lider Admin</title>
+    <!-- Authentication Guard -->
+    <script src="js/auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -482,16 +484,21 @@
         async function loadStudentProgressOverview() {
             try {
                 const studentProgressContainer = document.getElementById('student-progress-overview');
-                
+
                 // Get students and their progress
                 const studentsResult = await window.DB.load('userProfiles');
                 const students = (studentsResult && studentsResult.success) ? studentsResult.data : [];
-                
+
                 const progressResult = await window.DB.load('userProgress');
                 const progressData = (progressResult && progressResult.success) ? progressResult.data : [];
-                
+
+                // Get total modules count
+                const modulesResult = await window.DB.loadModules();
+                const modules = (modulesResult && modulesResult.success) ? modulesResult.data : [];
+                const totalModules = modules.length;
+
                 const studentProfiles = students.filter(s => s.role === 'student').slice(0, 5);
-                
+
                 if (studentProfiles.length === 0) {
                     studentProgressContainer.innerHTML = `
                         <div class="text-center py-8">
@@ -501,12 +508,12 @@
                     `;
                     return;
                 }
-                
+
                 studentProgressContainer.innerHTML = studentProfiles.map(student => {
                     const studentProgress = progressData.filter(p => p.userEmail === student.userEmail);
                     const completedModules = studentProgress.filter(p => p.completionRate >= 100).length;
                     const avgScore = studentProgress.reduce((sum, p) => sum + (p.examScore || 0), 0) / Math.max(studentProgress.length, 1);
-                    const progressPercent = Math.round((completedModules / 8) * 100);
+                    const progressPercent = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
                     
                     return `
                         <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -516,7 +523,7 @@
                                 </div>
                                 <div>
                                     <h4 class="font-medium text-gray-900">${student.fullName || student.firstName}</h4>
-                                    <p class="text-sm text-gray-600">${getDepartmentName(student.department)}</p>
+                                    <p class="text-sm text-gray-600">${student.userEmail || ''}</p>
                                 </div>
                             </div>
                             <div class="text-right">
@@ -526,7 +533,7 @@
                                     </div>
                                     <span class="text-xs text-gray-500">${progressPercent}%</span>
                                 </div>
-                                <p class="text-xs text-gray-500">${completedModules}/8 modül • ${Math.round(avgScore) || 0} puan</p>
+                                <p class="text-xs text-gray-500">${completedModules}/${totalModules} modül • ${Math.round(avgScore) || 0} puan</p>
                             </div>
                         </div>
                     `;

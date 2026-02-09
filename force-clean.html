@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Force Clean - Video Temizleme</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-bold mb-8">🔥 Force Clean - Silinen Videoları Temizle</h1>
+
+        <div class="bg-red-900/50 border border-red-500 p-4 rounded-lg mb-6">
+            <p class="text-red-300 font-bold">
+                ⚠️ DİKKAT: Bu araç Firestore'a DOĞRUDAN bağlanır ve silinen videoları kalıcı olarak siler!
+            </p>
+        </div>
+
+        <!-- Status -->
+        <div id="status" class="mb-6 p-4 rounded-lg bg-gray-800">
+            <p>Bekleniyor...</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <button onclick="checkFirebaseConnection()" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold">
+                1. Firebase Bağlantısını Kontrol Et
+            </button>
+            <button onclick="listAllVideos()" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold">
+                2. Tüm Videoları Listele
+            </button>
+            <button onclick="forceCleanDeleted()" class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg font-semibold">
+                3. FORCE DELETE (Silinen Videoları Sil)
+            </button>
+            <button onclick="clearCacheAndReload()" class="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-semibold">
+                4. Cache Temizle ve Yenile
+            </button>
+        </div>
+
+        <!-- Results -->
+        <div class="bg-gray-800 p-6 rounded-lg overflow-auto" style="max-height: 600px;">
+            <h3 class="text-xl font-bold mb-4 sticky top-0 bg-gray-800">📊 Sonuçlar:</h3>
+            <pre id="results" class="text-sm whitespace-pre-wrap"></pre>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-production.js"></script>
+
+    <script>
+        function log(message) {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            results.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('results').textContent = '';
+        }
+
+        function updateStatus(message, color = 'bg-gray-800') {
+            const status = document.getElementById('status');
+            status.className = `mb-6 p-4 rounded-lg ${color}`;
+            status.innerHTML = `<p class="font-bold">${message}</p>`;
+        }
+
+        async function checkFirebaseConnection() {
+            clearLog();
+            updateStatus('Firebase bağlantısı kontrol ediliyor...', 'bg-blue-900');
+
+            try {
+                log('🔍 Firebase durumu kontrol ediliyor...');
+
+                // Check if Firebase is loaded
+                if (typeof firebase === 'undefined') {
+                    throw new Error('Firebase SDK yüklenmedi!');
+                }
+                log('✅ Firebase SDK yüklendi');
+
+                // Check if app is initialized
+                if (!firebase.apps || firebase.apps.length === 0) {
+                    throw new Error('Firebase app başlatılmadı!');
+                }
+                log('✅ Firebase app başlatıldı');
+
+                // Check Firestore
+                const db = firebase.firestore();
+                if (!db) {
+                    throw new Error('Firestore erişilemiyor!');
+                }
+                log('✅ Firestore erişilebilir');
+
+                // Try to read collection
+                log('\n📚 coordinatorVideos koleksiyonu okunuyor...');
+                const snapshot = await db.collection('coordinator_videos').get();
+                log(`✅ Koleksiyon okundu: ${snapshot.size} doküman bulundu`);
+
+                updateStatus(`✅ Firebase ÇALIŞIYOR! ${snapshot.size} video bulundu.`, 'bg-green-900');
+
+                return true;
+
+            } catch (error) {
+                log(`\n❌ HATA: ${error.message}`);
+                updateStatus('❌ Firebase bağlantı hatası!', 'bg-red-900');
+                return false;
+            }
+        }
+
+        async function listAllVideos() {
+            clearLog();
+            updateStatus('Videolar listeleniyor...', 'bg-blue-900');
+
+            try {
+                log('📚 Tüm videolar yükleniyor...\n');
+
+                const db = firebase.firestore();
+                const snapshot = await db.collection('coordinator_videos').get();
+
+                log(`📊 TOPLAM: ${snapshot.size} video\n`);
+
+                const deletedVideos = [];
+                const activeVideos = [];
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const videoInfo = {
+                        id: doc.id,
+                        title: data.title || 'İsimsiz',
+                        status: data.status || 'active'
+                    };
+
+                    if (data.status === 'deleted') {
+                        deletedVideos.push(videoInfo);
+                    } else {
+                        activeVideos.push(videoInfo);
+                    }
+                });
+
+                log(`✅ Aktif: ${activeVideos.length}`);
+                log(`🗑️  Silinmiş: ${deletedVideos.length}\n`);
+
+                if (deletedVideos.length > 0) {
+                    log('═══════════════════════════════════');
+                    log('SİLİNMİŞ VİDEOLAR:');
+                    log('═══════════════════════════════════\n');
+                    deletedVideos.forEach((v, i) => {
+                        log(`${i + 1}. ${v.title}`);
+                        log(`   ID: ${v.id}\n`);
+                    });
+                }
+
+                if (activeVideos.length > 0) {
+                    log('═══════════════════════════════════');
+                    log('AKTİF VİDEOLAR:');
+                    log('═══════════════════════════════════\n');
+                    activeVideos.forEach((v, i) => {
+                        log(`${i + 1}. ${v.title}`);
+                        log(`   ID: ${v.id}\n`);
+                    });
+                }
+
+                updateStatus(`📊 ${activeVideos.length} aktif, ${deletedVideos.length} silinmiş video`, 'bg-purple-900');
+
+            } catch (error) {
+                log(`\n❌ HATA: ${error.message}`);
+                updateStatus('❌ Liste alınamadı!', 'bg-red-900');
+            }
+        }
+
+        async function forceCleanDeleted() {
+            if (!confirm('⚠️ SİLİNMİŞ VİDEOLARI KALICI OLARAK SİLMEK İSTEDİĞİNİZE EMİN MİSİNİZ?\n\nBu işlem geri alınamaz!')) {
+                return;
+            }
+
+            clearLog();
+            updateStatus('FORCE DELETE başlatılıyor...', 'bg-red-900');
+
+            try {
+                log('🔥 FORCE DELETE BAŞLATILDI\n');
+
+                const db = firebase.firestore();
+                const snapshot = await db.collection('coordinator_videos').get();
+
+                log(`📚 ${snapshot.size} video taranıyor...\n`);
+
+                const deletedVideos = [];
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.status === 'deleted') {
+                        deletedVideos.push({
+                            id: doc.id,
+                            title: data.title || 'İsimsiz'
+                        });
+                    }
+                });
+
+                if (deletedVideos.length === 0) {
+                    log('✅ Silinecek video yok!');
+                    updateStatus('✅ Veritabanı temiz!', 'bg-green-900');
+                    return;
+                }
+
+                log(`🗑️  ${deletedVideos.length} SİLİNMİŞ VİDEO BULUNDU\n`);
+                log('═══════════════════════════════════\n');
+
+                let successCount = 0;
+                let errorCount = 0;
+
+                for (const video of deletedVideos) {
+                    try {
+                        log(`Siliniyor: ${video.title}...`);
+
+                        // DOĞRUDAN Firestore'dan sil
+                        await db.collection('coordinator_videos').doc(video.id).delete();
+
+                        log(`✅ SİLİNDİ: ${video.title}\n`);
+                        successCount++;
+
+                        // Rate limiting için küçük gecikme
+                        await new Promise(r => setTimeout(r, 200));
+
+                    } catch (error) {
+                        log(`❌ HATA: ${video.title} - ${error.message}\n`);
+                        errorCount++;
+                    }
+                }
+
+                log('═══════════════════════════════════\n');
+                log(`✅ Başarılı: ${successCount}`);
+                log(`❌ Başarısız: ${errorCount}\n`);
+
+                updateStatus(`✅ Temizlendi! ${successCount} video silindi.`, 'bg-green-900');
+
+                // Clear all caches
+                if (window.DB && window.DB.clearCache) {
+                    window.DB.clearCache();
+                    log('🧹 Cache temizlendi');
+                }
+
+                log('\n🎉 İŞLEM TAMAMLANDI!');
+                log('Koordinatör panelini yenileyin.');
+
+            } catch (error) {
+                log(`\n❌ BÜYÜK HATA: ${error.message}`);
+                updateStatus('❌ İşlem başarısız!', 'bg-red-900');
+            }
+        }
+
+        async function clearCacheAndReload() {
+            clearLog();
+            log('🧹 Cache temizleniyor...\n');
+
+            // Clear DB cache
+            if (window.DB && window.DB.clearCache) {
+                window.DB.clearCache();
+                log('✅ DB cache temizlendi');
+            }
+
+            // Clear browser cache
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                for (const name of cacheNames) {
+                    await caches.delete(name);
+                }
+                log('✅ Browser cache temizlendi');
+            }
+
+            log('\n🔄 Sayfa 2 saniye sonra yenilenecek...');
+
+            updateStatus('Cache temizlendi! Sayfa yenileniyor...', 'bg-green-900');
+
+            setTimeout(() => {
+                location.reload(true);
+            }, 2000);
+        }
+
+        // Auto-start
+        window.addEventListener('DOMContentLoaded', function() {
+            updateStatus('Hazır! İlk önce "Firebase Bağlantısını Kontrol Et" butonuna tıklayın.', 'bg-blue-900');
+        });
+    </script>
+</body>
+</html>

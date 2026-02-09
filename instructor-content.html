@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VIDEO YÖNETİMİ - Çevik Lider</title>
+    <!-- Authentication Guard -->
+    <script src="js/auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -32,6 +34,14 @@
                     <i class="fas fa-users"></i> Öğrenci Yönetimi
                 </a>
             </nav>
+
+            <!-- Logout Button -->
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 16px; border-top: 1px solid #1e293b;">
+                <button onclick="logout()" style="display: flex; align-items: center; color: #9ca3af; background: transparent; border: none; cursor: pointer; width: 100%; text-align: left; transition: color 0.3s;">
+                    <i class="fas fa-sign-out-alt" style="margin-right: 12px;"></i>
+                    <span>Çıkış Yap</span>
+                </button>
+            </div>
     </aside>
 
         <!-- Main -->
@@ -223,12 +233,47 @@
         async function loadVideos() {
             try {
                 console.log('📹 Videolar yükleniyor...');
-                
-                if (window.DB.clearCache) window.DB.clearCache('coordinatorVideos');
-                
-                const result = await window.DB.load('coordinatorVideos');
-                let videos = (result && result.success) ? result.data : [];
-                videos = videos.filter(v => v.status !== 'deleted');
+
+                // AGGRESSIVE CACHE CLEARING
+                if (window.DB) {
+                    // Clear specific cache
+                    if (window.DB.clearCache) {
+                        window.DB.clearCache('coordinatorVideos');
+                    }
+                    // Clear all cache
+                    if (window.DB.cache) {
+                        window.DB.cache.clear();
+                    }
+                    console.log('🔄 Tüm cache temizlendi');
+                }
+
+                // Force fresh load directly from Firestore
+                let videos = [];
+                if (window.DB && window.DB.db) {
+                    console.log('🔥 Firestore\'dan direkt yükleniyor...');
+                    const snapshot = await window.DB.db.collection('coordinator_videos').get();
+                    videos = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    console.log('📊 Firestore\'dan yüklenen video:', videos.length);
+                } else {
+                    // Fallback to DB.load
+                    const result = await window.DB.load('coordinatorVideos');
+                    videos = (result && result.success) ? result.data : [];
+                    console.log('📊 DB.load ile yüklenen video:', videos.length);
+                }
+
+                // Filter out deleted videos
+                videos = videos.filter(v => {
+                    const isActive = v.status !== 'deleted';
+                    if (!isActive) {
+                        console.log('🗑️ Silinen video filtrelendi:', v.title, v.id);
+                    }
+                    return isActive;
+                });
+
+                console.log('📊 Aktif video sayısı:', videos.length);
                 
                 const filter = document.getElementById('filterModule').value;
                 if (filter) videos = videos.filter(v => v.moduleId === filter);
@@ -538,28 +583,40 @@
                 let result;
                 if (editingVideoId) {
                     // Update existing video
-                    data.id = editingVideoId;
+                    console.log('🔄 Video güncelleniyor, ID:', editingVideoId);
                     data.updatedAt = new Date().toISOString();
-                    result = await window.DB.save('coordinatorVideos', data);
+                    // IMPORTANT: Pass the ID as second parameter to update existing document
+                    result = await window.DB.save('coordinatorVideos', data, editingVideoId);
                     if (result && result.success) {
+                        console.log('✅ Video güncellendi:', editingVideoId);
                         alert('✅ Video başarıyla güncellendi!');
                     }
                 } else {
                     // Create new video
+                    console.log('➕ Yeni video ekleniyor');
                     data.createdAt = new Date().toISOString();
                     result = await window.DB.save('coordinatorVideos', data);
                     if (result && result.success) {
+                        console.log('✅ Yeni video eklendi');
                         alert('✅ Video, sorular ve PDF\'ler eklendi!');
                     }
                 }
 
                 if (result && result.success) {
+                    // Clear form
                     document.getElementById('videoForm').reset();
                     document.getElementById('questions-container').innerHTML = '';
                     document.getElementById('pdf-inputs').innerHTML = '';
                     questionCount = 0;
                     pdfCount = 0;
-                    cancelEdit(); // Reset edit mode
+
+                    // Reset edit mode
+                    cancelEdit();
+
+                    // Clear cache and reload videos
+                    if (window.DB.clearCache) {
+                        window.DB.clearCache('coordinatorVideos');
+                    }
                     await loadVideos();
                 } else {
                     throw new Error('Kayıt başarısız');
@@ -570,13 +627,45 @@
         }
         
         async function deleteVideo(id) {
-            if (!confirm('Silmek istediğinizden emin misiniz?')) return;
+            if (!confirm('Bu videoyu kalıcı olarak silmek istediğinizden emin misiniz?')) return;
+
+            console.log('🗑️ Video siliniyor, ID:', id);
+
             try {
-                await window.DB.update('coordinatorVideos', id, { status: 'deleted', deletedAt: new Date().toISOString() });
-                alert('✅ Video silindi!');
-                if (window.DB.clearCache) window.DB.clearCache('coordinatorVideos');
-                    await loadVideos();
+                // Delete directly from Firestore
+                if (window.DB && window.DB.db) {
+                    await window.DB.db.collection('coordinator_videos').doc(id).delete();
+                    console.log('✅ Video Firestore\'dan direkt silindi:', id);
+                } else {
+                    // Fallback to DB.delete
+                    const deleteResult = await window.DB.delete('coordinatorVideos', id);
+                    if (!deleteResult || !deleteResult.success) {
+                        throw new Error('Video silinemedi');
+                    }
+                    console.log('✅ Video DB.delete ile silindi:', id);
+                }
+
+                // Clear ALL caches aggressively
+                if (window.DB) {
+                    if (window.DB.clearCache) {
+                        window.DB.clearCache('coordinatorVideos');
+                    }
+                    if (window.DB.cache) {
+                        window.DB.cache.clear();
+                    }
+                }
+
+                console.log('🔄 Cache temizlendi');
+
+                alert('✅ Video başarıyla silindi! Sayfa yenilenecek...');
+
+                // Force reload the page to clear all caches
+                setTimeout(() => {
+                    window.location.reload(true);
+                }, 1000);
+
             } catch (e) {
+                console.error('❌ Video silme hatası:', e);
                 alert('❌ Hata: ' + e.message);
             }
         }
@@ -585,17 +674,19 @@
 
         async function editVideo(id) {
             try {
+                console.log('✏️ Video düzenleniyor, ID:', id);
                 editingVideoId = id;
 
-                // Load video data
-                const result = await window.DB.load('coordinatorVideos');
-                const videos = (result && result.success) ? result.data : [];
-                const video = videos.find(v => v.id === id);
+                // Load specific video data by ID
+                const result = await window.DB.load('coordinatorVideos', id);
 
-                if (!video) {
+                if (!result || !result.success || !result.data) {
                     alert('Video bulunamadı');
+                    console.error('❌ Video yüklenemedi:', id);
                     return;
                 }
+
+                const video = result.data;
 
                 // Scroll to top
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -608,12 +699,45 @@
                 document.getElementById('difficulty').value = video.difficulty || 'medium';
                 document.getElementById('youtubeUrl').value = video.youtubeUrl || video.videoUrl || '';
 
-                // TODO: Load questions and PDFs (complex - for now just show warning)
+                // Clear existing questions and PDFs
+                document.getElementById('questions-container').innerHTML = '';
+                document.getElementById('pdf-inputs').innerHTML = '';
+                questionCount = 0;
+                pdfCount = 0;
+
+                // Load existing questions
                 if (video.questions && video.questions.length > 0) {
-                    console.warn('⚠️ Bu videoda sorular var ama şu anda düzenleme desteklenmiyor');
+                    console.log('📝 Sorular yükleniyor:', video.questions.length);
+                    video.questions.forEach(q => {
+                        addQuestion();
+                        const container = document.getElementById('question-' + questionCount);
+                        if (container) {
+                            container.querySelector('.question-text').value = q.question || '';
+                            container.querySelector('.question-type').value = q.questionType || 'multiple-choice';
+                            container.querySelector('.question-explanation').value = q.explanation || '';
+
+                            if (q.questionType === 'multiple-choice' && q.options) {
+                                container.querySelector('.option-a').value = q.options[0] || '';
+                                container.querySelector('.option-b').value = q.options[1] || '';
+                                container.querySelector('.option-c').value = q.options[2] || '';
+                                container.querySelector('.option-d').value = q.options[3] || '';
+                                container.querySelector('.correct-answer').value = q.correctAnswer || 0;
+                            } else if (q.questionType === 'fill-blank' && q.correctAnswers) {
+                                updateQuestionType(questionCount);
+                                container.querySelector('.correct-answers').value = q.correctAnswers.join(', ');
+                            }
+                        }
+                    });
                 }
+
+                // Load existing PDFs
                 if (video.pdfs && video.pdfs.length > 0) {
-                    console.warn('⚠️ Bu videoda PDF\'ler var ama şu anda düzenleme desteklenmiyor');
+                    console.log('📄 PDF\'ler yükleniyor:', video.pdfs.length);
+                    video.pdfs.forEach(pdf => {
+                        addPDFInput();
+                        document.getElementById(`pdf-title-${pdfCount}`).value = pdf.title || '';
+                        document.getElementById(`pdf-url-${pdfCount}`).value = pdf.url || '';
+                    });
                 }
 
                 // Change submit button to update mode
@@ -641,15 +765,22 @@
         }
 
         function cancelEdit() {
+            console.log('❌ Düzenleme iptal edildi');
             editingVideoId = null;
 
             // Reset form
             document.getElementById('videoForm').reset();
 
+            // Clear questions and PDFs
+            document.getElementById('questions-container').innerHTML = '';
+            document.getElementById('pdf-inputs').innerHTML = '';
+            questionCount = 0;
+            pdfCount = 0;
+
             // Reset submit button
             const submitBtn = document.querySelector('button[type="submit"]');
-            submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Kaydet';
-            submitBtn.style.background = '#059669';
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Videoyu Kaydet';
+            submitBtn.style.background = '#6366f1';
 
             // Remove cancel button
             const cancelBtn = document.getElementById('cancel-edit-btn');
@@ -702,6 +833,18 @@
             });
 
             return pdfs;
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('loginTime');
+                localStorage.removeItem('userRole');
+                console.log('🚪 Koordinatör çıkışı yapıldı');
+                window.location.href = 'index.html';
+            }
         }
     </script>
 </body>

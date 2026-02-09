@@ -202,63 +202,123 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-    
+
     <!-- Firebase Production DB -->
     <script src="js/firebase-production.js"></script>
     <script src="js/user-utils.js"></script>
 
+    <!-- Local Auth System (Fallback) -->
+    <script src="js/local-auth.js"></script>
+
     <script>
-        // Student login system
-        document.getElementById('login-form').addEventListener('submit', function(e) {
+        // Hybrid Student login system - Firebase with localStorage fallback
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             var email = document.getElementById('email').value;
             var password = document.getElementById('password').value;
             var errorElement = document.getElementById('error-message');
             var errorText = document.querySelector('.error-text');
-            
+            var submitButton = document.querySelector('button[type="submit"]');
+            var originalText = submitButton.innerHTML;
+
             // Email and password validation
             if (!email || !password) {
                 errorElement.classList.remove('hidden');
-                errorText.textContent = 'E-posta ve şifre alanları zorunludur.';
+                errorText.textContent = '⚠️ E-posta ve şifre alanları zorunludur.';
                 return;
             }
-            
+
             if (!email.includes('@')) {
                 errorElement.classList.remove('hidden');
-                errorText.textContent = 'Geçerli bir e-posta adresi giriniz.';
+                errorText.textContent = '⚠️ Geçerli bir e-posta adresi giriniz.';
                 return;
             }
-            
+
             if (password.length < 4) {
                 errorElement.classList.remove('hidden');
-                errorText.textContent = 'Şifre en az 4 karakter olmalıdır.';
+                errorText.textContent = '⚠️ Şifre en az 4 karakter olmalıdır.';
                 return;
             }
-            
+
             // Hide error message
             errorElement.classList.add('hidden');
-            
-            // Successful login simulation
-            console.log('Öğrenci girişi başarılı:', email);
-            
-            // Save user info to localStorage
-            localStorage.setItem('userEmail', email);
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('loginTime', new Date().toISOString());
-            localStorage.setItem('userRole', 'student');
-                    
+
             // Loading indicator
-            var submitButton = document.querySelector('button[type="submit"]');
-            var originalText = submitButton.innerHTML;
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Giriş yapılıyor...';
             submitButton.disabled = true;
-            
-            // Redirect to student dashboard
-            setTimeout(function() {
-                console.log('Öğrenci paneline yönlendiriliyor...');
-                window.location.href = 'student-dashboard.html';
-            }, 1500);
+
+            try {
+                let useLocalAuth = false;
+
+                // Try Firebase first (with quick timeout)
+                try {
+                    let attempts = 0;
+                    while ((!window.DB || !window.DB.isFirebaseReady) && attempts < 30) {
+                        await new Promise(r => setTimeout(r, 100));
+                        attempts++;
+                    }
+
+                    if (!window.DB || !window.DB.isFirebaseReady) {
+                        console.warn('⚠️ Firebase bağlanamadı, localStorage kullanılacak');
+                        useLocalAuth = true;
+                    }
+                } catch (firebaseError) {
+                    console.warn('⚠️ Firebase hatası, localStorage kullanılacak:', firebaseError);
+                    useLocalAuth = true;
+                }
+
+                let loginResult;
+
+                if (useLocalAuth) {
+                    // Use localStorage authentication
+                    console.log('🔐 localStorage ile giriş yapılıyor...');
+                    loginResult = window.LocalAuth.loginStudent(email, password);
+
+                    if (!loginResult.success) {
+                        throw new Error(loginResult.error);
+                    }
+                } else {
+                    // Use Firebase authentication
+                    console.log('🔥 Firebase ile giriş yapılıyor...');
+                    const usersResult = await window.DB.load('userProfiles');
+                    const users = (usersResult && usersResult.success && Array.isArray(usersResult.data)) ? usersResult.data : [];
+
+                    const user = users.find(u => u.userEmail === email);
+
+                    if (!user) {
+                        throw new Error('Kullanıcı bulunamadı. Lütfen kayıt olun.');
+                    }
+
+                    if (user.password && user.password !== password) {
+                        throw new Error('E-posta veya şifre hatalı!');
+                    }
+
+                    // Save to localStorage
+                    localStorage.setItem('userEmail', email);
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('loginTime', Date.now().toString());
+                    localStorage.setItem('userRole', 'student');
+
+                    loginResult = { success: true };
+                }
+
+                // Successful login
+                console.log('✅ Öğrenci girişi başarılı:', email);
+
+                // Redirect to student dashboard
+                setTimeout(function() {
+                    console.log('Öğrenci paneline yönlendiriliyor...');
+                    window.location.href = 'student-dashboard.html';
+                }, 1000);
+
+            } catch (error) {
+                console.error('❌ Giriş hatası:', error);
+                errorElement.classList.remove('hidden');
+                errorText.textContent = '❌ ' + error.message;
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            }
         });
         
         // Check login status on page load and show welcome message

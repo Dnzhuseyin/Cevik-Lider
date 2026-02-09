@@ -1,0 +1,1083 @@
+{
+  "ana-dokuman": {
+    "videoModule": "dijital-ceviklik",
+    "multipleChoice": [
+      {
+        "topic": "Dijital çeviklik kavramı",
+        "correctAnswer": "E",
+        "timeRange": "02:08 - 03:37"
+      },
+      {
+        "topic": "TPACK modeli",
+        "correctAnswer": "A",
+        "timeRange": "07:55 - 08:36"
+      },
+      {
+        "topic": "SAMR - Redefinition",
+        "correctAnswer": "B",
+        "timeRange": "07:09 - 07:29"
+      },
+      {
+        "topic": "Dijital anketlerin amacı",
+        "correctAnswer": "C",
+        "timeRange": "02:50 - 03:11"
+      },
+      {
+        "topic": "Sanal tatbikatların üstünlüğü",
+        "correctAnswer": "E",
+        "timeRange": "01:52 - 02:08"
+      },
+      {
+        "topic": "Öğrenme analitikleri",
+        "correctAnswer": "D",
+        "timeRange": "09:18 - 11:29"
+      },
+      {
+        "topic": "Dijital olgunlukta en az belirleyici unsur",
+        "correctAnswer": "D",
+        "timeRange": "05:58 - 06:25"
+      },
+      {
+        "topic": "KVKK",
+        "correctAnswer": "E",
+        "timeRange": "13:41 - 14:03"
+      },
+      {
+        "topic": "Siber güvenlikte liderin sorumluluğu",
+        "correctAnswer": "C",
+        "timeRange": "14:24 - 14:51"
+      },
+      {
+        "topic": "Yapay zekâ - etik ve hukuki ilke",
+        "correctAnswer": "E",
+        "timeRange": "13:22 - 14:51"
+      }
+    ],
+    "fillInBlank": [
+      {
+        "topic": "Dijital çeviklik",
+        "correctAnswer": "liderlik",
+        "timeRange": "02:08 - 03:37"
+      },
+      {
+        "topic": "Değişen koşullara hızla uyum",
+        "correctAnswer": "uyum",
+        "timeRange": "02:30 - 02:50"
+      },
+      {
+        "topic": "Dijital liderlik",
+        "correctAnswer": "dijital liderlik",
+        "timeRange": "04:27 - 05:37"
+      },
+      {
+        "topic": "SAMR - Redefinition",
+        "correctAnswer": "redefinition",
+        "timeRange": "07:09 - 07:29"
+      },
+      {
+        "topic": "KVKK",
+        "correctAnswer": "6698",
+        "timeRange": "13:41 - 14:03"
+      }
+    ],
+    "openEnded": [
+      {
+        "topic": "Dijital çeviklik ve stratejik gereklilik",
+        "timeRange": "01:30 - 04:27"
+      },
+      {
+        "topic": "Dijital liderliğin özellikleri",
+        "timeRange": "04:27 - 05:58"
+      },
+      {
+        "topic": "SAMR - TPACK karşılaştırması",
+        "timeRange": "06:25 - 08:36"
+      },
+      {
+        "topic": "Veri analitiği ve öğrenme analitikleri",
+        "timeRange": "09:18 - 11:29"
+      },
+      {
+        "topic": "Dijital hukuk, KVKK ve telif",
+        "timeRange": "13:22 - 14:51"
+      }
+    ]
+  },
+  "bolum-2": {
+    "videoModule": "vuca-liderlik",
+    "multipleChoice": [
+      {
+        "topic": "Değişkenlik (Volatility)",
+        "correctAnswer": "C",
+        "timeRange": "02:10 - 04:30"
+      },
+      {
+        "topic": "VUCA çevresel, BANI psikolojik/kaotik etkilere odaklanır",
+        "correctAnswer": "B",
+        "timeRange": "07:15 - 07:45"
+      },
+      {
+        "topic": "Clarity (Netlik)",
+        "correctAnswer": "D",
+        "timeRange": "08:20 - 09:30"
+      },
+      {
+        "topic": "Yanlış ifade (geleneksel–çevik karşılaştırması)",
+        "correctAnswer": "E",
+        "timeRange": "09:30 - 10:15"
+      },
+      {
+        "topic": "Adaptasyon (esnek uyum)",
+        "correctAnswer": "B",
+        "timeRange": "06:15 - 07:15"
+      },
+      {
+        "topic": "Deneme Yap – Anla – Yanıt Ver",
+        "correctAnswer": "C",
+        "timeRange": "10:15 - 11:25"
+      },
+      {
+        "topic": "Hata durumunda savunmaya geçme",
+        "correctAnswer": "C",
+        "timeRange": "12:10 - 13:00"
+      },
+      {
+        "topic": "Empati ve farkındalık (Mindfulness)",
+        "correctAnswer": "B",
+        "timeRange": "13:00 - 13:20"
+      },
+      {
+        "topic": "Karmaşık verileri analiz etme",
+        "correctAnswer": "C",
+        "timeRange": "12:30 - 13:00"
+      },
+      {
+        "topic": "Değişim direnci ve güncelliğini yitirmiş süreçler",
+        "correctAnswer": "C",
+        "timeRange": "13:30 - 14:30"
+      }
+    ],
+    "fillInBlank": [
+      {
+        "topic": "Askeri köken",
+        "correctAnswer": "askeri köken",
+        "timeRange": "02:10 - 02:55"
+      },
+      {
+        "topic": "Vizyon",
+        "correctAnswer": "vizyon",
+        "timeRange": "07:45 - 09:30"
+      },
+      {
+        "topic": "Kırılgan (Brittle)",
+        "correctAnswer": "brittle",
+        "timeRange": "04:30 - 05:25"
+      },
+      {
+        "topic": "Çevik (Agile) liderlik",
+        "correctAnswer": "agile liderlik",
+        "timeRange": "09:05 - 09:30"
+      },
+      {
+        "topic": "Kaotik Alan (Cynefin)",
+        "correctAnswer": "cynefin",
+        "timeRange": "11:25 - 11:40"
+      },
+      {
+        "topic": "Muğlaklık (Ambiguity)",
+        "correctAnswer": "ambiguity",
+        "timeRange": "04:05 - 04:30"
+      },
+      {
+        "topic": "Duygularını yönetme",
+        "correctAnswer": "duygularını yönetme",
+        "timeRange": "12:30 - 13:00"
+      },
+      {
+        "topic": "Sezgi",
+        "correctAnswer": "sezgi",
+        "timeRange": "13:00 - 13:20"
+      },
+      {
+        "topic": "Unutma",
+        "correctAnswer": "unutma",
+        "timeRange": "12:10 - 12:30"
+      },
+      {
+        "topic": "Güvenilir",
+        "correctAnswer": "güvenilir",
+        "timeRange": "13:30 - 14:05"
+      }
+    ],
+    "openEnded": [
+      {
+        "topic": "VUCA PRİME modelini uygulama",
+        "timeRanges": ["07:45 - 09:30", "12:10 - 13:20"]
+      },
+      {
+        "topic": "Cynefin – Kaotik Alan karar döngüsünü kullanma",
+        "timeRange": "11:25 - 11:40"
+      },
+      {
+        "topic": "Geleneksel liderlik ve Çevik liderlikte iş dağılımı",
+        "timeRange": "09:30 - 10:15"
+      },
+      {
+        "topic": "BANI–Brittle riskine karşı dayanıklılık",
+        "timeRange": "11:50 - 13:20"
+      },
+      {
+        "topic": "Belirsizliğin (Uncertainty) fırsat alanı olması",
+        "timeRanges": ["02:10 - 04:30", "13:30 - 14:05"]
+      }
+    ]
+  },
+  "bolum-4": {
+    "videoModule": "baglanti-stratejik-ceviklik",
+    "multipleChoice": [
+      {
+        "topic": "İş birliği & yinelemeli geri bildirim",
+        "correctAnswer": "C",
+        "timeRange": "07:20 - 08:40"
+      },
+      {
+        "topic": "Doğrusal ve durağan planlar",
+        "correctAnswer": "B",
+        "timeRange": "01:20 - 07:40"
+      },
+      {
+        "topic": "Çevresel değişimi fark etme/anlamlandırma",
+        "correctAnswer": "C",
+        "timeRange": "12:55 - 13:40"
+      },
+      {
+        "topic": "Dinamik yetenekler değişimi/dönüşümü mümkün kılar",
+        "correctAnswer": "C",
+        "timeRange": "12:55 - 14:30"
+      },
+      {
+        "topic": "Frequent/Ambitious/Specific/Transparent",
+        "correctAnswer": "D",
+        "timeRange": "17:20 - 18:40"
+      },
+      {
+        "topic": "Temel sonuçlar = ölçülebilir ilerleme göstergeleri",
+        "correctAnswer": "B",
+        "timeRange": "19:05 - 20:10"
+      },
+      {
+        "topic": "BSC = stratejiyi bütüncül izleme",
+        "correctAnswer": "B",
+        "timeRange": "19:05 - 20:10"
+      },
+      {
+        "topic": "KPI sürekli izleme, OKR dönemsel hedefler",
+        "correctAnswer": "B",
+        "timeRange": "19:05 - 20:10"
+      },
+      {
+        "topic": "Geri bildirim ve öğrenmeye dayalı",
+        "correctAnswer": "B",
+        "timeRange": "20:25 - 22:05"
+      },
+      {
+        "topic": "Merkezsizleşmiş ve esnek karar alma",
+        "correctAnswer": "C",
+        "timeRange": "07:20 - 08:40"
+      }
+    ],
+    "fillInBlank": [
+      {
+        "topic": "bağlantısallık",
+        "correctAnswer": "bağlantısallık",
+        "timeRange": "07:20 - 08:40"
+      },
+      {
+        "topic": "esneklik – hız",
+        "correctAnswer": "esneklik - hız",
+        "timeRange": "02:00 - 07:10"
+      },
+      {
+        "topic": "zihniyet – kültürel",
+        "correctAnswer": "zihniyet - kültürel",
+        "timeRange": "10:00 - 11:20"
+      },
+      {
+        "topic": "kaynak akışkanlığı",
+        "correctAnswer": "kaynak akışkanlığı",
+        "timeRange": "12:55 - 13:40"
+      },
+      {
+        "topic": "dinamik",
+        "correctAnswer": "dinamik",
+        "timeRange": "07:20 - 08:10"
+      },
+      {
+        "topic": "algılama – yakalama – dönüştürme",
+        "correctAnswer": "algılama - yakalama - dönüştürme",
+        "timeRange": "12:55 - 14:30"
+      },
+      {
+        "topic": "bugüne – geleceğe",
+        "correctAnswer": "bugüne - geleceğe",
+        "timeRange": "06:50 - 07:40"
+      },
+      {
+        "topic": "sık (frequent) – şeffaf (transparent)",
+        "correctAnswer": "frequent - transparent",
+        "timeRange": "17:20 - 18:40"
+      },
+      {
+        "topic": "eylem / performans",
+        "correctAnswer": "eylem / performans",
+        "timeRange": "19:05 - 20:10"
+      },
+      {
+        "topic": "verilerin – sonuçların",
+        "correctAnswer": "verilerin - sonuçların",
+        "timeRange": "20:25 - 22:05"
+      }
+    ],
+    "openEnded": [
+      {
+        "topic": "Stratejik çeviklik & dinamik yeteneklerle analiz",
+        "timeRanges": ["01:20 - 02:30", "02:30 - 05:20", "07:00 - 07:40", "12:55 - 13:40", "20:25 - 22:05"]
+      },
+      {
+        "topic": "VUCA/BANI koşullarında hiyerarşik yapıdan ağ bağlantılı yapıya geçişin yönetsel sonuçları",
+        "timeRanges": ["02:30 - 05:20", "07:20 - 08:40", "10:00 - 11:20"]
+      },
+      {
+        "topic": "FAST benimsenirse hedef belirleme süreçleri nasıl dönüşür? OKR ve KPI ile ilişkilendirme",
+        "timeRanges": ["17:20 - 18:40", "19:05 - 20:10"]
+      },
+      {
+        "topic": "Çevik dönüşümde kültür değişimi neden zaman alır? Yönetici stratejilerinin oluşturulması",
+        "timeRanges": ["07:20 - 08:40", "10:00 - 11:20"]
+      },
+      {
+        "topic": "PUKÖ kullanan okulun çevik yönetim açısından hangi katkıları olur? Senaryo üzerinden analiz etme",
+        "timeRanges": ["19:05 - 20:10", "20:25 - 22:05"]
+      }
+    ]
+  },
+  "bolum-5": {
+    "videoModule": "paydas-iletisim-cevikligi",
+    "multipleChoice": [
+      {
+        "topic": "Kaynak",
+        "correctAnswer": "C",
+        "timeRange": "04:23 - 05:58"
+      },
+      {
+        "topic": "Goldman ve arkadaşları (1995)",
+        "correctAnswer": "B",
+        "timeRange": "03:17 - 04:23"
+      },
+      {
+        "topic": "Zorlama",
+        "correctAnswer": "E",
+        "timeRange": "08:44 - 10:34"
+      },
+      {
+        "topic": "Görmezden Gelme (Kriz yönetimi; önleme, hazırlık, müdahale ve gözden geçirmeden oluşur)",
+        "correctAnswer": "E",
+        "timeRange": "20:52 - 23:24"
+      },
+      {
+        "topic": "Beden dili ve duygusal aktarımın eksikliği",
+        "correctAnswer": "C",
+        "timeRange": "24:30 - 26:16"
+      },
+      {
+        "topic": "İnformal iletişim",
+        "correctAnswer": "B",
+        "timeRange": "19:05 - 20:52"
+      },
+      {
+        "topic": "Bilgi akışı sağlanmalı ve iletişim kanalları açık tutulmalıdır",
+        "correctAnswer": "C",
+        "timeRange": "17:47 - 23:54"
+      },
+      {
+        "topic": "Uzlaşma",
+        "correctAnswer": "A",
+        "timeRange": "14:26 - 16:17"
+      },
+      {
+        "topic": "Tüm paydaşların ortak bir vizyon üzerinde görüş birliğine varması",
+        "correctAnswer": "B",
+        "timeRange": "04:23 - 05:58"
+      },
+      {
+        "topic": "Rutin planlanmış toplantılar (Kriz beklenmedik ve olağanüstü durumlardır)",
+        "correctAnswer": "C",
+        "timeRange": "17:47 - 23:54"
+      }
+    ],
+    "fillInBlank": [
+      {
+        "topic": "Dönüt",
+        "correctAnswer": "dönüt",
+        "timeRange": "04:23 - 05:58"
+      },
+      {
+        "topic": "Bağlantılı",
+        "correctAnswer": "bağlantılı",
+        "timeRange": "02:15 - 03:17"
+      },
+      {
+        "topic": "İşbirliği",
+        "correctAnswer": "işbirliği",
+        "timeRange": "07:04 - 08:44"
+      },
+      {
+        "topic": "Durumsal kriz iletişimi (SCCT)",
+        "correctAnswer": "SCCT",
+        "timeRange": "17:47 - 20:52"
+      },
+      {
+        "topic": "KVKK (Kişisel Verilerin Korunması Kanunu)",
+        "correctAnswer": "KVKK",
+        "timeRange": "24:30 - 26:16"
+      }
+    ],
+    "openEnded": [
+      {
+        "topic": "Çevik iletişimin önemi",
+        "timeRanges": ["00:00 - 00:28", "04:23 - 05:58"]
+      },
+      {
+        "topic": "Kaçınma stratejisi",
+        "timeRange": "12:27 - 14:26"
+      },
+      {
+        "topic": "Çevik iletişim",
+        "timeRange": "04:23 - 05:58"
+      },
+      {
+        "topic": "Kriz yönetim döngüsü",
+        "timeRange": "20:52 - 23:24"
+      },
+      {
+        "topic": "Formal ve informal iletişim",
+        "timeRange": "19:05 - 20:52"
+      }
+    ]
+  },
+  "bolum-6": {
+    "videoModule": "yaraticilik-inovasyon",
+    "multipleChoice": [
+      {
+        "topic": "Akıcılık, Esneklik, Özgünlük, Detaylandırma",
+        "correctAnswer": "B",
+        "timeRange": "09:16 - 11:15"
+      },
+      {
+        "topic": "Kuluçka Devri",
+        "correctAnswer": "D",
+        "timeRange": "06:18 - 09:16"
+      },
+      {
+        "topic": "Hisleri, sezgileri ve duyguları",
+        "correctAnswer": "C",
+        "timeRange": "14:25 - 17:53"
+      },
+      {
+        "topic": "Grup büyüklüğü en az 20 kişi olmalıdır",
+        "correctAnswer": "C",
+        "timeRange": "11:51 - 14:25"
+      },
+      {
+        "topic": "Biçim ya da niteliğini değiştirmek, küçültmek veya büyütmek",
+        "correctAnswer": "D",
+        "timeRange": "17:53 - 20:39"
+      },
+      {
+        "topic": "Empati kurma",
+        "correctAnswer": "E",
+        "timeRange": "25:00 - 25:43"
+      },
+      {
+        "topic": "Zihin Haritaları (Mind Mapping)",
+        "correctAnswer": "B",
+        "timeRange": "20:39 - 21:55"
+      },
+      {
+        "topic": "Aktif deneyimleme",
+        "correctAnswer": "D",
+        "timeRange": "21:55 - 25:43"
+      },
+      {
+        "topic": "Hata yapmayı bir öğrenme fırsatı olarak görmek",
+        "correctAnswer": "D",
+        "timeRange": "21:55 - 25:00"
+      },
+      {
+        "topic": "Substitute (Yerine geçme)",
+        "correctAnswer": "A",
+        "timeRange": "17:53 - 20:39"
+      }
+    ],
+    "fillInBlank": [
+      {
+        "topic": "Aydınlanma",
+        "correctAnswer": "aydınlanma",
+        "timeRange": "06:18 - 09:16"
+      },
+      {
+        "topic": "Akıcılık (Fluency)",
+        "correctAnswer": "akıcılık",
+        "timeRange": "09:16 - 11:15"
+      },
+      {
+        "topic": "Sarı",
+        "correctAnswer": "sarı",
+        "timeRange": "14:25 - 17:53"
+      },
+      {
+        "topic": "İş modelinin",
+        "correctAnswer": "iş modelinin",
+        "timeRange": "04:32 - 05:43"
+      },
+      {
+        "topic": "Eleme (Yok etme/Çıkarma)",
+        "correctAnswer": "eleme",
+        "timeRange": "17:53 - 20:39"
+      }
+    ],
+    "openEnded": [
+      {
+        "topic": "Wallas'ın 4 aşaması: Hazırlık, kuluçka, aydınlanma, doğrulama",
+        "timeRange": "06:18 - 09:16"
+      },
+      {
+        "topic": "Zihin haritaları tekniği",
+        "timeRange": "20:39 - 21:55"
+      },
+      {
+        "topic": "Tasarım odaklı düşünme: İnsan merkezli çözümler",
+        "timeRange": "25:00 - 25:43"
+      },
+      {
+        "topic": "Yaratıcı düşünme süreci ve boyutları",
+        "timeRanges": ["05:43 - 06:18", "09:16 - 11:15"]
+      },
+      {
+        "topic": "SCAMPER tekniği",
+        "timeRange": "17:53 - 20:39"
+      }
+    ]
+  },
+  "bolum-7": {
+    "videoModule": "kisisel-liderlik-dayaniklilik",
+    "multipleChoice": [
+      {
+        "topic": "Kişisel liderlik kavramı",
+        "correctAnswer": "D",
+        "timeRange": "01:15 - 03:00"
+      },
+      {
+        "topic": "Psikolojik dayanıklılık",
+        "correctAnswer": "A",
+        "timeRange": "03:48 - 05:00"
+      },
+      {
+        "topic": "Öz farkındalığı yüksek liderin ekip yönetimi",
+        "correctAnswer": "B",
+        "timeRange": "08:30 - 09:30"
+      },
+      {
+        "topic": "Bandura'nın sosyal öğrenme kuramı",
+        "correctAnswer": "C",
+        "timeRange": "13:15 - 14:15"
+      },
+      {
+        "topic": "Kişisel liderliğin Paylaşım özelliği",
+        "correctAnswer": "B",
+        "timeRange": "06:30 - 07:30"
+      },
+      {
+        "topic": "Kişisel Gelişim Planı (KGP)",
+        "correctAnswer": "A",
+        "timeRange": "12:00 - 13:30"
+      },
+      {
+        "topic": "Afet ve kriz anlarında kişisel liderlik",
+        "correctAnswer": "B",
+        "timeRange": "15:10 - 16:35"
+      },
+      {
+        "topic": "Bilgelik kavramı",
+        "correctAnswer": "A",
+        "timeRange": "16:30 - 17:40"
+      },
+      {
+        "topic": "Öz farkındalık ile duygusal zeka ilişkisi",
+        "correctAnswer": "C",
+        "timeRange": "08:45 - 10:00"
+      }
+    ],
+    "fillInBlank": [
+      {
+        "topic": "Psikolojik",
+        "correctAnswer": "psikolojik",
+        "timeRange": "03:30 - 04:50"
+      },
+      {
+        "topic": "Sosyal destek",
+        "correctAnswer": "sosyal",
+        "timeRange": "15:30 - 17:30"
+      },
+      {
+        "topic": "Empati",
+        "correctAnswer": "empati",
+        "timeRange": "05:40 - 06:40"
+      },
+      {
+        "topic": "Tepkiler",
+        "correctAnswer": "tepkiler",
+        "timeRange": "08:40 - 10:40"
+      },
+      {
+        "topic": "Dayanaklı",
+        "correctAnswer": "dayanaklı",
+        "timeRange": "03:30 - 05:00"
+      }
+    ],
+    "openEnded": [
+      {
+        "topic": "Psikolojik dayanıklılığı artıran faktörler",
+        "timeRange": "10:00 - 11:30"
+      },
+      {
+        "topic": "Sosyal destek ağlarının etkisi",
+        "timeRange": "14:30 - 15:30"
+      },
+      {
+        "topic": "Öz farkındalığın rolü",
+        "timeRange": "08:30 - 09:30"
+      },
+      {
+        "topic": "Değerlerin ve etik ilkelerin önemi",
+        "timeRange": "06:30 - 07:50"
+      }
+    ]
+  },
+  "bolum-9": {
+    "videoModule": "katilimci-guclendirici-liderlik",
+    "multipleChoice": [
+      {
+        "topic": "Yetki paylaşımının öğretmenler üzerindeki etkisi",
+        "correctAnswer": "A",
+        "timeRange": "08:43 - 09:06"
+      },
+      {
+        "topic": "Mesleki Öğrenme Topluluklarında koçluk tekniği",
+        "correctAnswer": "D",
+        "timeRange": "12:00 - 12:25"
+      },
+      {
+        "topic": "Paylaşılan liderlik ve okul yönetişimi",
+        "correctAnswer": "C",
+        "timeRange": "07:45 - 07:59"
+      },
+      {
+        "topic": "MÖT işleyiş döngüsünde temel başlangıç noktası",
+        "correctAnswer": "D",
+        "timeRange": "14:30 - 14:46"
+      },
+      {
+        "topic": "Mentorluk ve koçluk terminolojisinin karıştırılması",
+        "correctAnswer": "C",
+        "timeRange": "12:00 - 12:26"
+      },
+      {
+        "topic": "Okul müdürü liderliğinin dengelemesi gereken görevler",
+        "correctAnswer": "B",
+        "timeRange": "18:38 - 18:50"
+      },
+      {
+        "topic": "Öğretmenlerin çabalarının ödüllendirilmesi",
+        "correctAnswer": "B",
+        "timeRange": "10:13 - 10:40"
+      },
+      {
+        "topic": "Okul yönetişimi kavramının ortaya çıkması",
+        "correctAnswer": "D",
+        "timeRange": "08:15 - 08:40"
+      },
+      {
+        "topic": "Takdir edilen öğretmenlerin hissettikleri",
+        "correctAnswer": "C",
+        "timeRange": "09:45 - 10:15"
+      },
+      {
+        "topic": "Katılımcı okul kültürünün boyutları",
+        "correctAnswer": "E",
+        "timeRange": "01:38 - 02:30"
+      }
+    ],
+    "fillInBlank": [
+      {
+        "topic": "İçsel motivasyonlarında",
+        "correctAnswer": "içsel motivasyonlarında",
+        "timeRange": "08:43 - 09:06"
+      },
+      {
+        "topic": "Uzun vadeli",
+        "correctAnswer": "uzun vadeli",
+        "timeRange": "12:05 - 12:25"
+      },
+      {
+        "topic": "Başarısızlığa",
+        "correctAnswer": "başarısızlığa",
+        "timeRange": "18:15 - 18:25"
+      },
+      {
+        "topic": "Yetkilendirme",
+        "correctAnswer": "yetkilendirme",
+        "timeRange": "08:00 - 08:36"
+      },
+      {
+        "topic": "Paydaşların",
+        "correctAnswer": "paydaşların",
+        "timeRange": "18:23 - 18:39"
+      }
+    ],
+    "openEnded": [
+      {
+        "topic": "Katılımcı okul kültürü ve okul müdürü rolü",
+        "timeRange": "05:17 - 06:00"
+      },
+      {
+        "topic": "Okul yönetişimi kavramının nedenleri",
+        "timeRange": "07:45 - 08:39"
+      },
+      {
+        "topic": "MÖT ve okul müdürlerinin liderlik yaklaşımı",
+        "timeRange": "14:20 - 14:32"
+      },
+      {
+        "topic": "Çevrimiçi MÖT'lerin olumlu yönleri",
+        "timeRange": "04:50 - 05:13"
+      },
+      {
+        "topic": "Koçluk, mentorluk ve MÖT pratik çözümleri",
+        "timeRange": "12:50 - 13:40"
+      }
+    ]
+  },
+  "bolum-10": {
+    "videoModule": "proaktif-liderlik",
+    "multipleChoice": [
+      {
+        "topic": "Proaktif ve reaktif insanlar arasındaki fark",
+        "correctAnswer": "D",
+        "timeRange": "01:00 - 01:30"
+      },
+      {
+        "topic": "Liderlik ve yönetim ayrımı (Drucker)",
+        "correctAnswer": "E",
+        "timeRange": "02:55 - 03:20"
+      },
+      {
+        "topic": "Senaryo geliştirme sürecinin amacı",
+        "correctAnswer": "C",
+        "timeRange": "05:30 - 06:10"
+      },
+      {
+        "topic": "Yetki devrinin proaktif liderlik çıktısı",
+        "correctAnswer": "A",
+        "timeRange": "07:45 - 08:24"
+      },
+      {
+        "topic": "Görsel ve dijital araçların afet eğitimindeki faydası",
+        "correctAnswer": "B",
+        "timeRange": "10:34 - 11:06"
+      },
+      {
+        "topic": "Öğrenme kültürünün stratejik faydası",
+        "correctAnswer": "C",
+        "timeRange": "10:20 - 10:40"
+      },
+      {
+        "topic": "Simülasyon ve role-play avantajı",
+        "correctAnswer": "A",
+        "timeRange": "12:00 - 12:32"
+      },
+      {
+        "topic": "Değişime açıklık ile örgütsel esneklik ilişkisi",
+        "correctAnswer": "B",
+        "timeRange": "14:40 - 15:05"
+      },
+      {
+        "topic": "Proaktif liderlerin performans değerlendirmesi",
+        "correctAnswer": "E",
+        "timeRange": "16:00 - 16:20"
+      },
+      {
+        "topic": "Risk analizinin psikososyal boyutu",
+        "correctAnswer": "E",
+        "timeRange": "03:35 - 04:32"
+      }
+    ],
+    "fillInBlank": [
+      {
+        "topic": "Stratejik hazırlıklar",
+        "correctAnswer": "stratejik hazırlıklar",
+        "timeRange": "01:40 - 02:10"
+      },
+      {
+        "topic": "Önleyici planlama",
+        "correctAnswer": "önleyici planlama",
+        "timeRange": "08:30 - 09:10"
+      },
+      {
+        "topic": "Senaryo geliştirme",
+        "correctAnswer": "senaryo geliştirme",
+        "timeRange": "08:30 - 09:10"
+      },
+      {
+        "topic": "Yetki Devri",
+        "correctAnswer": "yetki devri",
+        "timeRange": "07:40 - 08:12"
+      },
+      {
+        "topic": "Öğrenme kültürü",
+        "correctAnswer": "öğrenme kültürü",
+        "timeRange": "10:13 - 10:40"
+      }
+    ],
+    "openEnded": [
+      {
+        "topic": "Proaktif liderlik ve reaktif yaklaşım ayrımı",
+        "timeRanges": ["02:00 - 02:13", "16:00 - 16:20"]
+      },
+      {
+        "topic": "Öğrenme kültürünün önemi ve göstergeleri",
+        "timeRange": "10:15 - 10:40"
+      },
+      {
+        "topic": "Değişime açıklık ve esneklik birleşimi",
+        "timeRange": "03:13 - 03:34"
+      },
+      {
+        "topic": "Ekip koordinasyonu ve eksikliğinin sonuçları",
+        "timeRange": "08:15 - 08:43"
+      },
+      {
+        "topic": "Afet senaryoları geliştirmenin amaçları",
+        "timeRange": "05:30 - 06:06"
+      }
+    ]
+  },
+  "bolum-11": {
+    "videoModule": "degisim-yonetimi",
+    "multipleChoice": [
+      {
+        "topic": "Psikolojik Direnç Faktörleri",
+        "correctAnswer": "C",
+        "timeRange": "02:53 - 03:40"
+      },
+      {
+        "topic": "Kısa vadeli kazanımları görünür kılma",
+        "correctAnswer": "A",
+        "timeRange": "07:48 - 08:10"
+      },
+      {
+        "topic": "Product Backlog",
+        "correctAnswer": "C",
+        "timeRange": "06:18 - 06:42"
+      },
+      {
+        "topic": "İş süreçlerini görselleştirme (Kanban)",
+        "correctAnswer": "A",
+        "timeRange": "07:09 - 07:27"
+      },
+      {
+        "topic": "Öz-yeterlik kaygıları ve kurumsal destek eksikliği",
+        "correctAnswer": "D",
+        "timeRange": "02:26 - 02:53"
+      },
+      {
+        "topic": "Merkeziyetçi eğitim sistemi",
+        "correctAnswer": "E",
+        "timeRange": "04:47 - 05:10"
+      },
+      {
+        "topic": "Esnek, yinelemeli ve paydaş odaklı materyaller",
+        "correctAnswer": "A",
+        "timeRange": "11:32 - 12:40"
+      },
+      {
+        "topic": "Kolb öğrenme döngüsü",
+        "correctAnswer": "E",
+        "timeRange": "11:32 - 12:40"
+      },
+      {
+        "topic": "Gerçek hayat senaryolarını güvenli ortamda deneyimleme",
+        "correctAnswer": "C",
+        "timeRange": "11:51 - 12:40"
+      },
+      {
+        "topic": "Kolaylaştırıcı ve destekleyici lider",
+        "correctAnswer": "E",
+        "timeRange": "03:40 - 04:02"
+      }
+    ],
+    "fillInBlank": [
+      {
+        "topic": "Kurumsal sürdürülebilirlik",
+        "correctAnswer": "kurumsal sürdürülebilirlik",
+        "timeRange": "00:00 - 00:29"
+      },
+      {
+        "topic": "Öz-yeterlik kaygısı",
+        "correctAnswer": "öz-yeterlik kaygısı",
+        "timeRange": "02:53 - 03:40"
+      },
+      {
+        "topic": "Küçük ve yinelemeli adımlar",
+        "correctAnswer": "küçük ve yinelemeli adımlar",
+        "timeRange": "05:54 - 06:18"
+      },
+      {
+        "topic": "Product Owner rolü",
+        "correctAnswer": "product owner",
+        "timeRange": "06:42 - 07:09"
+      },
+      {
+        "topic": "Psikososyal destek",
+        "correctAnswer": "psikososyal destek",
+        "timeRange": "11:51 - 12:19"
+      }
+    ],
+    "openEnded": [
+      {
+        "topic": "Psikolojik – örgütsel – kültürel direnç",
+        "timeRange": "02:06 - 05:10"
+      },
+      {
+        "topic": "Çevik liderlik ve değişim yönetimi",
+        "timeRange": "05:30 - 08:10"
+      },
+      {
+        "topic": "Scrum – Kanban karşılaştırması",
+        "timeRange": "06:18 - 07:27"
+      },
+      {
+        "topic": "Sürekli öğrenme kültürü",
+        "timeRange": "08:34 - 10:28"
+      },
+      {
+        "topic": "Simülasyon, role-play ve kriz becerileri",
+        "timeRange": "11:32 - 12:40"
+      }
+    ]
+  },
+  "bolum-12": {
+    "videoModule": "etik-liderlik-sosyal-sorumluluk",
+    "multipleChoice": [
+      {
+        "topic": "Etik ve ahlak arasındaki temel fark",
+        "correctAnswer": "B",
+        "timeRange": "02:50 - 03:60"
+      },
+      {
+        "topic": "Sonuççu normatif etik teorisi",
+        "correctAnswer": "C",
+        "timeRange": "03:00 - 04:00"
+      },
+      {
+        "topic": "Etik liderlik tanımındaki temel mekanizma",
+        "correctAnswer": "B",
+        "timeRange": "02:45 - 03:45"
+      },
+      {
+        "topic": "Etik ikilem örneği (adalet vs şefkat)",
+        "correctAnswer": "B",
+        "timeRange": "11:30 - 12:30"
+      },
+      {
+        "topic": "Etik ikilemlerle başa çıkma stratejisi",
+        "correctAnswer": "D",
+        "timeRange": "11:15 - 12:30"
+      },
+      {
+        "topic": "Sürdürülebilir kalkınmanın etik ilkesi",
+        "correctAnswer": "D",
+        "timeRange": "15:15 - 16:30"
+      },
+      {
+        "topic": "Sosyal sermaye kavramı",
+        "correctAnswer": "D",
+        "timeRange": "07:50 - 08:50"
+      },
+      {
+        "topic": "Etik ve ahlak ayrımı",
+        "correctAnswer": "A",
+        "timeRange": "03:00 - 04:50"
+      },
+      {
+        "topic": "Uygulamalı etik türü",
+        "correctAnswer": "B",
+        "timeRange": "05:00 - 06:50"
+      },
+      {
+        "topic": "Kamu görevlilerinin toplum yararı ilkesi",
+        "correctAnswer": "C",
+        "timeRange": "07:15 - 08:30"
+      }
+    ],
+    "fillInBlank": [
+      {
+        "topic": "Adalet ve dürüstlük",
+        "correctAnswer": "adalet ve dürüstlük",
+        "timeRange": "13:30 - 14:30"
+      },
+      {
+        "topic": "Erdemlilik",
+        "correctAnswer": "erdemlilik",
+        "timeRange": "18:00 - 19:00"
+      },
+      {
+        "topic": "Kurum",
+        "correctAnswer": "kurum",
+        "timeRange": "18:30 - 19:30"
+      },
+      {
+        "topic": "Bağlılık ve adalet",
+        "correctAnswer": "bağlılık ve adalet",
+        "timeRange": "14:50 - 16:00"
+      },
+      {
+        "topic": "Sosyal",
+        "correctAnswer": "sosyal",
+        "timeRange": "09:00 - 11:10"
+      }
+    ],
+    "openEnded": [
+      {
+        "topic": "Etik liderliğin güven ve şeffaflık kültürüne etkisi",
+        "timeRange": "08:30 - 09:50"
+      },
+      {
+        "topic": "Liderin etik karar alma ilkeleri",
+        "timeRange": "06:20 - 07:40"
+      },
+      {
+        "topic": "Etik liderliğin çalışan motivasyonu ve iş doyumuna etkisi",
+        "timeRange": "12:30 - 13:50"
+      },
+      {
+        "topic": "Etik liderliğin sosyal sorumluluk faaliyetlerine etkisi",
+        "timeRange": "10:00 - 11:00"
+      },
+      {
+        "topic": "Etik dışı davranışların sosyal sorumluluk imajına etkisi",
+        "timeRange": "10:30 - 11:40"
+      }
+    ]
+  }
+}

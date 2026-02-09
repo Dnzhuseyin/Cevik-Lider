@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groq API Direct Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl font-bold mb-8">🤖 Groq API Direct Test</h1>
+
+        <div class="bg-gray-800 p-6 rounded-lg mb-6">
+            <h3 class="text-xl font-bold mb-4">API Bilgileri:</h3>
+            <p class="text-sm text-gray-400 mb-2">API Key: <code class="bg-gray-900 px-2 py-1 rounded">gsk_0A9V...GrdPm</code></p>
+            <p class="text-sm text-gray-400">Model: <code class="bg-gray-900 px-2 py-1 rounded">llama-3.3-70b-versatile</code></p>
+            <p class="text-sm text-green-400 mt-2">✅ Direct API çağrısı (PHP proxy yok)</p>
+        </div>
+
+        <div class="bg-gray-800 p-6 rounded-lg mb-6">
+            <label class="block text-lg font-bold mb-2">Test Prompt'u:</label>
+            <textarea id="prompt" rows="3" class="w-full bg-gray-900 p-4 rounded border border-gray-700 text-white" placeholder="Mesajınızı yazın...">Merhaba! Kendini tanıt.</textarea>
+            <button onclick="testGroqAPI()" class="mt-4 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded font-semibold">
+                Test Et
+            </button>
+        </div>
+
+        <div id="status" class="mb-6 p-4 rounded bg-gray-800 hidden">
+            <p class="font-bold">Durum:</p>
+            <p id="status-text"></p>
+        </div>
+
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h3 class="text-xl font-bold mb-4">Sonuç:</h3>
+            <pre id="result" class="bg-gray-900 p-4 rounded text-sm overflow-auto max-h-96 whitespace-pre-wrap"></pre>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = 'YOUR_GROQ_API_KEY_HERE'; // Replace with your actual API key
+        const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+        const MODEL = 'llama-3.3-70b-versatile';
+
+        async function testGroqAPI() {
+            const prompt = document.getElementById('prompt').value;
+            const statusDiv = document.getElementById('status');
+            const statusText = document.getElementById('status-text');
+            const resultDiv = document.getElementById('result');
+
+            if (!prompt.trim()) {
+                alert('Lütfen bir prompt girin!');
+                return;
+            }
+
+            // Show status
+            statusDiv.classList.remove('hidden');
+            statusDiv.className = 'mb-6 p-4 rounded bg-blue-900';
+            statusText.textContent = 'İstek gönderiliyor...';
+            resultDiv.textContent = 'Bekleniyor...';
+
+            try {
+                console.log('🚀 Groq API test başlatıldı');
+                console.log('Prompt:', prompt);
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: MODEL,
+                        messages: [
+                            {
+                                role: 'user',
+                                content: prompt
+                            }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 500
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API Error ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                console.log('✅ Yanıt alındı:', data);
+
+                // Show success
+                statusDiv.className = 'mb-6 p-4 rounded bg-green-900';
+                statusText.textContent = '✅ Başarılı!';
+
+                // Display result
+                const message = data.choices[0].message.content;
+                resultDiv.textContent = `YANIT:\n\n${message}\n\n\nFULL RESPONSE:\n${JSON.stringify(data, null, 2)}`;
+
+            } catch (error) {
+                console.error('❌ Hata:', error);
+
+                // Show error
+                statusDiv.className = 'mb-6 p-4 rounded bg-red-900';
+                statusText.textContent = '❌ Hata: ' + error.message;
+
+                resultDiv.textContent = 'HATA:\n\n' + error.message + '\n\n' + (error.stack || '');
+            }
+        }
+
+        // Auto-initialize
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('🤖 Groq API Direct Test sayfası hazır');
+        });
+    </script>
+</body>
+</html>

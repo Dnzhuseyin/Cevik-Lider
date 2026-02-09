@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hard Refresh - Cache Temizle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+    <div class="max-w-2xl mx-auto text-center p-8">
+        <h1 class="text-4xl font-bold mb-8">🔄 Hard Refresh</h1>
+
+        <div class="bg-gray-800 p-8 rounded-lg mb-6">
+            <p class="text-2xl mb-4">Cache temizleniyor...</p>
+            <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+
+        <div id="log" class="bg-black p-4 rounded text-left text-sm font-mono max-h-60 overflow-auto"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            logDiv.textContent += message + '\n';
+            console.log(message);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function hardRefresh() {
+            log('🧹 Hard Refresh başlatıldı...\n');
+
+            // 1. Clear localStorage
+            log('1️⃣ localStorage temizleniyor...');
+            const importantKeys = ['userEmail', 'isLoggedIn', 'userRole', 'loginTime'];
+            const savedData = {};
+            importantKeys.forEach(key => {
+                savedData[key] = localStorage.getItem(key);
+            });
+            localStorage.clear();
+            importantKeys.forEach(key => {
+                if (savedData[key]) {
+                    localStorage.setItem(key, savedData[key]);
+                }
+            });
+            log('   ✅ localStorage temizlendi (kullanıcı bilgileri korundu)\n');
+
+            // 2. Clear sessionStorage
+            log('2️⃣ sessionStorage temizleniyor...');
+            sessionStorage.clear();
+            log('   ✅ sessionStorage temizlendi\n');
+
+            // 3. Clear Service Workers
+            if ('serviceWorker' in navigator) {
+                log('3️⃣ Service Workers temizleniyor...');
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+                log(`   ✅ ${registrations.length} Service Worker kaldırıldı\n`);
+            }
+
+            // 4. Clear Cache Storage
+            if ('caches' in window) {
+                log('4️⃣ Cache Storage temizleniyor...');
+                const cacheNames = await caches.keys();
+                for (const name of cacheNames) {
+                    await caches.delete(name);
+                }
+                log(`   ✅ ${cacheNames.length} cache silindi\n`);
+            }
+
+            // 5. Clear IndexedDB
+            if ('indexedDB' in window) {
+                log('5️⃣ IndexedDB temizleniyor...');
+                const dbs = await indexedDB.databases();
+                for (const db of dbs) {
+                    indexedDB.deleteDatabase(db.name);
+                }
+                log(`   ✅ ${dbs.length} database silindi\n`);
+            }
+
+            log('🎉 TÜM CACHE TEMİZLENDİ!\n');
+            log('🔄 Ana sayfaya yönlendiriliyorsunuz...\n');
+
+            setTimeout(() => {
+                window.location.href = 'instructor-content.html';
+            }, 2000);
+        }
+
+        // Auto-start
+        window.addEventListener('DOMContentLoaded', hardRefresh);
+    </script>
+</body>
+</html>

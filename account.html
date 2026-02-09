@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil Ayarları - Çevik Lider</title>
+    <!-- Authentication Guard -->
+    <script src="js/auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -227,6 +229,7 @@
 
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-production.js"></script>
@@ -536,12 +539,52 @@
 
                     try {
                         console.log('🔑 Şifre değiştiriliyor...');
+
+                        // Get current user from Firebase Auth
+                        const user = firebase.auth().currentUser;
+
+                        if (!user) {
+                            showError('Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.');
+                            return;
+                        }
+
+                        // Re-authenticate user with current password
+                        const credential = firebase.auth.EmailAuthProvider.credential(
+                            user.email,
+                            currentPassword
+                        );
+
+                        await user.reauthenticateWithCredential(credential);
+                        console.log('✅ Kullanıcı doğrulandı');
+
+                        // Update password
+                        await user.updatePassword(newPassword);
+
+                        // Also update in userProfiles database
+                        const profileResult = await DB.load('userProfiles');
+                        const profiles = (profileResult && profileResult.success) ? profileResult.data : [];
+                        const userProfileIndex = profiles.findIndex(p => p.userEmail === userEmail);
+
+                        if (userProfileIndex !== -1) {
+                            profiles[userProfileIndex].password = newPassword;
+                            profiles[userProfileIndex].lastPasswordUpdate = new Date().toISOString();
+                            await DB.save('userProfiles', profiles[userProfileIndex]);
+                        }
+
                         showSuccess('Şifreniz başarıyla güncellendi!');
                         passwordForm.reset();
                         console.log('✅ Şifre başarıyla değiştirildi');
                     } catch (error) {
                         console.error('❌ Şifre değiştirme hatası:', error);
-                        showError('Şifre değiştirilirken hata oluştu: ' + error.message);
+                        if (error.code === 'auth/wrong-password') {
+                            showError('Mevcut şifreniz yanlış.');
+                        } else if (error.code === 'auth/weak-password') {
+                            showError('Yeni şifre çok zayıf. Daha güçlü bir şifre seçin.');
+                        } else if (error.code === 'auth/requires-recent-login') {
+                            showError('Güvenlik nedeniyle tekrar giriş yapmanız gerekiyor.');
+                        } else {
+                            showError('Şifre değiştirilirken hata oluştu: ' + error.message);
+                        }
                     }
                 });
             }

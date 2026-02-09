@@ -608,19 +608,41 @@ class FirebaseProductionDB {
     async getCoordinatorVideos() {
         try {
             console.log('📹 Koordinatör videoları alınıyor...');
-            
-            // Clear cache for fresh data
-            this.clearCache('coordinatorVideos');
-            
-            const result = await this.load('coordinatorVideos');
-            const allVideos = (result && result.success) ? result.data : [];
-            
+
+            // AGGRESSIVE CACHE CLEARING
+            this.cache.clear();
+            console.log('🔄 Tüm cache temizlendi');
+
+            // Load directly from Firestore for fresh data
+            let allVideos = [];
+
+            if (this.db) {
+                console.log('🔥 Firestore\'dan direkt yükleniyor...');
+                const snapshot = await this.db.collection('coordinator_videos').get();
+                allVideos = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                console.log(`📊 Firestore\'dan yüklendi: ${allVideos.length} video`);
+            } else {
+                // Fallback to load method
+                const result = await this.load('coordinatorVideos');
+                allVideos = (result && result.success) ? result.data : [];
+                console.log(`📊 DB.load ile yüklendi: ${allVideos.length} video`);
+            }
+
             // Filter out deleted videos (only show active videos)
-            const activeVideos = allVideos.filter(video => video.status !== 'deleted');
-            
+            const activeVideos = allVideos.filter(video => {
+                const isActive = video.status !== 'deleted';
+                if (!isActive) {
+                    console.log(`🗑️ Silinen video filtrelendi: ${video.title} (${video.id})`);
+                }
+                return isActive;
+            });
+
             console.log(`📹 ${allVideos.length} toplam video, ${activeVideos.length} aktif video bulundu`);
             return activeVideos;
-            
+
         } catch (error) {
             console.error('❌ Koordinatör videoları alma hatası:', error);
             return [];

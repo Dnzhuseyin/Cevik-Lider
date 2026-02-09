@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş Test - Debug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">🔍 Giriş Sistemi Debug</h1>
+
+        <!-- Status -->
+        <div id="firebase-status" class="mb-6 p-4 rounded-lg bg-gray-200">
+            <h3 class="font-bold mb-2">Firebase Durum:</h3>
+            <p id="firebase-info">Kontrol ediliyor...</p>
+        </div>
+
+        <!-- Test Buttons -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <button onclick="testFirebaseConnection()"
+                class="bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700">
+                Firebase Bağlantısını Test Et
+            </button>
+            <button onclick="listAllUsers()"
+                class="bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700">
+                Tüm Kullanıcıları Listele
+            </button>
+            <button onclick="listAllCoordinators()"
+                class="bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700">
+                Tüm Koordinatörleri Listele
+            </button>
+            <button onclick="createTestStudent()"
+                class="bg-yellow-600 text-white py-3 px-4 rounded-lg hover:bg-yellow-700">
+                Test Öğrenci Oluştur
+            </button>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="bg-white p-6 rounded-lg shadow">
+            <h3 class="font-bold mb-4 text-xl">Sonuçlar:</h3>
+            <div id="results-content" class="font-mono text-sm whitespace-pre-wrap"></div>
+        </div>
+
+        <!-- Quick Login Forms -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <!-- Coordinator Login -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="font-bold mb-4">Koordinatör Test Girişi</h3>
+                <form id="coord-form" class="space-y-3">
+                    <input type="email" id="coord-email" value="koordinator@ceviklider.com"
+                        class="w-full px-3 py-2 border rounded">
+                    <input type="password" id="coord-password" value="CevikLider2024!"
+                        class="w-full px-3 py-2 border rounded">
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                        Koordinatör Girişi Test Et
+                    </button>
+                </form>
+            </div>
+
+            <!-- Student Login -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="font-bold mb-4">Öğrenci Test Girişi</h3>
+                <form id="student-form" class="space-y-3">
+                    <input type="email" id="student-email" value="test@student.com"
+                        class="w-full px-3 py-2 border rounded">
+                    <input type="password" id="student-password" value="test123"
+                        class="w-full px-3 py-2 border rounded">
+                    <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+                        Öğrenci Girişi Test Et
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-production.js"></script>
+
+    <script>
+        function log(message, isError = false) {
+            const content = document.getElementById('results-content');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = isError ? '❌' : '✅';
+            content.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            console.log(message);
+        }
+
+        async function waitForFirebase() {
+            log('Firebase bekleniyor...');
+            let attempts = 0;
+            while ((!window.DB || !window.DB.isFirebaseReady) && attempts < 100) {
+                await new Promise(r => setTimeout(r, 100));
+                attempts++;
+            }
+
+            if (!window.DB || !window.DB.isFirebaseReady) {
+                throw new Error('Firebase başlatılamadı!');
+            }
+
+            log('Firebase hazır!');
+        }
+
+        async function testFirebaseConnection() {
+            document.getElementById('results-content').textContent = '';
+            try {
+                log('Firebase bağlantısı test ediliyor...');
+                await waitForFirebase();
+
+                // Try to read a collection
+                const result = await window.DB.load('userProfiles');
+                log('Firestore okuma testi BAŞARILI');
+                log(`userProfiles koleksiyonunda ${result?.data?.length || 0} kayıt bulundu`);
+
+            } catch (error) {
+                log('Firebase bağlantı hatası: ' + error.message, true);
+            }
+        }
+
+        async function listAllUsers() {
+            document.getElementById('results-content').textContent = '';
+            try {
+                await waitForFirebase();
+                log('Öğrenciler yükleniyor...');
+
+                const result = await window.DB.load('userProfiles');
+                const users = (result && result.success && Array.isArray(result.data)) ? result.data : [];
+
+                log(`Toplam ${users.length} öğrenci bulundu:`);
+                users.forEach((user, index) => {
+                    log(`${index + 1}. ${user.userEmail} - ${user.firstName || 'İsim yok'} ${user.lastName || ''}`);
+                    if (user.password) {
+                        log(`   Şifre: ${user.password}`);
+                    }
+                });
+
+                if (users.length === 0) {
+                    log('⚠️ Hiç öğrenci kaydı bulunamadı!', true);
+                }
+
+            } catch (error) {
+                log('Öğrenciler yüklenemedi: ' + error.message, true);
+            }
+        }
+
+        async function listAllCoordinators() {
+            document.getElementById('results-content').textContent = '';
+            try {
+                await waitForFirebase();
+                log('Koordinatörler yükleniyor...');
+
+                const result = await window.DB.load('coordinatorProfiles');
+                const coordinators = (result && result.success && Array.isArray(result.data)) ? result.data : [];
+
+                log(`Toplam ${coordinators.length} koordinatör bulundu:`);
+                coordinators.forEach((coord, index) => {
+                    log(`${index + 1}. ${coord.userEmail} - ${coord.firstName || 'İsim yok'} ${coord.lastName || ''}`);
+                    if (coord.password) {
+                        log(`   Şifre: ${coord.password}`);
+                    }
+                    log(`   Aktif: ${coord.isActive !== false ? 'Evet' : 'Hayır'}`);
+                });
+
+                if (coordinators.length === 0) {
+                    log('⚠️ Hiç koordinatör kaydı bulunamadı!', true);
+                    log('📝 create-coordinator.html sayfasını kullanarak koordinatör oluşturun');
+                }
+
+            } catch (error) {
+                log('Koordinatörler yüklenemedi: ' + error.message, true);
+            }
+        }
+
+        async function createTestStudent() {
+            document.getElementById('results-content').textContent = '';
+            try {
+                await waitForFirebase();
+                log('Test öğrenci oluşturuluyor...');
+
+                const testStudent = {
+                    userEmail: 'test@student.com',
+                    password: 'test123',
+                    firstName: 'Test',
+                    lastName: 'Öğrenci',
+                    role: 'student',
+                    department: 'Test Departmanı',
+                    createdAt: new Date().toISOString(),
+                    isActive: true
+                };
+
+                const result = await window.DB.save('userProfiles', testStudent);
+
+                if (result && result.success) {
+                    log('Test öğrenci başarıyla oluşturuldu!');
+                    log(`Email: ${testStudent.userEmail}`);
+                    log(`Şifre: ${testStudent.password}`);
+                } else {
+                    throw new Error('Kayıt başarısız');
+                }
+
+            } catch (error) {
+                log('Test öğrenci oluşturulamadı: ' + error.message, true);
+            }
+        }
+
+        // Test login forms
+        document.getElementById('coord-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            document.getElementById('results-content').textContent = '';
+
+            const email = document.getElementById('coord-email').value;
+            const password = document.getElementById('coord-password').value;
+
+            try {
+                log(`Koordinatör girişi test ediliyor: ${email}`);
+                await waitForFirebase();
+
+                const result = await window.DB.load('coordinatorProfiles');
+                const coordinators = (result && result.success && Array.isArray(result.data)) ? result.data : [];
+
+                log(`Veritabanında ${coordinators.length} koordinatör bulundu`);
+
+                const coordinator = coordinators.find(c => c.userEmail === email);
+
+                if (!coordinator) {
+                    log('Koordinatör hesabı bulunamadı!', true);
+                    log('Mevcut koordinatörler:', true);
+                    coordinators.forEach(c => log(`  - ${c.userEmail}`, true));
+                    return;
+                }
+
+                log('Koordinatör bulundu!');
+                log(`Şifre kontrolü: DB şifresi="${coordinator.password}" vs Girilen="${password}"`);
+
+                if (coordinator.password && coordinator.password !== password) {
+                    log('Şifre yanlış!', true);
+                    return;
+                }
+
+                log('GİRİŞ BAŞARILI! ✅');
+
+            } catch (error) {
+                log('Hata: ' + error.message, true);
+            }
+        });
+
+        document.getElementById('student-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            document.getElementById('results-content').textContent = '';
+
+            const email = document.getElementById('student-email').value;
+            const password = document.getElementById('student-password').value;
+
+            try {
+                log(`Öğrenci girişi test ediliyor: ${email}`);
+                await waitForFirebase();
+
+                const result = await window.DB.load('userProfiles');
+                const users = (result && result.success && Array.isArray(result.data)) ? result.data : [];
+
+                log(`Veritabanında ${users.length} öğrenci bulundu`);
+
+                const user = users.find(u => u.userEmail === email);
+
+                if (!user) {
+                    log('Öğrenci hesabı bulunamadı!', true);
+                    log('Önce "Test Öğrenci Oluştur" butonuna tıklayın', true);
+                    return;
+                }
+
+                log('Öğrenci bulundu!');
+                log(`Şifre kontrolü: DB şifresi="${user.password}" vs Girilen="${password}"`);
+
+                if (user.password && user.password !== password) {
+                    log('Şifre yanlış!', true);
+                    return;
+                }
+
+                log('GİRİŞ BAŞARILI! ✅');
+
+            } catch (error) {
+                log('Hata: ' + error.message, true);
+            }
+        });
+
+        // Check Firebase status on load
+        document.addEventListener('DOMContentLoaded', async () => {
+            const statusEl = document.getElementById('firebase-info');
+
+            try {
+                await waitForFirebase();
+                statusEl.innerHTML = '✅ Firebase bağlantısı BAŞARILI';
+                statusEl.parentElement.className = 'mb-6 p-4 rounded-lg bg-green-100 text-green-800';
+            } catch (error) {
+                statusEl.innerHTML = '❌ Firebase bağlantısı BAŞARISIZ: ' + error.message;
+                statusEl.parentElement.className = 'mb-6 p-4 rounded-lg bg-red-100 text-red-800';
+            }
+        });
+    </script>
+</body>
+</html>

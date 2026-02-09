@@ -8,7 +8,7 @@ class GroqAPI {
         const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
         this.proxyURL = isProduction
             ? '/api/groq-proxy'
-            : 'http://localhost:5500/api/groq-proxy';  
+            : 'http://localhost:8000/api/groq-proxy';  
         this.model = 'llama-3.3-70b-versatile';
         console.log('✅ Model ayarlandı:', this.model);
         this.lastRequestTime = 0;
@@ -162,102 +162,167 @@ class GroqAPI {
         }
     }
     
-    // Eğitim için özel promptlar
-    async generateSecurityAdvice(situation) {
-        const context = `Sen bir eğitim uzmanısın. Öğrencilere bilgi güvenliği konusunda tavsiyelerde bulunuyorsun. Türkçe yanıt ver.`;
-        const prompt = `Bu durumda doğru prensipleri kullanarak nasıl hareket etmeliyim: ${situation}`;
-        
-        return await this.generateContent(prompt, context);
-    }
+    // AI özelliği: Sadece video önerisi (diğer özellikler devre dışı)
     
-    async generateQuizQuestion(topic, difficulty = 'orta') {
-        const context = `Sen bir eğitim uzmanısın. Öğrenciler için anlaşılır, öğretici ve kaliteli test soruları hazırlıyorsun.
+    // YENİ: Zaman damgası haritası yükle
+    async loadTimestampMappings() {
+        try {
+            const response = await fetch('/data/timelines/question-timestamps.json');
+            if (!response.ok) {
+                console.warn('⚠️ Timestamp mappings yüklenemedi');
+                return null;
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Timestamp mappings yükleme hatası:', error);
+            return null;
+        }
+    }
 
-KURALLAR:
-- Türkçe dilbilgisi kurallarına uy
-- Net ve açık sorular sor
-- Şıklar birbirinden farklı olsun
-- Gerçek bilgiye dayalı sorular sor
-- Sadece JSON döndür, başka açıklama yapma`;
-        
-        const randomSeed = Math.floor(Math.random() * 1000);
-        
-        const prompt = `Konu: "${topic}"
-Zorluk: ${difficulty}
-Çeşitlilik: ${randomSeed}
+    // Soru konusuna göre timestamp bul
+    findTimestampForQuestion(timestampData, questionTopic, questionType = 'multipleChoice') {
+        if (!timestampData) {
+            console.log('⚠️ timestampData null');
+            return null;
+        }
 
-Bir çoktan seçmeli soru oluştur (4 şık).
+        console.log('🔎 Aranan soru konusu:', questionTopic);
+        console.log('📝 Soru tipi:', questionType);
 
-SADECE ŞU JSON FORMATINI DÖNDÜR:
-{
-    "question": "Soru metni buraya",
-    "options": ["A şıkkı", "B şıkkı", "C şıkkı", "D şıkkı"],
-    "correctAnswer": 0,
-    "explanation": "Kısa açıklama"
-}
+        let bestMatch = null;
+        let bestScore = 0;
 
-SADECE JSON, BAŞKA HİÇBİR ŞEY YAZMA!`;
-        
-        const result = await this.generateContent(prompt, context);
-        
-        if (result.success) {
-            try {
-                // Clean response
-                let cleanText = result.text.trim();
-                cleanText = cleanText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-                
-                const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
-                if (jsonMatch) {
-                    const data = JSON.parse(jsonMatch[0]);
-                    
-                    if (data.question && Array.isArray(data.options) && data.options.length === 4) {
-                        return [{
-                            question: data.question,
-                            options: data.options,
-                            correctAnswer: data.correctAnswer || data.correct || 0,
-                            difficulty: difficulty,
-                            explanation: data.explanation || ''
-                        }];
-                    }
+        // Tüm bölümleri tara
+        for (const [bolumKey, bolumData] of Object.entries(timestampData)) {
+            const questions = bolumData[questionType] || [];
+            console.log(`📂 ${bolumKey} - ${questions.length} soru`);
+
+            // Soru konusunu ara
+            for (const q of questions) {
+                const matchResult = this.matchQuestionTopic(questionTopic, q.topic);
+
+                if (matchResult === true) {
+                    console.log('✅ Tam eşleşme bulundu!', q.topic);
+                    return {
+                        timeRange: q.timeRange || q.timeRanges?.[0],
+                        videoModule: bolumData.videoModule,
+                        bolumKey: bolumKey
+                    };
+                } else if (typeof matchResult === 'number' && matchResult > bestScore) {
+                    bestScore = matchResult;
+                    bestMatch = {
+                        timeRange: q.timeRange || q.timeRanges?.[0],
+                        videoModule: bolumData.videoModule,
+                        bolumKey: bolumKey,
+                        topic: q.topic
+                    };
                 }
-            } catch (error) {
-                console.error('❌ Soru parse hatası:', error);
             }
         }
-        
-        return [];
+
+        if (bestMatch && bestScore >= 0.3) {
+            console.log(`✅ En iyi eşleşme bulundu (skor: ${(bestScore * 100).toFixed(0)}%):`, bestMatch.topic);
+            return bestMatch;
+        }
+
+        console.log('❌ Hiçbir bölümde yeterli eşleşme bulunamadı');
+        return null;
     }
-    
-    async generateModuleSummary(moduleContent) {
-        const context = `Sen bir eğitim içeriği uzmanısın. Eğitim modüllerinin özetlerini hazırlıyorsun. Türkçe yanıt ver.`;
-        const prompt = `Bu modül içeriğinin özetini hazırla: ${moduleContent}`;
-        
-        return await this.generateContent(prompt, context);
+
+    // Soru konusu eşleştirme (fuzzy matching) - true veya skor döndürür
+    matchQuestionTopic(userQuestion, mappedTopic) {
+        const normalize = (str) => str.toLowerCase()
+            .replace(/[çÇ]/g, 'c')
+            .replace(/[ğĞ]/g, 'g')
+            .replace(/[ıİ]/g, 'i')
+            .replace(/[öÖ]/g, 'o')
+            .replace(/[şŞ]/g, 's')
+            .replace(/[üÜ]/g, 'u')
+            .replace(/[^\w\s]/g, '')
+            .trim();
+
+        const normalizedQuestion = normalize(userQuestion);
+        const normalizedTopic = normalize(mappedTopic);
+
+        // Tam eşleşme
+        if (normalizedQuestion.includes(normalizedTopic) || normalizedTopic.includes(normalizedQuestion)) {
+            return true;
+        }
+
+        // Özel kelime eşleşmeleri (domain-specific keywords) - En yüksek öncelik
+        const specialKeywords = [
+            'oz yeterlik', 'psikolojik direnc', 'product backlog', 'kanban',
+            'kolb', 'scrum', 'kvkk', 'tpack', 'samr', 'vuca', 'bani',
+            'cynefin', 'scamper', 'mot', 'fast', 'okr', 'bsc', 'kpi',
+            'wallas', 'drucker', 'bandura', 'etik liderlik', 'merkeziyetci',
+            'degisim direnci', 'kurumsal surdurulebilirlik', 'yinelemeli',
+            'product owner', 'psikososyal', 'simulasyon', 'role play',
+            'kisa vadeli kazanim', 'orgutsel direnc', 'kulturel direnc',
+            'cevik dusunce', 'sprint', 'hata yapma kulturu', 'ogrenme kulturu'
+        ];
+
+        for (const keyword of specialKeywords) {
+            const normalizedKeyword = normalize(keyword);
+            if (normalizedQuestion.includes(normalizedKeyword) && normalizedTopic.includes(normalizedKeyword)) {
+                console.log(`🔑 Özel kelime eşleşmesi: "${keyword}"`);
+                return true;
+            }
+        }
+
+        // Anahtar kelime eşleşmesi (skor döndür)
+        const questionWords = normalizedQuestion.split(/\s+/).filter(w => w.length > 2);
+        const topicWords = normalizedTopic.split(/\s+/).filter(w => w.length > 2);
+
+        if (questionWords.length === 0 || topicWords.length === 0) {
+            return 0;
+        }
+
+        // Ortak kelimeleri bul
+        const commonWords = questionWords.filter(w => topicWords.includes(w));
+        const matchRatio = commonWords.length / Math.max(questionWords.length, topicWords.length);
+
+        if (matchRatio >= 0.4) {
+            console.log(`🎯 Eşleşme oranı: ${(matchRatio * 100).toFixed(0)}% - "${mappedTopic}"`);
+            return true;
+        }
+
+        // Düşük skor döndür (en iyi eşleşme için)
+        return matchRatio;
     }
-    
-    async generatePersonalizedFeedback(userProgress, completedModules) {
-        const context = `Sen bir eğitim koçusun. Öğrencilerin ilerlemesine göre kişiselleştirilmiş geri bildirimler veriyorsun. Türkçe yanıt ver.`;
-        const prompt = `Kullanıcının genel ilerlemesi: %${userProgress}, tamamladığı modüller: ${completedModules.join(', ')}. Bu bilgilere göre kişiselleştirilmiş bir geri bildirim ve gelişim önerileri hazırla.`;
-        
-        return await this.generateContent(prompt, context);
-    }
-    
-    // YENİ: Yanlış cevaplara göre kişiselleştirilmiş video önerisi
+
+    // YENİ: Yanlış cevaplara göre kişiselleştirilmiş video önerisi (TIMESTAMP DESTEĞİ İLE)
     async generateVideoRecommendation(wrongQuestion, wrongAnswer, correctAnswer, allModules, allVideos) {
         console.log('🔒 Güvenli API Proxy kullanılıyor (API key backend\'de)');
         console.log('🔗 Proxy URL:', this.proxyURL);
-        
+
         try {
+            // Timestamp haritasını yükle
+            const timestampData = await this.loadTimestampMappings();
+
+            // Soru için timestamp bul
+            console.log('🔍 Timestamp arıyorum, soru:', wrongQuestion);
+            const timestampMatch = this.findTimestampForQuestion(timestampData, wrongQuestion);
+
+            if (timestampMatch) {
+                console.log('✅ Timestamp bulundu:', timestampMatch);
+            } else {
+                console.log('⚠️ Bu soru için timestamp bulunamadı');
+                console.log('📋 Yüklenen timestamp verisi var mı?', timestampData ? 'Evet' : 'Hayır');
+                if (timestampData) {
+                    console.log('📦 Toplam bölüm sayısı:', Object.keys(timestampData).length);
+                }
+            }
+
             const context = `Sen bir eğitim danışmanısın. Türkçe yanıt ver. Kısa ve net ol.`;
-            
+
             // Ensure arrays are valid
             const modules = Array.isArray(allModules) ? allModules : [];
             const videos = Array.isArray(allVideos) ? allVideos : [];
-            
-            const modulesInfo = modules.length > 0 
+
+            const modulesInfo = modules.length > 0
                 ? modules.map(m => `- ${m.title || 'İsimsiz Modül'}: ${m.description || 'Açıklama yok'}`).join('\n')
                 : 'Henüz modül eklenmemiş.';
-            
+
             const videosInfo = videos.length > 0
                 ? videos.map(v => {
                     const videoId = v.id || v.youtubeVideoId || 'bilinmeyen';
@@ -268,21 +333,30 @@ SADECE JSON, BAŞKA HİÇBİR ŞEY YAZMA!`;
                 }).join('\n')
                 : 'Henüz video eklenmemiş.';
         
+            // Timestamp bilgisini prompt'a ekle
+            const timestampInfo = timestampMatch
+                ? `\n\n🎯 ÖNEMLİ: Bu soru için özel zaman aralığı bulundu: ${timestampMatch.timeRange}\nÖğrenci videoyu ${timestampMatch.timeRange} bölümünden izlemelidir.`
+                : '';
+
+            const timestampField = timestampMatch ? `,"timestamp":"${timestampMatch.timeRange}"` : '';
+
             const prompt = `
 Öğrenci yanlış cevap verdi:
 Soru: ${wrongQuestion}
 Yanlış Cevap: ${wrongAnswer}
 Doğru Cevap: ${correctAnswer}
+${timestampInfo}
 
 Mevcut Videolar:
 ${videosInfo}
 
 Öğrenciye hangi videoyu izlemesini önerirsiniz? Mevcut videolardan en uygununu seçin.
+${timestampMatch ? `\nÖNEMLİ: Bu soru için özel zaman aralığı var: ${timestampMatch.timeRange}` : ''}
 
-Sadece bu JSON formatında yanıt ver:
-{"feedback": "Kısa motivasyon mesajı","recommendedVideoId": "video_id","recommendedVideoTitle": "video_başlığı","reason": "Neden bu video"}
+Sadece bu JSON formatında yanıt ver (reason alanında Türkçe olmayan kelime kullanma):
+{"feedback":"Kısa motivasyon mesajı","recommendedVideoId":"video_id","recommendedVideoTitle":"video_başlığı","reason":"Neden bu video"${timestampField}}
 
-SADECE JSON!`;
+SADECE GEÇERLİ JSON! Türkçe karakterler kullanabilirsin ama JSON formatı bozulmamalı.`;
             
             const result = await this.generateContent(prompt, context);
             
@@ -338,7 +412,8 @@ SADECE JSON!`;
                             feedback: data.feedback || 'Bu konuyu tekrar gözden geçirmenizi öneririz.',
                             recommendedVideoId: actualVideoId || data.recommendedVideoId || null,
                             recommendedVideoTitle: actualVideoTitle || data.recommendedVideoTitle || null,
-                            reason: data.reason || ''
+                            reason: data.reason || '',
+                            timestamp: timestampMatch ? timestampMatch.timeRange : (data.timestamp || null)
                         };
                     }
                 } catch (error) {
@@ -352,7 +427,8 @@ SADECE JSON!`;
                 feedback: 'Bu konuyu tekrar gözden geçirmenizi öneririz. İlgili videoları izleyerek konuyu pekiştirebilirsiniz.',
                 recommendedVideoId: videos.length > 0 ? (videos[0].id || videos[0].youtubeVideoId) : null,
                 recommendedVideoTitle: videos.length > 0 ? videos[0].title : null,
-                reason: ''
+                reason: '',
+                timestamp: timestampMatch ? timestampMatch.timeRange : null
             };
         } catch (error) {
             console.error('❌ generateVideoRecommendation hatası:', error);

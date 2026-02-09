@@ -120,62 +120,127 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-    
+
     <!-- Firebase Production DB -->
     <script src="js/firebase-production.js"></script>
     <script src="js/user-utils.js"></script>
+
+    <!-- Local Auth System (Fallback) -->
+    <script src="js/local-auth.js"></script>
+
     <script>
-        // Basit giriş sistemi
-        document.getElementById('login-form').addEventListener('submit', function(e) {
+        // Hybrid Coordinator login system - Firebase with localStorage fallback
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             var email = document.getElementById('email').value;
             var password = document.getElementById('password').value;
             var errorElement = document.getElementById('error-message');
             var errorText = document.querySelector('.error-text');
-            
-            // E-posta ve şifre kontrolü (basit validasyon)
-            if (!email || !password) {
-                errorElement.classList.remove('hidden');
-                errorText.textContent = 'E-posta ve şifre alanları zorunludur.';
-                return;
-            }
-            
-            if (!email.includes('@')) {
-                errorElement.classList.remove('hidden');
-                errorText.textContent = 'Geçerli bir e-posta adresi giriniz.';
-                return;
-            }
-            
-            if (password.length < 4) {
-                errorElement.classList.remove('hidden');
-                errorText.textContent = 'Şifre en az 4 karakter olmalıdır.';
-                return;
-            }
-            
-            // Hata mesajını gizle
-            errorElement.classList.add('hidden');
-            
-            // Başarılı giriş simülasyonu
-            console.log('Koordinatör girişi başarılı:', email);
-            
-            // Kullanıcı bilgilerini localStorage'a kaydet
-            localStorage.setItem('userEmail', email);
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('loginTime', new Date().toISOString());
-            localStorage.setItem('userRole', 'coordinator');
-                    
-            // Loading göstergesi
             var submitButton = document.querySelector('button[type="submit"]');
             var originalText = submitButton.textContent;
-            submitButton.textContent = 'Giriş yapılıyor...';
+
+            // Email and password validation
+            if (!email || !password) {
+                errorElement.classList.remove('hidden');
+                errorText.textContent = '⚠️ E-posta ve şifre alanları zorunludur.';
+                return;
+            }
+
+            if (!email.includes('@')) {
+                errorElement.classList.remove('hidden');
+                errorText.textContent = '⚠️ Geçerli bir e-posta adresi giriniz.';
+                return;
+            }
+
+            if (password.length < 4) {
+                errorElement.classList.remove('hidden');
+                errorText.textContent = '⚠️ Şifre en az 4 karakter olmalıdır.';
+                return;
+            }
+
+            // Hide error message
+            errorElement.classList.add('hidden');
+
+            // Loading indicator
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Giriş yapılıyor...';
             submitButton.disabled = true;
-            
-            // Koordinatör olarak yönlendir
-            setTimeout(function() {
-                console.log('Koordinatör paneline yönlendiriliyor...');
-                window.location.href = 'instructor-dashboard.html';
-            }, 1000);
+
+            try {
+                let useLocalAuth = false;
+
+                // Try Firebase first (with quick timeout)
+                try {
+                    let attempts = 0;
+                    while ((!window.DB || !window.DB.isFirebaseReady) && attempts < 30) {
+                        await new Promise(r => setTimeout(r, 100));
+                        attempts++;
+                    }
+
+                    if (!window.DB || !window.DB.isFirebaseReady) {
+                        console.warn('⚠️ Firebase bağlanamadı, localStorage kullanılacak');
+                        useLocalAuth = true;
+                    }
+                } catch (firebaseError) {
+                    console.warn('⚠️ Firebase hatası, localStorage kullanılacak:', firebaseError);
+                    useLocalAuth = true;
+                }
+
+                let loginResult;
+
+                if (useLocalAuth) {
+                    // Use localStorage authentication
+                    console.log('🔐 localStorage ile giriş yapılıyor...');
+                    loginResult = window.LocalAuth.loginCoordinator(email, password);
+
+                    if (!loginResult.success) {
+                        throw new Error(loginResult.error);
+                    }
+                } else {
+                    // Use Firebase authentication
+                    console.log('🔥 Firebase ile giriş yapılıyor...');
+                    const coordinatorsResult = await window.DB.load('coordinatorProfiles');
+                    const coordinators = (coordinatorsResult && coordinatorsResult.success && Array.isArray(coordinatorsResult.data)) ? coordinatorsResult.data : [];
+
+                    const coordinator = coordinators.find(c => c.userEmail === email);
+
+                    if (!coordinator) {
+                        throw new Error('Koordinatör hesabı bulunamadı!');
+                    }
+
+                    if (coordinator.password && coordinator.password !== password) {
+                        throw new Error('E-posta veya şifre hatalı!');
+                    }
+
+                    if (coordinator.isActive === false) {
+                        throw new Error('Hesabınız devre dışı bırakılmış. Lütfen yönetici ile iletişime geçin.');
+                    }
+
+                    // Save to localStorage
+                    localStorage.setItem('userEmail', email);
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('loginTime', Date.now().toString());
+                    localStorage.setItem('userRole', 'coordinator');
+
+                    loginResult = { success: true };
+                }
+
+                // Successful login
+                console.log('✅ Koordinatör girişi başarılı:', email);
+
+                // Redirect to coordinator dashboard
+                setTimeout(function() {
+                    console.log('Koordinatör paneline yönlendiriliyor...');
+                    window.location.href = 'instructor-dashboard.html';
+                }, 1000);
+
+            } catch (error) {
+                console.error('❌ Giriş hatası:', error);
+                errorElement.classList.remove('hidden');
+                errorText.textContent = '❌ ' + error.message;
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            }
         });
         
         // Sayfa yüklendiğinde oturum kontrolü

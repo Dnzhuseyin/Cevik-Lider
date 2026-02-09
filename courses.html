@@ -7,6 +7,8 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Eğitim Modülleri - Çevik Lider</title>
+    <!-- Authentication Guard -->
+    <script src="js/auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -106,7 +108,7 @@
                         <i class="fas fa-chart-line text-primary mr-2"></i>
                         Öğrenme Yolculuğunuz
                     </h2>
-                    <span class="text-sm text-gray-500" id="completion-stats">0/8 modül tamamlandı</span>
+                    <span class="text-sm text-gray-500" id="completion-stats">Yükleniyor...</span>
             </div>
             
                 <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
@@ -124,7 +126,7 @@
                     </div>
                     <div class="text-center">
                         <div class="text-2xl font-bold text-gray-400" id="locked-modules">0</div>
-                        <div class="text-sm text-gray-600">Erişilebilir</div>
+                        <div class="text-sm text-gray-600">Toplam Modül</div>
                     </div>
                 </div>
             </div>
@@ -137,8 +139,8 @@
     </main>
 
     <!-- Firebase CDN -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     
     <!-- Firebase Production DB -->
@@ -160,20 +162,21 @@
             if (!window.DB) {
                 console.log('⏳ Firebase DB bekleniyor...');
                 let waitAttempts = 0;
-                while (!window.DB && waitAttempts < 10) {
+                while (!window.DB && waitAttempts < 30) {
                     await new Promise(resolve => setTimeout(resolve, 500));
                     waitAttempts++;
-                    console.log(`⏳ Firebase DB bekleme denemesi: ${waitAttempts}/10`);
+                    console.log(`⏳ Firebase DB bekleme denemesi: ${waitAttempts}/30`);
                 }
-                
+
                 if (!window.DB) {
-                    console.error('❌ Firebase DB sistemi 5 saniye içinde yüklenmedi!');
-                    return;
+                    console.error('❌ Firebase DB sistemi 15 saniye içinde yüklenmedi!');
+                    console.log('💡 localStorage authentication kullanarak devam ediliyor...');
+                    // Continue anyway - hybrid auth will handle it
                 }
             }
-            
-            // Wait for Firebase to be ready
-            if (!window.DB.isFirebaseReady) {
+
+            // Wait for Firebase to be ready (only if DB exists)
+            if (window.DB && !window.DB.isFirebaseReady) {
                 console.log('⏳ Firebase hazır olması bekleniyor...');
                 let readyAttempts = 0;
                 while (!window.DB.isFirebaseReady && readyAttempts < 10) {
@@ -181,14 +184,14 @@
                     readyAttempts++;
                     console.log(`⏳ Firebase ready bekleme denemesi: ${readyAttempts}/10`);
                 }
-                
+
                 if (!window.DB.isFirebaseReady) {
                     console.error('❌ Firebase 5 saniye içinde hazır olmadı!');
-                    return;
+                    console.log('💡 localStorage ile devam ediliyor...');
                 }
             }
-            
-            console.log('✅ Firebase hazır, sayfa yükleniyor...');
+
+            console.log('✅ Sayfa yükleniyor...');
             
             // Initialize user info using UserUtils
             await UserUtils.initializeUserInfo();
@@ -231,21 +234,27 @@
         async function loadModules() {
             try {
                 console.log('📚 Modüller veritabanından yükleniyor...');
-                
-                // Wait for Firebase to be ready
-                await new Promise(resolve => {
+
+                // Wait for Firebase to be ready (with timeout)
+                await new Promise((resolve, reject) => {
+                    let attempts = 0;
+                    const maxAttempts = 50; // 10 seconds
                     const checkDB = () => {
                         if (window.DB) {
                             console.log('✅ Firebase Production DB hazır!');
                             resolve();
+                        } else if (attempts >= maxAttempts) {
+                            console.error('❌ Firebase DB timeout after 10 seconds');
+                            reject(new Error('Firebase DB timeout'));
                         } else {
-                            console.log('⏳ Firebase Production DB bekleniyor...');
+                            attempts++;
+                            console.log(`⏳ Firebase Production DB bekleniyor... (${attempts}/${maxAttempts})`);
                             setTimeout(checkDB, 200);
                         }
                     };
                     checkDB();
                 });
-                
+
                 // Get modules from Firebase
                 const modulesResult = await window.DB.load('modules');
                 modules = (modulesResult && modulesResult.success) ? modulesResult.data : [];
@@ -264,13 +273,15 @@
                 const videos = allVideos.filter(video => video.status !== 'deleted');
                 
                 console.log(`📊 ${modules.length} modül, ${videos.length} video, ${myProgress.length} ilerleme kaydı bulundu`);
-                
+
+                // Update global modules array
+                allModules = modules;
+
                 if (modules.length === 0) {
                     // No modules found - coordinator needs to create modules
                     console.log('⚠️ Henüz modül eklenmemiş. Koordinatör modül eklemeli.');
-                    allModules = [];
                 }
-                
+
                 displayModules(modules, myProgress, videos);
                 
             } catch (error) {
@@ -474,11 +485,17 @@
         }
 
         function updateProgressUI() {
-            const totalModules = allModules.length || 8;
+            const totalModules = allModules.length;
             const completedCount = Object.values(userProgress).filter(p => p >= 100).length;
             const currentCount = Object.values(userProgress).filter(p => p > 0 && p < 100).length;
             const accessibleCount = totalModules; // All modules are accessible
-            const overallProgress = Math.round((completedCount / totalModules) * 100);
+
+            // Calculate overall progress: average of all module progress
+            let overallProgress = 0;
+            if (totalModules > 0) {
+                const totalProgress = Object.values(userProgress).reduce((sum, p) => sum + p, 0);
+                overallProgress = Math.round(totalProgress / totalModules);
+            }
             
             // Update progress bar
             const progressBar = document.getElementById('progress-bar');

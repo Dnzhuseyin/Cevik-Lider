@@ -7,6 +7,8 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>Modül Detayı - Çevik Lider</title>
+    <!-- Authentication Guard -->
+    <script src="js/auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -241,12 +243,12 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-production.js?v=20241121020"></script>
     <script src="js/user-utils.js"></script>
-    <script src="js/groq-api.js?v=20241121150"></script>
+    <script src="js/groq-api.js?v=20250202004"></script>
     <script src="js/main.js"></script>
     
     <script>
@@ -648,9 +650,6 @@
 
             document.getElementById('video-title').textContent = video.title;
             document.getElementById('video-description').textContent = video.description;
-
-            // Mark video as watched when loaded
-            markVideoAsWatched(video.id);
             
                     const videoPlaceholder = document.getElementById('video-placeholder');
             
@@ -668,20 +667,26 @@
                 }
                 
                 if (youtubeId) {
-                    // Create YouTube embed iframe
+                    // Create YouTube embed iframe with enablejsapi for tracking
                     videoPlaceholder.style.display = 'block';
                     videoPlaceholder.innerHTML = `
-                            <iframe 
-                                width="100%" 
-                                height="100%" 
-                            src="https://www.youtube.com/embed/${youtubeId}" 
-                                frameborder="0" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            <iframe
+                                id="youtube-player-${video.id}"
+                                width="100%"
+                                height="100%"
+                            src="https://www.youtube.com/embed/${youtubeId}?enablejsapi=1"
+                                frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowfullscreen
                             style="border-radius: 0.5rem;">
                             </iframe>
                         `;
                     console.log('✅ YouTube video yüklendi:', youtubeId);
+
+                    // Mark as watched after 10 seconds of viewing (YouTube API alternative)
+                    setTimeout(() => {
+                        markVideoAsWatched(video.id);
+                    }, 10000); // 10 saniye sonra izlendi olarak işaretle
                     } else {
                     // No valid YouTube ID
                     videoPlaceholder.style.display = 'flex';
@@ -976,10 +981,10 @@
             
             // Save open-ended answer
             saveQuestionAnswer(questionIndex, question.question, answer, 'Açık uçlu soru', null, question.explanation, 'open-ended');
-            
+
             // Show feedback (for now, just show a message)
             alert('Cevabınız kaydedildi. Koordinatör tarafından değerlendirilecektir.');
-            
+
             // Disable the textarea and button
             answerTextarea.disabled = true;
             answerTextarea.classList.add('bg-gray-100', 'cursor-not-allowed');
@@ -989,7 +994,7 @@
                 submitButton.classList.add('opacity-50', 'cursor-not-allowed');
                 submitButton.innerHTML = '<i class="fas fa-check mr-2"></i>Cevap Gönderildi';
             }
-            
+
             // Show success message
             const questionDiv = document.querySelector(`[data-question-index="${questionIndex}"]`);
             if (questionDiv) {
@@ -997,7 +1002,17 @@
                 successMsg.className = 'mt-3 ml-14 p-3 bg-green-50 border-2 border-green-200 rounded-lg';
                 successMsg.innerHTML = '<i class="fas fa-check-circle text-green-600 mr-2"></i><span class="text-sm text-green-800">Cevabınız kaydedildi. Koordinatör tarafından değerlendirilecektir.</span>';
                 answerTextarea.parentElement.appendChild(successMsg);
+
+                // Mark explanation box as visible for progress tracking
+                const explanationBox = questionDiv.querySelector('.explanation-box');
+                if (explanationBox) {
+                    explanationBox.style.display = 'block';
+                    explanationBox.classList.add('bg-green-50', 'border-green-200');
+                }
             }
+
+            // Update progress (açık uçlu soru cevaplanmış sayılır)
+            updateVideoProgress();
         }
         
         // Submit fill-in-the-blank answer
@@ -1083,17 +1098,20 @@
                 // Show wrong answer feedback
                 const wrongAnswerText = wrongAnswers.map(w => `Kullanıcı: "${w.user}", Doğru: "${w.correct}"`).join('; ');
                 const correctAnswerText = correctAnswers.join(', ');
-                
+
                 if (explanationBox) {
                     explanationBox.style.display = 'block';
                     explanationBox.classList.remove('border-green-200', 'bg-green-50');
                     explanationBox.classList.add('border-red-200', 'bg-red-50');
-                    explanationBox.querySelector('.explanation-text').innerHTML = 
+                    explanationBox.querySelector('.explanation-text').innerHTML =
                         `❌ ${correctCount}/${correctAnswers.length} boşluk doğru. Doğru cevaplar: ${correctAnswerText}`;
-                    
+
                     // Get AI recommendation for wrong answer
                     await getAIRecommendationForFillBlank(questionIndex, wrongAnswerText, correctAnswerText, explanationBox);
                 }
+
+                // Update progress (yanlış cevap da ilerleme sayılır)
+                updateVideoProgress();
             }
             
             // Disable inputs and button
@@ -1188,6 +1206,13 @@
                                         <i class="fas fa-video mr-2"></i>${recommendation.recommendedVideoTitle || 'Önerilen Video'}
                                     </p>
                                     <p class="text-xs text-gray-600">${recommendation.reason || ''}</p>
+                                    ${recommendation.timestamp ? `
+                                    <div class="mt-2 p-2 bg-yellow-50 rounded border border-yellow-300">
+                                        <p class="text-xs text-yellow-800">
+                                            <i class="fas fa-clock mr-1"></i><strong>Önerilen Zaman Aralığı:</strong> ${recommendation.timestamp}
+                                        </p>
+                                    </div>
+                                    ` : ''}
                                             </div>
                         </div>
                     </div>
@@ -1297,7 +1322,10 @@
                 
                 // Save wrong answer
                 saveQuestionAnswer(questionIndex, question.question, studentAnswer, correctAnswerText, false, question.explanation, 'multiple-choice');
-                
+
+                // Update progress (yanlış cevap da ilerleme sayılır)
+                updateVideoProgress();
+
                 // Get AI recommendation for wrong answer
                 getAIRecommendation(questionIndex, selectedOption, correctAnswer, explanationBox);
             }
@@ -1423,6 +1451,13 @@
                                         <i class="fas fa-video mr-2"></i>${recommendation.recommendedVideoTitle}
                                     </p>
                                     <p class="text-xs text-gray-600">${recommendation.reason}</p>
+                                    ${recommendation.timestamp ? `
+                                    <div class="mt-2 p-2 bg-yellow-50 rounded border border-yellow-300">
+                                        <p class="text-xs text-yellow-800">
+                                            <i class="fas fa-clock mr-1"></i><strong>Önerilen Zaman Aralığı:</strong> ${recommendation.timestamp}
+                                        </p>
+                                    </div>
+                                    ` : ''}
                                 </div>
                             </div>
                         </div>
@@ -1540,9 +1575,10 @@
                     }
                 });
             }
-            
-            const progressPercent = totalQuestions > 0 
-                ? Math.round((correctAnswers / totalQuestions) * 100) 
+
+            // Progress: cevaplanmış soru sayısı / toplam soru sayısı (doğru/yanlış fark etmez)
+            const progressPercent = totalQuestions > 0
+                ? Math.round((questionsAnswered / totalQuestions) * 100)
                 : 0;
             const isCompleted = progressPercent === 100 && totalQuestions > 0;
             
@@ -1553,21 +1589,21 @@
             video.progress.progressPercent = progressPercent;
             video.progress.completed = isCompleted;
             
-            // Calculate overall module progress
+            // Calculate overall module progress (based on answered questions, not correct)
             let totalModuleProgress = 0;
             let totalModuleQuestions = 0;
-            let totalModuleCorrect = 0;
-            
+            let totalModuleAnswered = 0;
+
             module.videos.forEach(v => {
                 if (v.questions && v.questions.length > 0) {
                     totalModuleQuestions += v.questions.length;
                     const vProgress = v.progress || {};
-                    totalModuleCorrect += (vProgress.correctAnswers || 0);
+                    totalModuleAnswered += (vProgress.questionsAnswered || 0);
                 }
             });
-            
-            const moduleProgress = totalModuleQuestions > 0 
-                ? Math.round((totalModuleCorrect / totalModuleQuestions) * 100) 
+
+            const moduleProgress = totalModuleQuestions > 0
+                ? Math.round((totalModuleAnswered / totalModuleQuestions) * 100)
                 : 0;
             
             // Update UI
@@ -1588,7 +1624,6 @@
             await loadVideoList();
             
             console.log(`📊 Video ilerleme güncellendi: ${correctAnswers}/${totalQuestions} = ${progressPercent}%`);
-            console.log(`📊 Modül ilerleme: ${totalModuleCorrect}/${totalModuleQuestions} = ${moduleProgress}%`);
         }
         
         // Display AI recommendation
@@ -1621,40 +1656,13 @@
         async function markVideoAsWatched(videoId) {
             try {
                 const userEmail = localStorage.getItem('userEmail');
-                if (!userEmail || !window.DB) return;
+                if (!userEmail || !window.DB || !currentModule) return;
 
-                // Get existing watched videos
-                const watchedVideosResult = await window.DB.load('watchedVideos');
-                let watchedVideos = [];
+                // Video izleme userProgress içinde videosWatched array'inde tutulur
+                console.log('📹 Video izlendi olarak işaretleniyor:', videoId);
 
-                if (watchedVideosResult && watchedVideosResult.success) {
-                    watchedVideos = Array.isArray(watchedVideosResult.data)
-                        ? watchedVideosResult.data
-                        : Object.values(watchedVideosResult.data || {});
-                }
-
-                // Check if already watched
-                const alreadyWatched = watchedVideos.some(w =>
-                    w.userEmail === userEmail &&
-                    w.videoId === videoId &&
-                    w.moduleId === currentModule
-                );
-
-                if (!alreadyWatched) {
-                    const watchData = {
-                        id: `watch_${userEmail}_${currentModule}_${videoId}_${Date.now()}`,
-                        userEmail: userEmail,
-                        moduleId: currentModule,
-                        videoId: videoId,
-                        watchedAt: new Date().toISOString()
-                    };
-
-                    await window.DB.save('watchedVideos', watchData);
-                    console.log('✅ Video izlendi olarak işaretlendi:', videoId);
-
-                    // Update user progress with watched video count
-                    await updateUserProgressWithWatchedVideo();
-                }
+                // Video izleme zaten updateVideoProgress() içinde yapılıyor
+                // Bu fonksiyon sadece log için kullanılıyor
 
             } catch (error) {
                 console.error('❌ Video izleme kaydı hatası:', error);
@@ -1696,7 +1704,7 @@
                 const watchedCount = userWatchedInModule.length;
 
                 // Get quiz results count
-                const quizResultsData = await window.DB.load('quizResults');
+                const quizResultsData = await window.DB.load('videoQuestionAnswers');
                 let quizResults = [];
 
                 if (quizResultsData && quizResultsData.success) {
@@ -1814,7 +1822,7 @@
                     answeredAt: new Date().toISOString()
                 };
 
-                await window.DB.save('quizResults', answerData);
+                await window.DB.save('videoQuestionAnswers', answerData);
                 console.log('✅ Soru cevabı kaydedildi:', answerData);
 
                 // Update progress after answering question

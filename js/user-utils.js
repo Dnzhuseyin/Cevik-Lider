@@ -175,47 +175,45 @@ async function loadUserInfo() {
 
 // Update user display in UI
 function updateUserDisplay(name, email) {
-    console.log(`🔄 UI güncelleniyor: ${name} (${email})`);
-    
-    // Update desktop sidebar
+    console.log(`🔄 UI güncelleniyor: ${email}`);
+
+    // Update desktop sidebar - sadece email göster
     const userName = document.getElementById('user-name');
     const userEmail = document.getElementById('user-email');
-    
+
     if (userName) {
-        userName.textContent = name;
-        console.log('✅ Desktop name güncellendi:', name);
+        userName.textContent = email;
+        console.log('✅ Desktop email güncellendi:', email);
     }
     if (userEmail) {
-        // user-email elementini boş bırakıyoruz
         userEmail.textContent = '';
-        console.log('✅ Desktop email boş bırakıldı');
+        console.log('✅ Desktop user-email boş bırakıldı');
     }
 
-    // Update mobile sidebar
+    // Update mobile sidebar - sadece email göster
     const mobileUserName = document.getElementById('mobile-user-name');
     const mobileUserEmail = document.getElementById('mobile-user-email');
-    
+
     if (mobileUserName) {
-        mobileUserName.textContent = name;
-        console.log('✅ Mobile name güncellendi:', name);
+        mobileUserName.textContent = email;
+        console.log('✅ Mobile email güncellendi:', email);
     }
     if (mobileUserEmail) {
-        // mobile user-email elementini de boş bırakıyoruz
         mobileUserEmail.textContent = '';
-        console.log('✅ Mobile email boş bırakıldı');
+        console.log('✅ Mobile user-email boş bırakıldı');
     }
 
-    // Update header user name
+    // Update header user name - sadece email göster
     const headerUserName = document.getElementById('header-user-name');
     if (headerUserName) {
-        headerUserName.textContent = name;
-        console.log('✅ Header name güncellendi:', name);
+        headerUserName.textContent = email;
+        console.log('✅ Header email güncellendi:', email);
     }
 
-    // Update profile page specific elements
+    // Update profile page specific elements - isim ve email ayrı göster
     const profileName = document.getElementById('profile-name');
     const profileEmail = document.getElementById('profile-email');
-    
+
     if (profileName) {
         profileName.textContent = name;
         console.log('✅ Profile name güncellendi:', name);
@@ -225,30 +223,30 @@ function updateUserDisplay(name, email) {
         console.log('✅ Profile email güncellendi:', email);
     }
 
-    // Update instructor/coordinator specific elements
+    // Update instructor/coordinator specific elements - sadece email göster
     const instructorName = document.getElementById('instructor-name');
     const instructorEmail = document.getElementById('instructor-email');
-    
+
     if (instructorName) {
-        instructorName.textContent = name;
-        console.log('✅ Instructor name güncellendi:', name);
+        instructorName.textContent = email;
+        console.log('✅ Instructor email güncellendi:', email);
     }
     if (instructorEmail) {
         instructorEmail.textContent = '';
-        console.log('✅ Instructor email boş bırakıldı');
+        console.log('✅ Instructor user-email boş bırakıldı');
     }
 
-    // Update mobile instructor elements
+    // Update mobile instructor elements - sadece email göster
     const mobileInstructorName = document.getElementById('mobile-instructor-name');
     const mobileInstructorEmail = document.getElementById('mobile-instructor-email');
-    
+
     if (mobileInstructorName) {
-        mobileInstructorName.textContent = name;
-        console.log('✅ Mobile instructor name güncellendi:', name);
+        mobileInstructorName.textContent = email;
+        console.log('✅ Mobile instructor email güncellendi:', email);
     }
     if (mobileInstructorEmail) {
         mobileInstructorEmail.textContent = '';
-        console.log('✅ Mobile instructor email boş bırakıldı');
+        console.log('✅ Mobile instructor user-email boş bırakıldı');
     }
 }
 

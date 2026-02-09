@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timestamp Matching Testi</title>
+    <script src="js/groq-api.js"></script>
+</head>
+<body>
+    <h1>Timestamp Matching Testi</h1>
+    <div id="results"></div>
+
+    <script>
+        async function testMatching() {
+            const api = window.GroqAPI;
+            const resultsDiv = document.getElementById('results');
+
+            // Test soruları
+            const testQuestions = [
+                "Dijital çeviklik kavramı nedir?",
+                "TPACK modeli nedir?",
+                "KVKK hangi kanundur?",
+                "Siber güvenlikte liderin sorumluluğu",
+                "VUCA dünyasında değişkenlik"
+            ];
+
+            resultsDiv.innerHTML = '<h2>Test Sonuçları:</h2>';
+
+            // Timestamp verisini yükle
+            const timestampData = await api.loadTimestampMappings();
+
+            if (!timestampData) {
+                resultsDiv.innerHTML += '<p style="color: red;">❌ Timestamp verisi yüklenemedi!</p>';
+                return;
+            }
+
+            resultsDiv.innerHTML += '<p style="color: green;">✅ Timestamp verisi yüklendi</p>';
+
+            // Her test sorusunu dene
+            for (const question of testQuestions) {
+                const match = api.findTimestampForQuestion(timestampData, question);
+
+                if (match) {
+                    resultsDiv.innerHTML += `
+                        <div style="border: 1px solid green; padding: 10px; margin: 10px 0; background: #f0fff0;">
+                            <strong>Soru:</strong> ${question}<br>
+                            <strong>✅ Eşleşme bulundu!</strong><br>
+                            <strong>Zaman:</strong> ${match.timeRange}<br>
+                            <strong>Modül:</strong> ${match.videoModule}<br>
+                            <strong>Bölüm:</strong> ${match.bolumKey}
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML += `
+                        <div style="border: 1px solid red; padding: 10px; margin: 10px 0; background: #fff0f0;">
+                            <strong>Soru:</strong> ${question}<br>
+                            <strong>❌ Eşleşme bulunamadı</strong>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Sayfa yüklendiğinde test et
+        setTimeout(testMatching, 1000);
+    </script>
+</body>
+</html>

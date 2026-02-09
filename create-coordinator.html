@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koordinatör Hesabı Oluştur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+        <h1 class="text-2xl font-bold mb-6 text-center">Koordinatör Hesabı Oluştur</h1>
+
+        <div id="status" class="mb-4 p-4 rounded-lg hidden"></div>
+
+        <button id="createBtn" onclick="createCoordinator()"
+            class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+            Koordinatör Hesabı Oluştur
+        </button>
+
+        <div id="result" class="mt-6 p-4 bg-gray-50 rounded-lg hidden">
+            <h3 class="font-bold mb-2">Oluşturulan Hesap Bilgileri:</h3>
+            <div class="space-y-2 text-sm">
+                <p><strong>E-posta:</strong> <span id="email" class="font-mono"></span></p>
+                <p><strong>Şifre:</strong> <span id="password" class="font-mono"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-production.js"></script>
+
+    <script>
+        async function createCoordinator() {
+            const statusDiv = document.getElementById('status');
+            const resultDiv = document.getElementById('result');
+            const createBtn = document.getElementById('createBtn');
+
+            // Show loading
+            statusDiv.className = 'mb-4 p-4 rounded-lg bg-blue-100 text-blue-800';
+            statusDiv.textContent = 'Koordinatör hesabı oluşturuluyor...';
+            statusDiv.classList.remove('hidden');
+            createBtn.disabled = true;
+
+            try {
+                // Wait for Firebase
+                let attempts = 0;
+                while ((!window.DB || !window.DB.isFirebaseReady) && attempts < 100) {
+                    await new Promise(r => setTimeout(r, 100));
+                    attempts++;
+                }
+
+                if (!window.DB || !window.DB.isFirebaseReady) {
+                    throw new Error('Firebase bağlanamadı!');
+                }
+
+                // Coordinator credentials
+                const coordinatorEmail = 'koordinator@ceviklider.com';
+                const coordinatorPassword = 'CevikLider2024!';
+
+                // Create coordinator profile
+                const coordinatorData = {
+                    userEmail: coordinatorEmail,
+                    password: coordinatorPassword,
+                    firstName: 'Sistem',
+                    lastName: 'Koordinatörü',
+                    role: 'coordinator',
+                    title: 'Eğitim Koordinatörü',
+                    department: 'Eğitim Koordinasyonu',
+                    phone: '+90 555 000 0000',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    isActive: true
+                };
+
+                // Save to coordinatorProfiles collection
+                const result = await window.DB.save('coordinatorProfiles', coordinatorData);
+
+                if (result && result.success) {
+                    // Success
+                    statusDiv.className = 'mb-4 p-4 rounded-lg bg-green-100 text-green-800';
+                    statusDiv.textContent = '✅ Koordinatör hesabı başarıyla oluşturuldu!';
+
+                    // Show credentials
+                    document.getElementById('email').textContent = coordinatorEmail;
+                    document.getElementById('password').textContent = coordinatorPassword;
+                    resultDiv.classList.remove('hidden');
+
+                    console.log('✅ Koordinatör hesabı oluşturuldu:', coordinatorData);
+                } else {
+                    throw new Error('Kayıt başarısız oldu');
+                }
+
+            } catch (error) {
+                console.error('❌ Hata:', error);
+                statusDiv.className = 'mb-4 p-4 rounded-lg bg-red-100 text-red-800';
+                statusDiv.textContent = '❌ Hata: ' + error.message;
+            } finally {
+                createBtn.disabled = false;
+            }
+        }
+
+        console.log('📄 Koordinatör oluşturma sayfası yüklendi');
+    </script>
+</body>
+</html>
